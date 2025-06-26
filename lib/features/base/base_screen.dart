@@ -1,4 +1,5 @@
 import 'package:class_app/core/constants/app_colors.dart';
+import 'package:class_app/core/constants/strings.dart';
 import 'package:class_app/core/utilities/size_config.dart';
 import 'package:class_app/features/tutor/analytics/presentation/screens/analytics_screen.dart';
 import 'package:class_app/features/tutor/home/presentation/screens/home_screen.dart';
@@ -28,7 +29,7 @@ class _BaseScreenState extends State<BaseScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: Container(
-        margin: EdgeInsets.only(bottom: SizeConfig.blockSizeVertical! * 3),
+        margin: EdgeInsets.only(bottom: SizeConfig.blockSizeVertical! * 1.5),
         decoration: BoxDecoration(
           color: Color(greyColor).withValues(alpha: 0.8),
           borderRadius: BorderRadius.circular(
@@ -74,7 +75,7 @@ class _BaseScreenState extends State<BaseScreen> {
         items: [
           BottomNavigationBarItem(
             icon: SvgPicture.asset(
-              "assets/svgs/home.svg",
+              homeImage,
               colorFilter: ColorFilter.mode(
                 _currentIndex == 0 ? Color(blueColor) : Colors.grey,
                 BlendMode.srcIn,
@@ -84,7 +85,7 @@ class _BaseScreenState extends State<BaseScreen> {
           ),
           BottomNavigationBarItem(
             icon: SvgPicture.asset(
-              "assets/svgs/quiz.svg",
+              quizImage,
               colorFilter: ColorFilter.mode(
                 _currentIndex == 1 ? Color(blueColor) : Colors.grey,
                 BlendMode.srcIn,
@@ -94,7 +95,7 @@ class _BaseScreenState extends State<BaseScreen> {
           ),
           BottomNavigationBarItem(
             icon: SvgPicture.asset(
-              "assets/svgs/analytics.svg",
+              analyticsImage,
               colorFilter: ColorFilter.mode(
                 _currentIndex == 2 ? Color(blueColor) : Colors.grey,
                 BlendMode.srcIn,
@@ -104,7 +105,7 @@ class _BaseScreenState extends State<BaseScreen> {
           ),
           BottomNavigationBarItem(
             icon: SvgPicture.asset(
-              "assets/svgs/profile.svg",
+              profileImage,
               colorFilter: ColorFilter.mode(
                 _currentIndex == 3 ? Color(blueColor) : Colors.grey,
                 BlendMode.srcIn,

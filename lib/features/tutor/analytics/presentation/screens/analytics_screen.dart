@@ -1,3 +1,8 @@
+import 'package:auto_size_text/auto_size_text.dart';
+import 'package:class_app/core/constants/app_colors.dart';
+import 'package:class_app/core/constants/strings.dart';
+import 'package:class_app/core/utilities/size_config.dart';
+import 'package:class_app/features/tutor/home/presentation/widgets/custom_container.dart';
 import 'package:flutter/material.dart';
 
 class AnalyticsScreen extends StatelessWidget {
@@ -5,18 +10,88 @@ class AnalyticsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig().init(context);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Analytics'),
-        centerTitle: true,
-        automaticallyImplyLeading: false,
-      ),
-      body: Center(
-        child: Text(
-          'Analytics Screen',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: SizeConfig.horizontalPadding(context),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                height:
+                    SizeConfig.orientation(context) == Orientation.portrait
+                        ? SizeConfig.blockSizeVertical! * 2
+                        : SizeConfig.blockSizeVertical! * 0.3,
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+
+                children: [
+                  AutoSizeText(
+                    analyticsText,
+                    style: TextStyle(
+                      fontSize:
+                          SizeConfig.orientation(context) ==
+                                  Orientation.portrait
+                              ? SizeConfig.screenWidth! * 0.09
+                              : SizeConfig.screenWidth! * 0.05,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                  ),
+                  SizedBox(
+                    height:
+                        SizeConfig.orientation(context) == Orientation.portrait
+                            ? SizeConfig.blockSizeVertical! * 1
+                            : SizeConfig.blockSizeHorizontal! * 0.1,
+                  ),
+
+                  AutoSizeText(
+                    analyticsSubText,
+
+                    style: TextStyle(
+                      color: Color(blackColor),
+                      fontSize:
+                          SizeConfig.orientation(context) ==
+                                  Orientation.portrait
+                              ? SizeConfig.screenWidth! * 0.04
+                              : SizeConfig.screenWidth! * 0.025,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                  ),
+                ],
+              ),
+              SizedBox(
+                height:
+                    SizeConfig.orientation(context) == Orientation.portrait
+                        ? SizeConfig.blockSizeVertical! * 2
+                        : SizeConfig.blockSizeHorizontal! * 1,
+              ),
+              Expanded(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: 10, // Replace with your dynamic data count
+                  itemBuilder: (context, index) {
+                    return CustomContainer(
+                      titleText: "Lecture Week $index",
+                      subText: "256 responses",
+                      iconPath: analyticsImage,
+                      showTrailingIcon: true,
+                      onTap: () {
+                        // Handle tap action
+                      },
+                      onMoreTap: () {
+                        // Handle more action
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         ),
       ),

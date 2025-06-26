@@ -36,7 +36,10 @@ class CustomElevatedButton extends StatelessWidget {
         padding: EdgeInsets.zero,
         minimumSize: Size(
           width ?? double.infinity,
-          height ?? SizeConfig.blockSizeVertical! * 6,
+          height ??
+              (SizeConfig.orientation(context) == Orientation.portrait
+                  ? SizeConfig.blockSizeVertical! * 6
+                  : SizeConfig.blockSizeHorizontal! * 5),
         ),
         backgroundColor:
             isOutlineButton != null ? Color(whiteColor) : Color(blueColor),

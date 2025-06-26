@@ -1,3 +1,6 @@
+import 'package:auto_size_text/auto_size_text.dart';
+import 'package:class_app/core/constants/strings.dart';
+import 'package:class_app/core/utilities/size_config.dart';
 import 'package:flutter/material.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -6,17 +9,41 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-        centerTitle: true,
-        automaticallyImplyLeading: false,
-      ),
-      body: Center(
-        child: Text(
-          'Profile Screen',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: SizeConfig.horizontalPadding(context),
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height:
+                      SizeConfig.orientation(context) == Orientation.portrait
+                          ? SizeConfig.blockSizeVertical! * 2
+                          : SizeConfig.blockSizeVertical! * 0.3,
+                ),
+                AutoSizeText(
+                  profileText,
+                  style: TextStyle(
+                    fontSize:
+                        SizeConfig.orientation(context) == Orientation.portrait
+                            ? SizeConfig.screenWidth! * 0.09
+                            : SizeConfig.screenWidth! * 0.05,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                ),
+                SizedBox(
+                  height:
+                      SizeConfig.orientation(context) == Orientation.portrait
+                          ? SizeConfig.blockSizeVertical! * 1
+                          : SizeConfig.blockSizeHorizontal! * 0.1,
+                ),
+                Center(child: Stack(children: [Container()])),
+              ],
+            ),
           ),
         ),
       ),
