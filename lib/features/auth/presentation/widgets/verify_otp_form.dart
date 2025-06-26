@@ -1,0 +1,152 @@
+import 'package:class_app/core/constants/app_colors.dart';
+import 'package:class_app/core/constants/strings.dart';
+import 'package:class_app/core/utilities/size_config.dart';
+import 'package:class_app/features/auth/presentation/widgets/rich_text_widget.dart';
+import 'package:class_app/features/onboarding/widgets/custom_elevated_button.dart';
+import 'package:flutter/material.dart';
+
+class VerifyOTPForm extends StatefulWidget {
+  const VerifyOTPForm({super.key});
+
+  @override
+  State<VerifyOTPForm> createState() => VerifyOTPFormState();
+}
+
+class VerifyOTPFormState extends State<VerifyOTPForm> {
+  final int _otpLength = 5;
+  late List<FocusNode> _focusNodes;
+  late List<TextEditingController> _controllers;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNodes = List.generate(_otpLength, (_) => FocusNode());
+    _controllers = List.generate(_otpLength, (_) => TextEditingController());
+
+    // Autofocus first field when screen opens:
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNodes[0].requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNodes.forEach((f) => f.dispose());
+    _controllers.forEach((c) => c.dispose());
+    super.dispose();
+  }
+
+  void _onChanged(String value, int index) {
+    if (value.length == 1 && index < _otpLength - 1) {
+      // move to next
+      _focusNodes[index + 1].requestFocus();
+    }
+    if (value.isEmpty && index > 0) {
+      // back to previous
+      _focusNodes[index - 1].requestFocus();
+    }
+
+    // check if all boxes are filled
+    bool allFilled = _controllers.every((c) => c.text.isNotEmpty);
+    if (allFilled) _submitOtp();
+  }
+
+  void _submitOtp() {
+    final otp = _controllers.map((c) => c.text).join();
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('OTP Submitted: $otp')));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    SizeConfig().init(context);
+    double boxWidth =
+        SizeConfig.orientation(context) == Orientation.portrait
+            ? SizeConfig.screenWidth! * 0.16
+            : SizeConfig.screenWidth! * 0.12;
+    double boxHeight =
+        SizeConfig.orientation(context) == Orientation.portrait
+            ? SizeConfig.screenHeight! * 0.08
+            : SizeConfig.screenHeight! * 0.2;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: List.generate(_otpLength, (i) {
+              return SizedBox(
+                height: boxHeight,
+                width: boxWidth,
+                child: TextFormField(
+                  controller: _controllers[i],
+                  focusNode: _focusNodes[i],
+                  autofocus: i == 0,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize:
+                        SizeConfig.orientation(context) == Orientation.portrait
+                            ? SizeConfig.screenWidth! * 0.06
+                            : SizeConfig.screenWidth! * 0.04,
+                  ),
+                  keyboardType: TextInputType.number,
+                  maxLength: 1,
+                  decoration: InputDecoration(
+                    counterText: '',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        SizeConfig.blockSizeHorizontal! * 2,
+                      ),
+                      borderSide: BorderSide(
+                        color: Color(greyColor), // Grey border
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        SizeConfig.blockSizeHorizontal! * 2,
+                      ),
+                      borderSide: BorderSide(
+                        color: Color(blueColor), // Primary color border
+                      ),
+                    ),
+                  ),
+                  onChanged: (value) => _onChanged(value, i),
+                ),
+              );
+            }),
+          ),
+        ),
+        SizedBox(height: SizeConfig.blockSizeVertical! * 3),
+
+        CustomElevatedButton(
+          buttonText: verifyText,
+          height:
+              SizeConfig.orientation(context) == Orientation.portrait
+                  ? SizeConfig.blockSizeVertical! * 6
+                  : SizeConfig.blockSizeHorizontal! * 5,
+          onPressed: () {
+            // Handle verify action
+            Navigator.pushNamed(
+              context,
+              '/resetPassword',
+            ); // Navigate to reset password screen
+          },
+        ),
+        // Add your custom text field for email input here
+        SizedBox(height: SizeConfig.blockSizeVertical! * 3),
+        RichTextWidget(
+          text: didntReceiveCodeText,
+
+          actionText: resendText,
+          onTap: () {
+            // Handle resend code action
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Resend code action triggered')),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}

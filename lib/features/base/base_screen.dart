@@ -58,6 +58,7 @@ class _BaseScreenState extends State<BaseScreen> {
       body: _pages[_currentIndex],
 
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Color(whiteColor),
         enableFeedback: false,
         type: BottomNavigationBarType.fixed,
         showUnselectedLabels: true,

@@ -19,7 +19,7 @@ class OnboardingScreen extends StatefulWidget {
 class _Onboarding1ScreenState extends State<OnboardingScreen> {
   final PageController _controller = PageController();
   int _currentPage = 0;
-  
+
   void nextPage() {
     if (_currentPage < onboardingData.length - 1) {
       _controller.nextPage(
@@ -27,7 +27,7 @@ class _Onboarding1ScreenState extends State<OnboardingScreen> {
         curve: Curves.easeIn,
       );
     } else {
-      Navigator.pushReplacementNamed(context, '/base');
+      Navigator.pushReplacementNamed(context, '/login');
     }
   }
 
@@ -56,8 +56,8 @@ class _Onboarding1ScreenState extends State<OnboardingScreen> {
                   // Display the SVG image
                   SvgPicture.asset(
                     item["image"]!,
-                    width: MediaQuery.of(context).size.width,
-                    height: MediaQuery.of(context).size.height * 0.4,
+                    width: SizeConfig.screenWidth!,
+                    height: SizeConfig.screenHeight! * 0.4,
                   ),
                   SizedBox(height: SizeConfig.blockSizeVertical! * 1),
                   AutoSizeText(
@@ -114,15 +114,10 @@ class _Onboarding1ScreenState extends State<OnboardingScreen> {
                             ? SizeConfig.blockSizeHorizontal! * 3
                             : SizeConfig.blockSizeHorizontal! * 1,
                     onPressed: nextPage,
-                    child: AutoSizeText(
-                      _currentPage == onboardingData.length - 1
-                          ? getStartedButtonText
-                          : nextButtonText,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                    buttonText:
+                        _currentPage < onboardingData.length - 1
+                            ? nextButtonText
+                            : getStartedButtonText,
                   ),
                 ],
               ),

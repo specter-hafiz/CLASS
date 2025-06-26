@@ -1,3 +1,4 @@
+import 'package:class_app/core/constants/app_colors.dart';
 import 'package:class_app/core/constants/app_routes.dart';
 import 'package:class_app/features/onboarding/screens/onboarding_screen.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,14 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'CLASS',
       theme: ThemeData(
+        scaffoldBackgroundColor: Color(whiteColor),
+        appBarTheme: AppBarTheme(
+          surfaceTintColor: Colors.transparent,
+
+          backgroundColor: Color(whiteColor),
+          elevation: 0,
+          iconTheme: IconThemeData(color: Color(blackColor)),
+        ),
         fontFamily: "Poppins",
         textTheme: const TextTheme(
           bodyMedium: TextStyle(fontWeight: FontWeight.w400),
