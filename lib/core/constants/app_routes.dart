@@ -5,6 +5,8 @@ import 'package:class_app/features/auth/presentation/screens/reset_password_scre
 import 'package:class_app/features/auth/presentation/screens/verify_otp_screen.dart';
 import 'package:class_app/features/base/base_screen.dart';
 import 'package:class_app/features/onboarding/screens/onboarding_screen.dart';
+import 'package:class_app/features/tutor/profile/presentation/screens/assessment_screen.dart';
+import 'package:class_app/features/tutor/profile/presentation/screens/change_password_screen.dart';
 import 'package:flutter/material.dart';
 
 Map<String, Widget Function(BuildContext context)> appRoutes = {
@@ -14,6 +16,9 @@ Map<String, Widget Function(BuildContext context)> appRoutes = {
   '/forgotPassword': (context) => ForgotPasswordScreen(),
   '/verifyOtp': (context) => VerifyOTPScreen(),
   '/resetPassword': (context) => ResetPasswordScreen(),
+  '/changePassword': (context) => ChangePasswordScreen(),
+  '/assessment':
+      (context) => AssessmentScreen(), // Placeholder for assessment screen
   // '/home': (context) => BaseScreen(), // Placeholder for home screen
   // '/profile': ProfileScreen(),
   // '/settings': SettingsScreen(),
