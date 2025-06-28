@@ -44,7 +44,7 @@ class VerifyOTPScreen extends StatelessWidget {
                 ),
               ),
               SizedBox(height: SizeConfig.blockSizeVertical! * 1),
-              AutoSizeText(
+              Text(
                 otpVerificationSubText,
 
                 style: TextStyle(

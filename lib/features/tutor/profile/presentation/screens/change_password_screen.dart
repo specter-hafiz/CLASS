@@ -17,7 +17,7 @@ class ChangePasswordScreen extends StatelessWidget {
         automaticallyImplyLeading: false,
         leading: CustomBackButton(),
         centerTitle: true,
-        title: AutoSizeText(
+        title: Text(
           changePasswordText,
           style: TextStyle(
             fontSize:

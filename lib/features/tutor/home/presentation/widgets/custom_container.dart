@@ -79,7 +79,7 @@ class CustomContainer extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AutoSizeText(
+                    Text(
                       titleText,
                       style: TextStyle(
                         fontSize:
@@ -91,7 +91,7 @@ class CustomContainer extends StatelessWidget {
                       ),
                       maxLines: 1,
                     ),
-                    AutoSizeText(
+                    Text(
                       subText,
 
                       style: TextStyle(

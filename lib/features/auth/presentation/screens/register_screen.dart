@@ -34,7 +34,7 @@ class RegisterScreen extends StatelessWidget {
                   ),
                 ),
 
-                AutoSizeText(
+                Text(
                   registerText,
                   style: TextStyle(
                     fontSize:
@@ -46,7 +46,7 @@ class RegisterScreen extends StatelessWidget {
                   maxLines: 1,
                 ),
                 SizedBox(height: SizeConfig.blockSizeVertical! * 1),
-                AutoSizeText(
+                Text(
                   registerToContinueText,
                   style: TextStyle(
                     fontSize:

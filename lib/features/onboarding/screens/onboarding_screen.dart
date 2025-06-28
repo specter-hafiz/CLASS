@@ -60,7 +60,7 @@ class _Onboarding1ScreenState extends State<OnboardingScreen> {
                     height: SizeConfig.screenHeight! * 0.4,
                   ),
                   SizedBox(height: SizeConfig.blockSizeVertical! * 1),
-                  AutoSizeText(
+                  Text(
                     item["title"]!,
                     style: TextStyle(
                       fontSize:
@@ -73,7 +73,7 @@ class _Onboarding1ScreenState extends State<OnboardingScreen> {
                     textAlign: TextAlign.center,
                   ),
                   SizedBox(height: SizeConfig.blockSizeVertical! * 1),
-                  AutoSizeText(
+                  Text(
                     item["subtitle"]!,
                     style: TextStyle(
                       fontSize:

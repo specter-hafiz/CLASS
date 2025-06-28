@@ -1,5 +1,6 @@
 import 'package:class_app/core/constants/app_colors.dart';
 import 'package:class_app/core/constants/app_routes.dart';
+import 'package:class_app/core/utilities/size_config.dart';
 import 'package:class_app/features/onboarding/screens/onboarding_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -30,7 +31,12 @@ class MyApp extends StatelessWidget {
         ),
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: OnboardingScreen(),
+      home: Builder(
+        builder: (context) {
+          SizeConfig().init(context);
+          return OnboardingScreen();
+        },
+      ),
       routes: appRoutes,
     );
   }

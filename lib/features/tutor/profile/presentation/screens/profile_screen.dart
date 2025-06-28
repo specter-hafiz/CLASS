@@ -1,4 +1,3 @@
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:class_app/core/constants/app_colors.dart';
 import 'package:class_app/core/constants/strings.dart';
 import 'package:class_app/core/utilities/size_config.dart';
@@ -28,7 +27,7 @@ class ProfileScreen extends StatelessWidget {
                           ? SizeConfig.blockSizeVertical! * 2
                           : SizeConfig.blockSizeVertical! * 0.3,
                 ),
-                AutoSizeText(
+                Text(
                   profileText,
                   style: TextStyle(
                     fontSize:
@@ -117,7 +116,7 @@ class ProfileScreen extends StatelessWidget {
                           : SizeConfig.blockSizeHorizontal! * 0.5,
                 ),
                 Center(
-                  child: AutoSizeText(
+                  child: Text(
                     "Frimpong",
                     style: TextStyle(
                       fontSize:
@@ -252,7 +251,7 @@ class ProfileButton extends StatelessWidget {
                         : SizeConfig.blockSizeHorizontal! * 1,
               ),
               Expanded(
-                child: AutoSizeText(
+                child: Text(
                   text,
                   style: TextStyle(
                     fontSize:

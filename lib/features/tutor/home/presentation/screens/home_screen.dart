@@ -31,7 +31,7 @@ class HomeScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
 
                 children: [
-                  AutoSizeText(
+                  Text(
                     appNameText,
                     style: TextStyle(
                       fontSize:
@@ -50,7 +50,7 @@ class HomeScreen extends StatelessWidget {
                             : SizeConfig.blockSizeHorizontal! * 0.5,
                   ),
 
-                  AutoSizeText(
+                  Text(
                     homeSubText,
                     style: TextStyle(
                       fontSize:
@@ -96,7 +96,7 @@ class HomeScreen extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: AutoSizeText(
+                    child: Text(
                       recentTranscriptionsText,
                       style: TextStyle(
                         fontSize:
@@ -111,7 +111,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                   InkWell(
                     onTap: () {},
-                    child: AutoSizeText(
+                    child: Text(
                       viewAllText,
                       style: TextStyle(
                         color: Color(blueColor),

@@ -30,7 +30,7 @@ class QuizScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
 
                 children: [
-                  AutoSizeText(
+                  Text(
                     quizText,
                     style: TextStyle(
                       fontSize:
@@ -49,7 +49,7 @@ class QuizScreen extends StatelessWidget {
                             : SizeConfig.blockSizeHorizontal! * 0.1,
                   ),
 
-                  AutoSizeText(
+                  Text(
                     quizSubText,
 
                     style: TextStyle(

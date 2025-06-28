@@ -42,7 +42,7 @@ class ResetPasswordScreen extends StatelessWidget {
                 ),
               ),
               SizedBox(height: SizeConfig.blockSizeVertical! * 1),
-              AutoSizeText(
+              Text(
                 setNewPasswordSubText,
 
                 style: TextStyle(

@@ -43,7 +43,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         widget.showTitle
-            ? AutoSizeText(
+            ? Text(
               widget.titleText ?? "",
               style: TextStyle(
                 fontSize:

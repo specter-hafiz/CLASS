@@ -1,4 +1,3 @@
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:class_app/core/constants/app_colors.dart';
 import 'package:class_app/core/constants/strings.dart';
 import 'package:class_app/core/utilities/size_config.dart';
@@ -29,7 +28,6 @@ class CustomElevatedButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    SizeConfig().init(context);
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         shadowColor: Colors.transparent,
@@ -42,14 +40,13 @@ class CustomElevatedButton extends StatelessWidget {
                   : SizeConfig.blockSizeHorizontal! * 5),
         ),
         backgroundColor:
-            isOutlineButton != null ? Color(whiteColor) : Color(blueColor),
+            isOutlineButton == true ? Color(whiteColor) : Color(blueColor),
         elevation: 0,
         foregroundColor:
-            isOutlineButton != null ? Color(blueColor) : Color(whiteColor),
-
+            isOutlineButton == true ? Color(blueColor) : Color(whiteColor),
         shape: RoundedRectangleBorder(
           side:
-              isOutlineButton != null
+              isOutlineButton == true
                   ? BorderSide(color: Color(blueColor), width: 1.5)
                   : BorderSide.none,
           borderRadius: BorderRadius.circular(
@@ -64,28 +61,26 @@ class CustomElevatedButton extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          showIcon != null
-              ? SvgPicture.asset(
-                iconPath ?? googleImage,
-                width:
-                    SizeConfig.orientation(context) == Orientation.portrait
-                        ? SizeConfig.blockSizeHorizontal! * 3
-                        : SizeConfig.blockSizeHorizontal! * 5,
-                height:
-                    SizeConfig.orientation(context) == Orientation.portrait
-                        ? SizeConfig.blockSizeVertical! * 3
-                        : SizeConfig.blockSizeVertical! * 5,
-              )
-              : SizedBox.shrink(),
-          SizedBox(
-            width:
-                showIcon != null
-                    ? (SizeConfig.orientation(context) == Orientation.portrait
-                        ? SizeConfig.blockSizeHorizontal! * 2
-                        : SizeConfig.blockSizeHorizontal! * 1)
-                    : 0,
-          ),
-          AutoSizeText(
+          if (showIcon == true) ...[
+            SvgPicture.asset(
+              iconPath ?? googleImage,
+              width:
+                  SizeConfig.orientation(context) == Orientation.portrait
+                      ? SizeConfig.blockSizeHorizontal! * 3
+                      : SizeConfig.blockSizeHorizontal! * 5,
+              height:
+                  SizeConfig.orientation(context) == Orientation.portrait
+                      ? SizeConfig.blockSizeVertical! * 3
+                      : SizeConfig.blockSizeVertical! * 5,
+            ),
+            SizedBox(
+              width:
+                  SizeConfig.orientation(context) == Orientation.portrait
+                      ? SizeConfig.blockSizeHorizontal! * 2
+                      : SizeConfig.blockSizeHorizontal! * 1,
+            ),
+          ],
+          Text(
             buttonText,
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),

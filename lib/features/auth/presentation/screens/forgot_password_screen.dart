@@ -1,4 +1,3 @@
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:class_app/core/constants/app_colors.dart';
 import 'package:class_app/core/constants/strings.dart';
 import 'package:class_app/core/utilities/size_config.dart';
@@ -55,7 +54,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                 ),
               ),
               SizedBox(height: SizeConfig.blockSizeVertical! * 1),
-              AutoSizeText(
+              Text(
                 forgotPasswordSubText,
 
                 style: TextStyle(

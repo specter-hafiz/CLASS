@@ -1,4 +1,3 @@
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:class_app/core/constants/app_colors.dart';
 import 'package:class_app/core/constants/strings.dart';
 import 'package:class_app/core/utilities/size_config.dart';
@@ -18,7 +17,7 @@ class AssessmentScreen extends StatelessWidget {
       appBar: AppBar(
         leading: CustomBackButton(),
         centerTitle: true,
-        title: AutoSizeText(
+        title: Text(
           assessmentText,
           style: TextStyle(
             fontSize:
@@ -53,18 +52,33 @@ class AssessmentScreen extends StatelessWidget {
                   context: context,
                   barrierDismissible: false,
                   builder: (context) {
+                    final screenHeight = MediaQuery.of(context).size.height;
+                    final screenWidth = MediaQuery.of(context).size.width;
+
                     return AlertDialog(
                       backgroundColor: Color(whiteColor),
-                      content: SingleChildScrollView(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(
-                            maxWidth: 500,
-                          ), // Prevent overflow in wide screens
+                      insetPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 24,
+                      ),
+                      contentPadding: const EdgeInsets.all(16),
+                      content: SizedBox(
+                        width:
+                            SizeConfig.orientation(context) ==
+                                    Orientation.portrait
+                                ? screenWidth * 0.9
+                                : screenWidth *
+                                    0.4, // optional: control width too
+                        height:
+                            SizeConfig.orientation(context) ==
+                                    Orientation.portrait
+                                ? screenHeight * 0.38
+                                : screenHeight *
+                                    0.8, // 👈 manually control height here
+                        child: SingleChildScrollView(
                           child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              AutoSizeText(
+                              Text(
                                 detailsForAssessmentText,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
@@ -76,7 +90,6 @@ class AssessmentScreen extends StatelessWidget {
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                              const SizedBox(height: 12),
                               CustomTextField(
                                 hintText: "12342",
                                 controller: TextEditingController(),
@@ -99,23 +112,19 @@ class AssessmentScreen extends StatelessWidget {
                                     child: CustomElevatedButton(
                                       buttonText: cancelText,
                                       isOutlineButton: true,
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
+                                      onPressed: () => Navigator.pop(context),
                                     ),
                                   ),
-                                  SizedBox(
-                                    width:
-                                        SizeConfig.orientation(context) ==
-                                                Orientation.portrait
-                                            ? SizeConfig.blockSizeHorizontal! *
-                                                2
-                                            : SizeConfig.blockSizeVertical! * 2,
-                                  ),
+                                  const SizedBox(width: 12),
                                   Expanded(
                                     child: CustomElevatedButton(
                                       buttonText: startNowText,
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        Navigator.pushNamed(
+                                          context,
+                                          '/answerQuiz',
+                                        );
+                                      },
                                     ),
                                   ),
                                 ],
@@ -135,7 +144,7 @@ class AssessmentScreen extends StatelessWidget {
                       ? SizeConfig.blockSizeVertical! * 2
                       : SizeConfig.blockSizeHorizontal! * 2,
             ),
-            AutoSizeText(
+            Text(
               previusAssessmentText,
               style: TextStyle(
                 fontSize:

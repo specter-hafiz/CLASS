@@ -16,7 +16,7 @@ class ContinueWithWidget extends StatelessWidget {
           padding: EdgeInsets.symmetric(
             horizontal: SizeConfig.blockSizeHorizontal! * 2,
           ),
-          child: AutoSizeText(
+          child: Text(
             "or continue with ",
             style: TextStyle(
               color: Color(greyColor),

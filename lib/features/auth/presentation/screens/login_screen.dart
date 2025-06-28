@@ -36,7 +36,7 @@ class LoginScreen extends StatelessWidget {
                 ),
                 SizedBox(height: SizeConfig.blockSizeVertical! * 1),
 
-                AutoSizeText(
+                Text(
                   loginText,
                   style: TextStyle(
                     fontSize:
@@ -48,7 +48,7 @@ class LoginScreen extends StatelessWidget {
                   maxLines: 1,
                 ),
                 SizedBox(height: SizeConfig.blockSizeVertical! * 2),
-                AutoSizeText(
+                Text(
                   loginToContinueText,
                   style: TextStyle(
                     fontSize:

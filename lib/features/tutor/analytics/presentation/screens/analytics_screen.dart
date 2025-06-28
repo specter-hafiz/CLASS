@@ -30,7 +30,7 @@ class AnalyticsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
 
                 children: [
-                  AutoSizeText(
+                  Text(
                     analyticsText,
                     style: TextStyle(
                       fontSize:
@@ -49,7 +49,7 @@ class AnalyticsScreen extends StatelessWidget {
                             : SizeConfig.blockSizeHorizontal! * 0.1,
                   ),
 
-                  AutoSizeText(
+                  Text(
                     analyticsSubText,
 
                     style: TextStyle(
