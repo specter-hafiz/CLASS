@@ -1,4 +1,3 @@
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:class_app/core/constants/app_colors.dart';
 import 'package:class_app/core/utilities/size_config.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +48,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                 fontSize:
                     SizeConfig.orientation(context) == Orientation.portrait
                         ? SizeConfig.screenWidth! * 0.05
-                        : SizeConfig.screenWidth! * 0.03,
+                        : SizeConfig.screenWidth! * 0.02,
                 fontWeight: FontWeight.bold,
               ),
               maxLines: 1,

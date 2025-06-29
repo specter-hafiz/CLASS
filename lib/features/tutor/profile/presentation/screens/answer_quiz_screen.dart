@@ -1,48 +1,243 @@
+import 'dart:async';
+
 import 'package:class_app/core/constants/app_colors.dart';
 import 'package:class_app/core/constants/strings.dart';
 import 'package:class_app/core/utilities/size_config.dart';
 import 'package:class_app/features/auth/presentation/widgets/custom_back_button.dart';
 import 'package:class_app/features/onboarding/widgets/custom_elevated_button.dart';
+import 'package:class_app/features/tutor/profile/data/question.dart';
+import 'package:class_app/features/tutor/profile/presentation/screens/remarks_screen.dart';
+import 'package:class_app/features/tutor/profile/presentation/widgets/quiz_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
-class AnswerQuizScreen extends StatelessWidget {
+class AnswerQuizScreen extends StatefulWidget {
   const AnswerQuizScreen({super.key});
+
+  @override
+  State<AnswerQuizScreen> createState() => _AnswerQuizScreenState();
+}
+
+class _AnswerQuizScreenState extends State<AnswerQuizScreen> {
+  int currentIndex = 0;
+  int? selectedIndex;
+  int score = 0;
+  List<int?> selectedAnswers = List.filled(quizQuestions.length, null);
+  late Timer _timer;
+  Duration remainingTime = Duration(minutes: 1);
+  bool quizEnded = false;
+  @override
+  void initState() {
+    super.initState();
+    selectedIndex = selectedAnswers[currentIndex];
+    startTimer();
+  }
+
+  void startTimer() {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (remainingTime.inSeconds > 0) {
+        setState(() {
+          remainingTime -= Duration(seconds: 1);
+        });
+      } else {
+        submitQuiz(isTimeUp: true);
+      }
+    });
+  }
+
+  void submitQuiz({bool isTimeUp = false}) {
+    _timer.cancel();
+
+    int finalScore = 0;
+    for (int i = 0; i < quizQuestions.length; i++) {
+      if (selectedAnswers[i] == quizQuestions[i]['correctIndex']) {
+        finalScore++;
+      }
+    }
+
+    final calculatedScore = ((finalScore / quizQuestions.length) * 100).round();
+
+    setState(() {
+      score = calculatedScore;
+      quizEnded = true;
+    });
+
+    if (isTimeUp) {
+      // Immediately navigate to remarks without showing dialog
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => RemarksScreen(score: score.toString()),
+        ),
+      );
+    } else {
+      // Show confirmation dialog before submitting manually
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder:
+            (_) => AlertDialog(
+              backgroundColor: Color(whiteColor),
+              icon: Icon(Icons.info_outline_rounded, color: Color(blueColor)),
+              title: Text(
+                warningText,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize:
+                      SizeConfig.orientation(context) == Orientation.portrait
+                          ? SizeConfig.blockSizeHorizontal! * 6
+                          : SizeConfig.blockSizeVertical! * 6,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "Questions ${selectedAnswers.where((a) => a != null).length} / ${quizQuestions.length} answered",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize:
+                          SizeConfig.orientation(context) ==
+                                  Orientation.portrait
+                              ? SizeConfig.blockSizeHorizontal! * 4
+                              : SizeConfig.blockSizeVertical! * 4,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    confirmationText,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize:
+                          SizeConfig.orientation(context) ==
+                                  Orientation.portrait
+                              ? SizeConfig.blockSizeHorizontal! * 4
+                              : SizeConfig.blockSizeVertical! * 4,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: CustomElevatedButton(
+                        buttonText: cancelText,
+                        isOutlineButton: true,
+                        onPressed: () {
+                          Navigator.pop(context);
+                          setState(() {
+                            quizEnded = false;
+                          });
+                        },
+                      ),
+                    ),
+                    SizedBox(width: SizeConfig.blockSizeHorizontal! * 2),
+                    Expanded(
+                      child: CustomElevatedButton(
+                        buttonText: submitText,
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) =>
+                                      RemarksScreen(score: score.toString()),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+      );
+    }
+  }
+
+  void nextQuestion() {
+    if (selectedIndex != null) {
+      selectedAnswers[currentIndex] = selectedIndex;
+    }
+
+    if (currentIndex < quizQuestions.length - 1) {
+      setState(() {
+        currentIndex++;
+        selectedIndex = selectedAnswers[currentIndex];
+      });
+    } else {
+      submitQuiz();
+    }
+  }
+
+  void saveCurrentAnswer() {
+    if (selectedIndex != null) {
+      selectedAnswers[currentIndex] = selectedIndex;
+    }
+  }
+
+  void previousQuestion() {
+    if (selectedIndex != null) {
+      selectedAnswers[currentIndex] = selectedIndex;
+    }
+
+    if (currentIndex > 0) {
+      setState(() {
+        currentIndex--;
+        selectedIndex = selectedAnswers[currentIndex];
+      });
+    }
+  }
+
+  String get formattedTime {
+    String minutes = remainingTime.inMinutes
+        .remainder(60)
+        .toString()
+        .padLeft(2, '0');
+    String seconds = remainingTime.inSeconds
+        .remainder(60)
+        .toString()
+        .padLeft(2, '0');
+    return "00:$minutes:$seconds";
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     SizeConfig().init(context);
     final isPortrait = SizeConfig.orientation(context) == Orientation.portrait;
-    final screenHeight =
-        SizeConfig.screenHeight ?? MediaQuery.of(context).size.height;
     final screenWidth =
         SizeConfig.screenWidth ?? MediaQuery.of(context).size.width;
 
     return Scaffold(
       appBar: AppBar(
         leading: CustomBackButton(),
-        automaticallyImplyLeading: false,
         centerTitle: true,
+        automaticallyImplyLeading: false,
         title:
             isPortrait
-                ? Text(
-                  "01/100",
-                  style: TextStyle(
-                    fontSize: SizeConfig.blockSizeHorizontal! * 6,
-                    fontWeight: FontWeight.w600,
-                  ),
-                )
+                ? Text("Q${currentIndex + 1}/${quizQuestions.length}")
                 : Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     CustomElevatedButton(
                       buttonText: backText,
                       isOutlineButton: true,
-                      onPressed: () {},
+                      onPressed: previousQuestion,
                       width: screenWidth * 0.2,
                     ),
                     Text(
-                      "01/100",
+                      "Q${currentIndex + 1}/${quizQuestions.length}",
                       style: TextStyle(
                         fontSize: SizeConfig.blockSizeVertical! * 4,
                         fontWeight: FontWeight.w400,
@@ -50,21 +245,15 @@ class AnswerQuizScreen extends StatelessWidget {
                     ),
                     CustomElevatedButton(
                       buttonText: nextText,
-                      onPressed: () {},
+                      onPressed: nextQuestion,
                       width: screenWidth * 0.2,
                     ),
                   ],
                 ),
-        actionsPadding: EdgeInsets.only(
-          right: SizeConfig.horizontalPadding(context),
-        ),
         actions: [
           Container(
             padding: EdgeInsets.symmetric(
-              horizontal:
-                  isPortrait
-                      ? SizeConfig.blockSizeHorizontal! * 2
-                      : SizeConfig.blockSizeHorizontal! * 1,
+              horizontal: SizeConfig.blockSizeHorizontal! * 2,
             ),
             decoration: BoxDecoration(
               color: Color(blueColor),
@@ -74,20 +263,19 @@ class AnswerQuizScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
-                SvgPicture.asset(
-                  timerImage,
-                  width:
-                      isPortrait
-                          ? SizeConfig.blockSizeHorizontal! * 4
-                          : SizeConfig.blockSizeHorizontal! * 2,
-                  height:
-                      isPortrait
-                          ? SizeConfig.blockSizeHorizontal! * 4
-                          : SizeConfig.blockSizeHorizontal! * 2,
+                Container(
+                  padding: EdgeInsets.all(
+                    SizeConfig.blockSizeHorizontal! * 0.8,
+                  ),
+                  child: SvgPicture.asset(
+                    timerImage,
+                    width: SizeConfig.blockSizeHorizontal! * 4,
+                    height: SizeConfig.blockSizeHorizontal! * 4,
+                  ),
                 ),
                 SizedBox(width: SizeConfig.blockSizeHorizontal! * 1),
                 Text(
-                  "00:10:30",
+                  formattedTime,
                   style: TextStyle(
                     fontSize:
                         isPortrait
@@ -111,15 +299,17 @@ class AnswerQuizScreen extends StatelessWidget {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    SizedBox(
-                      height:
-                          SizeConfig.blockSizeVertical! *
-                          (SizeConfig.orientation(context) ==
-                                  Orientation.portrait
-                              ? 6
-                              : 2),
+                    SizedBox(height: SizeConfig.blockSizeVertical! * 2),
+                    QuizCard(
+                      questionIndex: currentIndex,
+                      onOptionSelected: (index) {
+                        setState(() {
+                          selectedIndex = index;
+                          selectedAnswers[currentIndex] = index;
+                        });
+                      },
+                      selectedIndex: selectedIndex,
                     ),
-                    QuizCard(),
                     SizedBox(height: SizeConfig.blockSizeVertical! * 6),
                   ],
                 ),
@@ -131,7 +321,7 @@ class AnswerQuizScreen extends StatelessWidget {
                   Expanded(
                     child: CustomElevatedButton(
                       buttonText: backText,
-                      onPressed: () {},
+                      onPressed: previousQuestion,
                       isOutlineButton: true,
                     ),
                   ),
@@ -139,261 +329,11 @@ class AnswerQuizScreen extends StatelessWidget {
                   Expanded(
                     child: CustomElevatedButton(
                       buttonText: nextText,
-                      onPressed: () {},
+                      onPressed: nextQuestion,
                     ),
                   ),
                 ],
               ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class QuizCard extends StatelessWidget {
-  const QuizCard({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    SizeConfig().init(context);
-
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        StackContainer(
-          bottomDisplacement:
-              SizeConfig.orientation(context) == Orientation.portrait
-                  ? (-SizeConfig.blockSizeHorizontal! * 6)
-                  : (-SizeConfig.blockSizeHorizontal! * 3),
-          color: hospitalBlue,
-        ),
-        StackContainer(
-          bottomDisplacement:
-              SizeConfig.orientation(context) == Orientation.portrait
-                  ? (-SizeConfig.blockSizeHorizontal! * 3)
-                  : (-SizeConfig.blockSizeHorizontal! * 1.5),
-        ),
-        Container(
-          padding: EdgeInsets.all(SizeConfig.blockSizeHorizontal! * 3),
-          decoration: BoxDecoration(
-            color: Color(whiteColor),
-            borderRadius: BorderRadius.circular(
-              SizeConfig.blockSizeHorizontal! * 3,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Color(blackColor).withValues(alpha: 0.4),
-                blurRadius: 3,
-                offset: Offset(0, 2), // changes position of shadow
-              ),
-            ],
-          ),
-          child:
-              SizeConfig.orientation(context) == Orientation.portrait
-                  ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      QuestionWidget(),
-                      SizeConfig.orientation(context) == Orientation.portrait
-                          ? AnswersWidget()
-                          : SizedBox.shrink(),
-                    ],
-                  )
-                  : Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(child: QuestionWidget()),
-                      SizedBox(width: SizeConfig.blockSizeHorizontal! * 2),
-                      Expanded(child: AnswersWidget()),
-                    ],
-                  ),
-        ),
-      ],
-    );
-  }
-}
-
-class QuestionWidget extends StatelessWidget {
-  const QuestionWidget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-
-      children: [
-        Text(
-          "Question",
-          style: TextStyle(
-            fontSize:
-                SizeConfig.orientation(context) == Orientation.portrait
-                    ? SizeConfig.blockSizeHorizontal! * 5
-                    : SizeConfig.blockSizeVertical! * 5,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        SizedBox(height: SizeConfig.blockSizeVertical! * 2),
-        Text(
-          "If it takes 5 hours for 5 men to dig 5 holes, how long does it take for 100 men to dig 100 holes?",
-          style: TextStyle(
-            fontSize:
-                SizeConfig.orientation(context) == Orientation.portrait
-                    ? SizeConfig.blockSizeHorizontal! * 5
-                    : SizeConfig.blockSizeVertical! * 5,
-            fontWeight: FontWeight.w400,
-          ),
-        ),
-        SizedBox(height: SizeConfig.blockSizeVertical! * 3),
-      ],
-    );
-  }
-}
-
-class StackContainer extends StatelessWidget {
-  const StackContainer({super.key, this.bottomDisplacement, this.color});
-  final double? bottomDisplacement;
-  final int? color;
-
-  @override
-  Widget build(BuildContext context) {
-    SizeConfig().init(context);
-
-    return Positioned(
-      left: 0,
-      right: 0,
-      bottom: bottomDisplacement ?? -SizeConfig.blockSizeHorizontal! * 3,
-      child: Container(
-        width:
-            SizeConfig.orientation(context) == Orientation.portrait
-                ? SizeConfig.blockSizeHorizontal! * 20
-                : SizeConfig.blockSizeHorizontal! * 20,
-        height:
-            SizeConfig.orientation(context) == Orientation.portrait
-                ? SizeConfig.blockSizeHorizontal! * 20
-                : SizeConfig.blockSizeHorizontal! * 10,
-        decoration: BoxDecoration(
-          color: Color(color ?? blueColor),
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(SizeConfig.blockSizeHorizontal! * 3),
-            bottomRight: Radius.circular(SizeConfig.blockSizeHorizontal! * 3),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Color(blackColor).withValues(alpha: 0.4),
-              blurRadius: 3,
-              offset: Offset(0, 2), // changes position of shadow
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class AnswersWidget extends StatefulWidget {
-  const AnswersWidget({super.key});
-
-  @override
-  State<AnswersWidget> createState() => _AnswersWidgetState();
-}
-
-class _AnswersWidgetState extends State<AnswersWidget> {
-  int selectedIndex = -1;
-  @override
-  Widget build(BuildContext context) {
-    SizeConfig().init(context);
-
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      itemCount: 4, // Example options count
-      itemBuilder: (context, index) {
-        return AnswerContainer(
-          index: index,
-          selectedIndex: selectedIndex, // Replace with actual selected index
-          onChanged: (i) {
-            // Handle selection change
-            setState(() {
-              selectedIndex = i;
-            });
-          },
-        );
-      },
-    );
-  }
-}
-
-class AnswerContainer extends StatelessWidget {
-  const AnswerContainer({
-    super.key,
-    required this.index,
-    required this.selectedIndex,
-    required this.onChanged,
-  });
-
-  final int index;
-  final int selectedIndex;
-  final ValueChanged<int> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    SizeConfig().init(context);
-
-    return InkWell(
-      onTap: () => onChanged(index),
-      child: Container(
-        margin: EdgeInsets.only(bottom: SizeConfig.blockSizeVertical! * 1),
-        padding: EdgeInsets.symmetric(
-          vertical: SizeConfig.blockSizeVertical! * 1,
-          horizontal: SizeConfig.blockSizeHorizontal! * 3,
-        ),
-        decoration: BoxDecoration(
-          color: selectedIndex == index ? Color(blueColor) : null,
-          borderRadius: BorderRadius.circular(
-            SizeConfig.blockSizeHorizontal! * 2,
-          ),
-          border: Border.all(
-            color:
-                selectedIndex == index ? Colors.transparent : Color(greyColor),
-            width: 2,
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Flexible(
-              child: Text(
-                "Option ${index + 1} ",
-                style: TextStyle(
-                  fontSize:
-                      SizeConfig.orientation(context) == Orientation.portrait
-                          ? SizeConfig.blockSizeHorizontal! * 4
-                          : SizeConfig.blockSizeVertical! * 4,
-                  color:
-                      selectedIndex == index
-                          ? Color(whiteColor)
-                          : Color(blackColor),
-                ),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 3,
-              ),
-            ),
-            SizedBox(width: SizeConfig.blockSizeHorizontal! * 2),
-            Radio<int>(
-              value: index,
-              groupValue: selectedIndex,
-              onChanged: (_) => onChanged(index),
-              activeColor: Color(whiteColor),
-              fillColor: WidgetStateProperty.resolveWith<Color>((states) {
-                if (states.contains(WidgetState.selected)) {
-                  return Color(whiteColor);
-                }
-                return Color(greyColor);
-              }),
-
-              visualDensity: VisualDensity.compact,
-            ),
           ],
         ),
       ),

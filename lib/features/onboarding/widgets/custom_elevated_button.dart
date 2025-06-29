@@ -15,6 +15,8 @@ class CustomElevatedButton extends StatelessWidget {
     this.showIcon,
     this.iconPath,
     this.isOutlineButton,
+    this.backgroundColor,
+    this.textColor,
   });
 
   final void Function()? onPressed;
@@ -25,6 +27,8 @@ class CustomElevatedButton extends StatelessWidget {
   final bool? showIcon;
   final String? iconPath;
   final bool? isOutlineButton;
+  final int? backgroundColor;
+  final int? textColor;
 
   @override
   Widget build(BuildContext context) {
@@ -40,10 +44,14 @@ class CustomElevatedButton extends StatelessWidget {
                   : SizeConfig.blockSizeHorizontal! * 5),
         ),
         backgroundColor:
-            isOutlineButton == true ? Color(whiteColor) : Color(blueColor),
+            isOutlineButton == true
+                ? Color(whiteColor)
+                : Color(backgroundColor ?? blueColor),
         elevation: 0,
         foregroundColor:
-            isOutlineButton == true ? Color(blueColor) : Color(whiteColor),
+            isOutlineButton == true
+                ? Color(blueColor)
+                : Color(textColor ?? whiteColor),
         shape: RoundedRectangleBorder(
           side:
               isOutlineButton == true

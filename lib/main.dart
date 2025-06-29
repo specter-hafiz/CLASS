@@ -25,6 +25,7 @@ class MyApp extends StatelessWidget {
           elevation: 0,
           iconTheme: IconThemeData(color: Color(blackColor)),
         ),
+        popupMenuTheme: PopupMenuThemeData(color: Color(whiteColor)),
         fontFamily: "Poppins",
         textTheme: const TextTheme(
           bodyMedium: TextStyle(fontWeight: FontWeight.w400),

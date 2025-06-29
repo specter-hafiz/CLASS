@@ -5,8 +5,8 @@ import 'package:class_app/features/auth/presentation/widgets/custom_textfield.da
 import 'package:class_app/features/onboarding/widgets/custom_elevated_button.dart';
 import 'package:flutter/material.dart';
 
-class ChangePasswordScreen extends StatelessWidget {
-  const ChangePasswordScreen({super.key});
+class EditProfileScreen extends StatelessWidget {
+  const EditProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class ChangePasswordScreen extends StatelessWidget {
         leading: CustomBackButton(),
         centerTitle: true,
         title: Text(
-          changePasswordText,
+          editProfileText,
           style: TextStyle(
             fontSize:
                 SizeConfig.orientation(context) == Orientation.portrait
@@ -37,7 +37,7 @@ class ChangePasswordScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CustomTextField(
-                hintText: passwordHintText,
+                hintText: userNameText,
                 titleText: oldPasswordText,
                 controller: TextEditingController(),
                 showTitle: true,
@@ -49,24 +49,8 @@ class ChangePasswordScreen extends StatelessWidget {
                         ? SizeConfig.blockSizeVertical! * 2
                         : SizeConfig.blockSizeHorizontal! * 2,
               ),
-              CustomTextField(
-                hintText: passwordHintText,
-                titleText: oldPasswordText,
 
-                controller: TextEditingController(),
-                showTitle: true,
-                showSuffixIcon: true,
-              ),
-              SizedBox(
-                height:
-                    SizeConfig.orientation(context) == Orientation.portrait
-                        ? SizeConfig.blockSizeVertical! * 2
-                        : SizeConfig.blockSizeHorizontal! * 2,
-              ),
-              CustomElevatedButton(
-                buttonText: changePasswordText,
-                onPressed: () {},
-              ),
+              CustomElevatedButton(buttonText: saveText, onPressed: () {}),
             ],
           ),
         ),

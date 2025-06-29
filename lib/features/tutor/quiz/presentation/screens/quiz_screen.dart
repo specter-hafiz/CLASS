@@ -1,4 +1,3 @@
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:class_app/core/constants/app_colors.dart';
 import 'package:class_app/core/constants/strings.dart';
 import 'package:class_app/core/utilities/size_config.dart';
@@ -83,6 +82,7 @@ class QuizScreen extends StatelessWidget {
                       showTrailingIcon: true,
                       onTap: () {
                         // Handle tap action
+                        Navigator.pushNamed(context, '/quizDetail');
                       },
                       onMoreTap: () {
                         // Handle more action
