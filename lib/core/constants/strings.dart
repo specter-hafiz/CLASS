@@ -43,8 +43,20 @@ const timeAllowedText = 'Time Allowed';
 const easyText = 'verYEasy';
 const deadlineText = 'Deadline for Assessment';
 
-const shareQuizText = 'Share Quiz For Assessment';
+const shareQuizText = 'Set Quiz For Assessment';
 const setQuizText = 'Set Quiz';
+const exportQuestionText = 'Export Questions';
+const exportText = 'Export';
+const fileNameText = 'File Name';
+const fileFormatText = 'File Format';
+const midsemesterText = 'Mid Semester Questions';
+const chooseFileFormatText = 'Choose File Format';
+const includeAnswersText = 'Include answers for questions';
+const wordText = 'Word';
+const pdfText = 'PDF';
+
+const copyText = 'Copy';
+const shareText = 'Share';
 const logoImage = 'assets/images/logo.png';
 const forwardImage = "assets/svgs/forward.svg";
 const changePasswordImage = 'assets/svgs/change_password.svg';
@@ -62,6 +74,7 @@ const analyticsImage = 'assets/svgs/analytics.svg';
 const profileImage = 'assets/svgs/profile.svg';
 const resetPasswordImage = 'assets/svgs/new_password.svg';
 const importImage = 'assets/svgs/import.svg';
+const successImage = 'assets/svgs/success.svg';
 const micOutlineImage = 'assets/svgs/mic_outline.svg';
 const googleImage = 'assets/svgs/google.svg';
 const documentImage = 'assets/svgs/document.svg';
@@ -71,6 +84,10 @@ const logoutImage = 'assets/svgs/logout.svg';
 const oldPasswordText = 'Old Password';
 const newPasswordText = 'New Password';
 const loginText = "Login";
+const successText = "Success";
+const successSubText = """Quiz has been set successfully. 
+Copy or share the link below for 
+assessment.""";
 const logoutText = "Logout";
 const appNameText = "CLASS";
 const quizText = "Quizzes";

@@ -185,7 +185,7 @@ class CustomAlertDialog extends StatelessWidget {
                       ),
                     ],
                   ),
-              const SizedBox(height: 20),
+              SizedBox(height: SizeConfig.blockSizeVertical! * 2),
               Row(
                 children: [
                   Expanded(

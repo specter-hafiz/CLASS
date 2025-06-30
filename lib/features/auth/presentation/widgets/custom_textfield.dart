@@ -14,6 +14,8 @@ class CustomTextField extends StatefulWidget {
     required this.showSuffixIcon,
     this.maxLines,
     this.focusNode,
+    this.readOnly,
+    this.underlineInputBorder,
   });
   final String hintText;
   final String? titleText;
@@ -23,6 +25,8 @@ class CustomTextField extends StatefulWidget {
   final bool showSuffixIcon;
   final int? maxLines;
   final FocusNode? focusNode;
+  final bool? readOnly;
+  final bool? underlineInputBorder;
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();
 }
@@ -58,6 +62,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
             ? SizedBox(height: SizeConfig.blockSizeVertical! * 1)
             : SizedBox.shrink(),
         TextFormField(
+          readOnly: widget.readOnly ?? false,
+
           focusNode: widget.focusNode,
           maxLines: widget.maxLines ?? 1,
           controller: widget.controller,
@@ -99,27 +105,51 @@ class _CustomTextFieldState extends State<CustomTextField> {
                       ? SizeConfig.blockSizeHorizontal! * 5
                       : SizeConfig.blockSizeHorizontal! * 3,
             ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(
-                SizeConfig.orientation(context) == Orientation.portrait
-                    ? SizeConfig.blockSizeHorizontal! * 2
-                    : SizeConfig.blockSizeHorizontal! * 1,
-              ),
-              borderSide: BorderSide(color: Color(blueColor), width: 1.0),
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(
-                SizeConfig.orientation(context) == Orientation.portrait
-                    ? SizeConfig.blockSizeHorizontal! * 2
-                    : SizeConfig.blockSizeHorizontal! * 1,
-              ),
-              borderSide: BorderSide(color: Color(greyColor), width: 1.0),
-            ),
+            focusedBorder:
+                widget.underlineInputBorder != null
+                    ? UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Color(blueColor),
+                        width: 1.0,
+                      ),
+                    )
+                    : OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        SizeConfig.orientation(context) == Orientation.portrait
+                            ? SizeConfig.blockSizeHorizontal! * 2
+                            : SizeConfig.blockSizeHorizontal! * 1,
+                      ),
+                      borderSide: BorderSide(
+                        color: Color(blueColor),
+                        width: 1.0,
+                      ),
+                    ),
+            border:
+                widget.underlineInputBorder != null
+                    ? UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Color(blueColor),
+                        width: 1.0,
+                      ),
+                    )
+                    : OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        SizeConfig.orientation(context) == Orientation.portrait
+                            ? SizeConfig.blockSizeHorizontal! * 2
+                            : SizeConfig.blockSizeHorizontal! * 1,
+                      ),
+                      borderSide: BorderSide(
+                        color: Color(greyColor),
+                        width: 1.0,
+                      ),
+                    ),
 
             contentPadding: EdgeInsets.symmetric(
               horizontal:
                   SizeConfig.orientation(context) == Orientation.portrait
-                      ? SizeConfig.horizontalPadding(context)
+                      ? (widget.underlineInputBorder != null
+                          ? SizeConfig.horizontalPadding(context) / 2
+                          : SizeConfig.horizontalPadding(context))
                       : SizeConfig.horizontalPadding(context) * 0.5,
               vertical: SizeConfig.blockSizeVertical! * 1.2,
             ),

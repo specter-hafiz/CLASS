@@ -12,7 +12,7 @@ class AnswersWidget extends StatefulWidget {
 
   final List<String> answersList;
   final int? selectedIndex;
-  final ValueChanged<int> onChanged;
+  final ValueChanged<int>? onChanged;
   final int? correctIndex;
   @override
   State<AnswersWidget> createState() => _AnswersWidgetState();

@@ -1,4 +1,3 @@
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:class_app/core/constants/app_colors.dart';
 import 'package:class_app/core/constants/strings.dart';
 import 'package:class_app/core/utilities/size_config.dart';
@@ -77,7 +76,50 @@ class HomeScreen extends StatelessWidget {
                       buttonText: recordText,
                       showIcon: true,
                       iconPath: micOutlineImage,
-                      onPressed: () {},
+                      onPressed: () async {
+                        await showModalBottomSheet(
+                          showDragHandle: true,
+                          backgroundColor: Color(whiteColor),
+                          context: context,
+                          builder: (context) {
+                            return Wrap(
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    IconButton(
+                                      icon: Icon(Icons.close_outlined),
+                                      color: Color(blackColor),
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                    SizedBox(
+                                      width:
+                                          SizeConfig.blockSizeHorizontal! * 15,
+                                    ),
+                                    Flexible(
+                                      child: Text(
+                                        'Record Audio',
+                                        style: TextStyle(
+                                          fontSize:
+                                              SizeConfig.screenWidth! * 0.05,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: SizeConfig.blockSizeVertical! * 2,
+                                ),
+                                // Add your recording widget here
+                                // For example, a microphone button
+                              ],
+                            );
+                          },
+                        );
+                      },
                     ),
                   ),
                   SizedBox(width: SizeConfig.blockSizeHorizontal! * 2),

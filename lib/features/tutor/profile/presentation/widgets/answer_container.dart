@@ -15,7 +15,7 @@ class AnswerContainer extends StatelessWidget {
   final int index;
   final int selectedIndex;
   final String answerText;
-  final ValueChanged<int> onChanged;
+  final ValueChanged<int>? onChanged;
   final int? correctIndex;
   Color? getBackgroundColor() {
     if (correctIndex != null) {
@@ -33,7 +33,7 @@ class AnswerContainer extends StatelessWidget {
     SizeConfig().init(context);
 
     return InkWell(
-      onTap: () => onChanged(index),
+      onTap: onChanged != null ? () => onChanged!(index) : null,
       child: Container(
         margin: EdgeInsets.only(bottom: SizeConfig.blockSizeVertical! * 1),
         padding: EdgeInsets.symmetric(
@@ -75,7 +75,7 @@ class AnswerContainer extends StatelessWidget {
             Radio<int>(
               value: index,
               groupValue: selectedIndex,
-              onChanged: (_) => onChanged(index),
+              onChanged: onChanged != null ? (_) => onChanged!(index) : null,
               activeColor: Color(whiteColor),
               fillColor: WidgetStateProperty.resolveWith<Color>((states) {
                 if (states.contains(WidgetState.selected)) {

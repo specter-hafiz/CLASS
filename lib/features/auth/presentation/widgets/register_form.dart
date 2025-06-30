@@ -1,3 +1,4 @@
+import 'package:class_app/core/constants/app_colors.dart';
 import 'package:class_app/core/constants/strings.dart';
 import 'package:class_app/core/utilities/size_config.dart';
 import 'package:class_app/features/auth/presentation/widgets/continue_with_widget.dart';
@@ -44,14 +45,7 @@ class RegisterForm extends StatelessWidget {
         Row(
           children: [
             // checkbox for terms and conditions
-            Checkbox(
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              visualDensity: VisualDensity.compact,
-              value: false,
-              onChanged: (value) {
-                // Handle checkbox change
-              },
-            ),
+            CustomCheckBox(),
             SizedBox(width: SizeConfig.blockSizeHorizontal! * 0.5),
             RichTextWidget(
               text: "I agree to the ",
@@ -93,6 +87,41 @@ class RegisterForm extends StatelessWidget {
                   : SizeConfig.blockSizeHorizontal! * 1,
         ),
       ],
+    );
+  }
+}
+
+class CustomCheckBox extends StatefulWidget {
+  const CustomCheckBox({super.key, this.onChanged});
+  final void Function(bool?)? onChanged;
+
+  @override
+  State<CustomCheckBox> createState() => _CustomCheckBoxState();
+}
+
+class _CustomCheckBoxState extends State<CustomCheckBox> {
+  var isChecked = false;
+  void toggleCheckbox(bool? value) {
+    setState(() {
+      // Update the checkbox state
+      isChecked = value ?? false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Checkbox(
+      activeColor: Color(blueColor),
+      checkColor: Color(whiteColor),
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      visualDensity: VisualDensity.compact,
+      value: isChecked,
+      onChanged: (value) {
+        toggleCheckbox(value);
+        if (widget.onChanged != null) {
+          widget.onChanged!(value);
+        }
+      },
     );
   }
 }
