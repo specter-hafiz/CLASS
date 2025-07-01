@@ -1,60 +1,118 @@
 import 'package:flutter/material.dart';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:audio_waveforms/audio_waveforms.dart';
 
-class AudioPlayerScreen extends StatefulWidget {
-  final String path;
+class AudioPlaybackScreen extends StatefulWidget {
+  final String audioPath;
 
-  const AudioPlayerScreen({super.key, required this.path});
+  const AudioPlaybackScreen({super.key, required this.audioPath});
 
   @override
-  State<AudioPlayerScreen> createState() => _AudioPlayerScreenState();
+  State<AudioPlaybackScreen> createState() => _AudioPlaybackScreenState();
 }
 
-class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
-  final AudioPlayer _audioPlayer = AudioPlayer();
+class _AudioPlaybackScreenState extends State<AudioPlaybackScreen> {
+  late AudioPlayer _audioPlayer;
+  late PlayerController _waveformController;
+
   bool _isPlaying = false;
 
   @override
-  initState() {
+  void initState() {
     super.initState();
-    _audioPlayer.onPlayerComplete.listen((state) {
-      setState(() {
-        _isPlaying = false;
+    _audioPlayer = AudioPlayer();
+    _waveformController = PlayerController();
+
+    _initAudio();
+  }
+
+  Future<void> _initAudio() async {
+    try {
+      await _waveformController.preparePlayer(
+        path: widget.audioPath,
+        shouldExtractWaveform: true,
+      );
+
+      await _audioPlayer.setFilePath(widget.audioPath);
+
+      _audioPlayer.playerStateStream.listen((state) {
+        final isPlaying = state.playing;
+        final isCompleted = state.processingState == ProcessingState.completed;
+
+        setState(() => _isPlaying = isPlaying);
+
+        if (isCompleted) {
+          _waveformController.stopPlayer();
+          _isPlaying = false; // Reset playing state
+          _audioPlayer.stop(); // Stop audio playback
+          _audioPlayer.seek(Duration.zero); // Reset audio
+          _waveformController.seekTo(0);
+        } else {
+          isPlaying
+              ? _waveformController.startPlayer()
+              : _waveformController.pausePlayer();
+        }
       });
-    });
+    } catch (e) {
+      debugPrint("Error loading audio: $e");
+    }
+  }
+
+  void _togglePlayPause() {
+    if (_isPlaying) {
+      _audioPlayer.pause();
+    } else {
+      _audioPlayer.play();
+    }
+  }
+
+  void _stopAndReturn() async {
+    await _audioPlayer.stop();
+    await _waveformController.stopAllPlayers();
+    Navigator.pop(context, widget.audioPath);
   }
 
   @override
   void dispose() {
     _audioPlayer.dispose();
+    _waveformController.dispose();
     super.dispose();
-  }
-
-  Future<void> _togglePlayPause() async {
-    if (_isPlaying) {
-      await _audioPlayer.pause();
-    } else {
-      await _audioPlayer.play(DeviceFileSource(widget.path));
-    }
-
-    setState(() {
-      _isPlaying = !_isPlaying;
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Audio Playback")),
-      body: Center(
+      appBar: AppBar(
+        title: const Text("Audio Playback"),
+        actions: [
+          IconButton(icon: const Icon(Icons.stop), onPressed: _stopAndReturn),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("Playing: ${widget.path.split('/').last}"),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
-              label: Text(_isPlaying ? "Pause" : "Play"),
+            AudioFileWaveforms(
+              size: Size(MediaQuery.of(context).size.width, 80),
+              playerController: _waveformController,
+              enableSeekGesture: true,
+              waveformType: WaveformType.fitWidth,
+              playerWaveStyle: PlayerWaveStyle(
+                liveWaveColor: Colors.blueAccent,
+                fixedWaveColor: Colors.grey.shade300,
+                showSeekLine: true,
+                seekLineColor: Colors.black,
+                waveThickness: 3,
+              ),
+            ),
+            const SizedBox(height: 40),
+            IconButton(
+              iconSize: 64,
+              icon: Icon(
+                _isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill,
+                color: Colors.blueAccent,
+              ),
               onPressed: _togglePlayPause,
             ),
           ],

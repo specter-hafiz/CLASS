@@ -44,6 +44,8 @@ const easyText = 'verYEasy';
 const deadlineText = 'Deadline for Assessment';
 
 const shareQuizText = 'Set Quiz For Assessment';
+const importfileText = 'Import File To Transcribe';
+const tapUploadText = 'Tap to upload file';
 const setQuizText = 'Set Quiz';
 const exportQuestionText = 'Export Questions';
 const exportText = 'Export';
@@ -74,6 +76,7 @@ const analyticsImage = 'assets/svgs/analytics.svg';
 const profileImage = 'assets/svgs/profile.svg';
 const resetPasswordImage = 'assets/svgs/new_password.svg';
 const importImage = 'assets/svgs/import.svg';
+const importDocImage = 'assets/svgs/import_doc.svg';
 const successImage = 'assets/svgs/success.svg';
 const micOutlineImage = 'assets/svgs/mic_outline.svg';
 const playImage = 'assets/svgs/play.svg';

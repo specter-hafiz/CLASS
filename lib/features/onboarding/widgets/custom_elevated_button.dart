@@ -82,10 +82,10 @@ class CustomElevatedButton extends StatelessWidget {
                   SizeConfig.orientation(context) == Orientation.portrait
                       ? SizeConfig.blockSizeVertical! * 3
                       : SizeConfig.blockSizeVertical! * 5,
-              colorFilter: ColorFilter.mode(
-                Color(iconColor ?? whiteColor),
-                BlendMode.srcIn,
-              ),
+              colorFilter:
+                  iconColor != null
+                      ? ColorFilter.mode(Color(iconColor!), BlendMode.srcIn)
+                      : null,
             ),
             SizedBox(
               width:
