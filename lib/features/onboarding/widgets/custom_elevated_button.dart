@@ -17,6 +17,7 @@ class CustomElevatedButton extends StatelessWidget {
     this.isOutlineButton,
     this.backgroundColor,
     this.textColor,
+    this.iconColor,
   });
 
   final void Function()? onPressed;
@@ -29,6 +30,7 @@ class CustomElevatedButton extends StatelessWidget {
   final bool? isOutlineButton;
   final int? backgroundColor;
   final int? textColor;
+  final int? iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -80,6 +82,10 @@ class CustomElevatedButton extends StatelessWidget {
                   SizeConfig.orientation(context) == Orientation.portrait
                       ? SizeConfig.blockSizeVertical! * 3
                       : SizeConfig.blockSizeVertical! * 5,
+              colorFilter: ColorFilter.mode(
+                Color(iconColor ?? whiteColor),
+                BlendMode.srcIn,
+              ),
             ),
             SizedBox(
               width:
