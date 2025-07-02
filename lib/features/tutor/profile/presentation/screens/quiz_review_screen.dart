@@ -61,15 +61,7 @@ class QuizReviewScreen extends StatelessWidget {
                   correctIndex: question['correctIndex'] as int?,
                   answersList: question['options'] as List<String>,
                   selectedIndex: Random().nextInt(question['options'].length),
-                  onChanged:
-                      (value) => Navigator.pushNamed(
-                        context,
-                        'quizReview',
-                        arguments: {
-                          'questionIndex': index,
-                          'selectedAnswerIndex': value,
-                        },
-                      ),
+                  onChanged: null,
                 ),
                 SizedBox(height: SizeConfig.blockSizeVertical! * 2),
               ],

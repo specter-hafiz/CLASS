@@ -42,12 +42,23 @@ const saveText = 'Save';
 const timeAllowedText = 'Time Allowed';
 const easyText = 'verYEasy';
 const deadlineText = 'Deadline for Assessment';
-
+const meetingDiscussionText = 'Meeting Discussion';
 const shareQuizText = 'Set Quiz For Assessment';
 const importfileText = 'Import File To Transcribe';
 const tapUploadText = 'Tap to upload file';
+const editText = 'Edit';
+const durationText = 'Duration';
+const editTrancriptText = "Edit Transcript";
 const setQuizText = 'Set Quiz';
+const audioText = 'Audio';
+const transcriptText = 'Transcript';
+const transcribingText = 'Transcribing...';
+const transcribingOverText = '''You can leave the app while we are 
+transcribing your file. We will send 
+you a notification once transcription 
+is available.''';
 const exportQuestionText = 'Export Questions';
+const exportResultsText = 'Export Results';
 const exportText = 'Export';
 const fileNameText = 'File Name';
 const fileFormatText = 'File Format';

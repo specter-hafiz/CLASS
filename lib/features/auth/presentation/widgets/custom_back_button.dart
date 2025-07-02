@@ -5,12 +5,17 @@ import 'package:flutter_svg/svg.dart';
 
 class CustomBackButton extends StatelessWidget {
   const CustomBackButton({super.key});
-
   @override
   Widget build(BuildContext context) {
     SizeConfig().init(context);
     return GestureDetector(
-      onTap: () => Navigator.pop(context),
+      onTap: () {
+        // Close the keyboard if it's open
+        if (FocusScope.of(context).hasFocus) {
+          FocusScope.of(context).unfocus();
+        }
+        Navigator.pop(context);
+      },
       child: SvgPicture.asset(
         backButtonImage,
         height: SizeConfig.blockSizeHorizontal! * 2,

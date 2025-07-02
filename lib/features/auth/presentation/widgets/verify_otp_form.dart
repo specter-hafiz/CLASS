@@ -31,8 +31,12 @@ class VerifyOTPFormState extends State<VerifyOTPForm> {
 
   @override
   void dispose() {
-    _focusNodes.forEach((f) => f.dispose());
-    _controllers.forEach((c) => c.dispose());
+    for (var f in _focusNodes) {
+      f.dispose();
+    }
+    for (var c in _controllers) {
+      c.dispose();
+    }
     super.dispose();
   }
 

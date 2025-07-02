@@ -81,6 +81,7 @@ class AnalyticsScreen extends StatelessWidget {
                       iconPath: analyticsImage,
                       showTrailingIcon: true,
                       onTap: () {
+                        Navigator.pushNamed(context, '/detail_analytics');
                         // Handle tap action
                       },
                       onMoreTap: () {

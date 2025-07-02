@@ -70,13 +70,7 @@ class ExportQuizDialog extends StatelessWidget {
                 ),
               ),
               SizedBox(width: SizeConfig.blockSizeHorizontal! * 2),
-              CustomCheckBox(
-                onChanged: (value) {
-                  // Handle checkbox change
-                  // You can implement the logic to include answers here
-                  print("Include answers: $value");
-                },
-              ),
+              CustomCheckBox(onChanged: (value) {}),
             ],
           ),
         ],

@@ -3,6 +3,7 @@ import 'package:class_app/core/constants/strings.dart';
 import 'package:class_app/core/utilities/size_config.dart';
 import 'package:class_app/features/tutor/analytics/presentation/screens/analytics_screen.dart';
 import 'package:class_app/features/tutor/home/presentation/screens/home_screen.dart';
+import 'package:class_app/features/tutor/home/presentation/widgets/recording_bottom_sheet.dart';
 import 'package:class_app/features/tutor/profile/presentation/screens/profile_screen.dart';
 import 'package:class_app/features/tutor/quiz/presentation/screens/quiz_screen.dart';
 import 'package:flutter/material.dart';
@@ -44,8 +45,25 @@ class _BaseScreenState extends State<BaseScreen> {
               SizeConfig.blockSizeHorizontal! * 10,
             ),
           ),
-          onPressed: () {
+          onPressed: () async {
+            var isPortrait =
+                SizeConfig.orientation(context) == Orientation.portrait;
             // Add your floating action button action here
+            await showModalBottomSheet(
+              constraints: BoxConstraints(
+                maxHeight:
+                    isPortrait
+                        ? SizeConfig.screenHeight! * 0.7
+                        : SizeConfig.screenHeight! * 0.95,
+              ),
+              showDragHandle: true,
+              isDismissible: false,
+              backgroundColor: Color(whiteColor),
+              context: context,
+              builder: (context) {
+                return RecordingBottomSheet(isPortrait: isPortrait);
+              },
+            );
           },
           backgroundColor: Color(blueColor),
           child: SvgPicture.asset(
