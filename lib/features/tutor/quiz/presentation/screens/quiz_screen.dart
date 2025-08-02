@@ -2,10 +2,25 @@ import 'package:class_app/core/constants/app_colors.dart';
 import 'package:class_app/core/constants/strings.dart';
 import 'package:class_app/core/utilities/size_config.dart';
 import 'package:class_app/features/tutor/home/presentation/widgets/custom_container.dart';
+import 'package:class_app/features/tutor/quiz/presentation/bloc/question_bloc.dart';
+import 'package:class_app/features/tutor/quiz/presentation/bloc/question_events.dart';
+import 'package:class_app/features/tutor/quiz/presentation/bloc/question_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class QuizScreen extends StatelessWidget {
+class QuizScreen extends StatefulWidget {
   const QuizScreen({super.key});
+
+  @override
+  State<QuizScreen> createState() => _QuizScreenState();
+}
+
+class _QuizScreenState extends State<QuizScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<QuestionBloc>().add(FetchQuizzesEvent());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,26 +85,65 @@ class QuizScreen extends StatelessWidget {
                         ? SizeConfig.blockSizeVertical! * 2
                         : SizeConfig.blockSizeHorizontal! * 1,
               ),
-              Expanded(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: 10, // Replace with your dynamic data count
-                  itemBuilder: (context, index) {
-                    return CustomContainer(
-                      titleText: "Lecture Week $index",
-                      subText: "100 questions",
-                      iconPath: quizDocumentImage,
-                      showTrailingIcon: true,
-                      onTap: () {
-                        // Handle tap action
-                        Navigator.pushNamed(context, '/quizDetail');
-                      },
-                      onMoreTap: () {
-                        // Handle more action
-                      },
+              BlocBuilder<QuestionBloc, QuestionState>(
+                builder: (context, state) {
+                  if (state is QuestionLoadingState) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (state is QuestionErrorState) {
+                    return Center(
+                      child: Column(
+                        children: [
+                          Text(
+                            state.message,
+                            style: TextStyle(color: Colors.red),
+                          ),
+                          SizedBox(height: 20),
+                          ElevatedButton(
+                            onPressed: () {
+                              context.read<QuestionBloc>().add(
+                                FetchQuizzesEvent(),
+                              );
+                            },
+                            child: Text('Retry'),
+                          ),
+                        ],
+                      ),
                     );
-                  },
-                ),
+                  } else if (state is QuizzesFetchedState) {
+                    if (state.quizzes.isEmpty) {
+                      return Center(
+                        child: Text(
+                          'No quizzes available',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      );
+                    }
+
+                    return Expanded(
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: state.quizzes.length,
+                        itemBuilder: (context, index) {
+                          final quiz = state.quizzes[index];
+                          return CustomContainer(
+                            titleText: quiz['title'],
+                            subText: "${quiz['questions'].length} questions",
+                            iconPath: quizDocumentImage,
+                            showTrailingIcon: true,
+                            onTap: () {
+                              // Handle tap action
+                              Navigator.pushNamed(context, '/quizDetail');
+                            },
+                            onMoreTap: () {
+                              // Handle more action
+                            },
+                          );
+                        },
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
               ),
             ],
           ),

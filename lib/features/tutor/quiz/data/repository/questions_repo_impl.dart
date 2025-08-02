@@ -1,0 +1,43 @@
+import 'package:class_app/features/tutor/quiz/data/source/questions_remote_data_source.dart';
+import 'package:class_app/features/tutor/quiz/domain/repository/questions_repository.dart';
+
+class QuestionsRepoImpl implements QuestionsRepository {
+  final QuestionsRemoteDataSource remoteDataSource;
+  QuestionsRepoImpl(this.remoteDataSource);
+  @override
+  Future<Map<String, dynamic>> fetchQuizzes() async {
+    return await remoteDataSource.fetchQuizzes();
+  }
+
+  @override
+  Future<Map<String, dynamic>> generateQuestions({
+    required String transcript,
+    required int numberOfQuestions,
+    required String title,
+    required DateTime expiresAt,
+    required String duration,
+    required String accessPassword,
+  }) async {
+    return await remoteDataSource.generateQuestions(
+      transcript: transcript,
+      numberOfQuestions: numberOfQuestions,
+      title: title,
+      expiresAt: expiresAt,
+      duration: duration,
+      accessPassword: accessPassword,
+    );
+  }
+
+  @override
+  Future<Map<String, dynamic>> getSharedQuestions(String id) async {
+    return await remoteDataSource.getSharedQuestions(id);
+  }
+
+  @override
+  Future<Map<String, dynamic>> submitAssessment({
+    required String id,
+    required Map<String, dynamic> response,
+  }) async {
+    return await remoteDataSource.submitAssessment(id: id, response: response);
+  }
+}

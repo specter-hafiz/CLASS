@@ -44,6 +44,17 @@ dependencies:
   just_audio: ^0.10.4
   percent_indicator: ^4.2.5
   fl_chart: ^1.0.0
+  get_it: ^8.0.3
+  flutter_bloc: ^9.1.1
+  dio: ^5.8.0+1
+  equatable: ^2.0.7
+  shared_preferences: ^2.5.3
+  connectivity_plus: ^6.1.4
+  logger: ^2.6.1
+  file_picker: ^10.2.0
+  http_parser: ^4.1.2
+  http: ^1.4.0
+  lottie: ^3.3.1
 
 dev_dependencies:
   flutter_test:
@@ -89,6 +100,7 @@ flutter:
   assets:
     - assets/images/
     - assets/svgs/
+    - assets/animations/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

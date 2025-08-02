@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class VerifyOTPScreen extends StatelessWidget {
-  const VerifyOTPScreen({super.key});
+  const VerifyOTPScreen({super.key, required this.email});
+  final String email;
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +56,7 @@ class VerifyOTPScreen extends StatelessWidget {
                 ),
               ),
               SizedBox(height: SizeConfig.blockSizeVertical! * 3),
-              VerifyOTPForm(),
+              VerifyOTPForm(email: email),
 
               SizedBox(height: SizeConfig.blockSizeVertical! * 2),
             ],

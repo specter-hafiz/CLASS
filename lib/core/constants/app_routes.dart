@@ -2,12 +2,9 @@ import 'package:class_app/features/auth/presentation/screens/forgot_password_scr
 import 'package:class_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:class_app/features/auth/presentation/screens/register_screen.dart';
 import 'package:class_app/features/auth/presentation/screens/reset_password_screen.dart';
-import 'package:class_app/features/auth/presentation/screens/verify_otp_screen.dart';
 import 'package:class_app/features/base/base_screen.dart';
 import 'package:class_app/features/onboarding/screens/onboarding_screen.dart';
 import 'package:class_app/features/tutor/analytics/presentation/screens/detail_analytics_screen.dart';
-import 'package:class_app/features/tutor/home/presentation/screens/edit_transcript_screen.dart';
-import 'package:class_app/features/tutor/home/presentation/screens/transcript_audio_screen.dart';
 import 'package:class_app/features/tutor/home/presentation/screens/transcription_screen.dart';
 import 'package:class_app/features/tutor/profile/presentation/screens/answer_quiz_screen.dart';
 import 'package:class_app/features/tutor/profile/presentation/screens/assessment_screen.dart';
@@ -22,7 +19,6 @@ Map<String, Widget Function(BuildContext context)> appRoutes = {
   '/login': (context) => LoginScreen(),
   '/register': (context) => RegisterScreen(),
   '/forgotPassword': (context) => ForgotPasswordScreen(),
-  '/verifyOtp': (context) => VerifyOTPScreen(),
   '/resetPassword': (context) => ResetPasswordScreen(),
   '/changePassword': (context) => ChangePasswordScreen(),
   '/assessment':
@@ -36,11 +32,7 @@ Map<String, Widget Function(BuildContext context)> appRoutes = {
       (context) => QuizDetailScreen(), // Placeholder for quiz detail screen
   '/base': (context) => BaseScreen(),
   '/transcribe': (context) => TranscriptionScreen(),
-  '/transcript_audio':
-      (context) =>
-          TranscriptAudioScreen(), // Placeholder for transcript audio screen
-  '/edit_text':
-      (context) => EditTranscriptScreen(), // Placeholder for edit text screen
+  // Placeholder for transcript audio screen
   '/detail_analytics': (context) => DetailAnalyticsScreen(),
   // Placeholder for audio recorder
 };

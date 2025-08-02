@@ -1,9 +1,15 @@
 import 'package:class_app/core/constants/app_colors.dart';
 import 'package:class_app/core/constants/strings.dart';
 import 'package:class_app/core/utilities/size_config.dart';
+import 'package:class_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:class_app/features/auth/presentation/bloc/auth_event.dart';
+import 'package:class_app/features/auth/presentation/bloc/auth_state.dart';
+import 'package:class_app/features/auth/presentation/screens/verify_otp_screen.dart'
+    show VerifyOTPScreen;
 import 'package:class_app/features/auth/presentation/widgets/custom_textfield.dart';
 import 'package:class_app/features/onboarding/widgets/custom_elevated_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -57,68 +63,96 @@ class _LoginFormState extends State<LoginForm> {
   @override
   Widget build(BuildContext context) {
     SizeConfig().init(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        CustomTextField(
-          showTitle: true,
-          titleText: emailText,
-          hintText: emailHintText,
-          showSuffixIcon: false,
-          controller: _emailController,
-          focusNode: _emailFocusNode,
-        ),
-        SizedBox(height: SizeConfig.blockSizeVertical! * 1),
-
-        CustomTextField(
-          showTitle: true,
-          titleText: passwordText,
-          hintText: passwordHintText,
-          showSuffixIcon: true,
-          obscureText: true,
-          controller: _passwordController,
-          focusNode: _passwordFocusNode,
-        ),
-        SizedBox(height: SizeConfig.blockSizeVertical! * 1),
-
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
+    return BlocConsumer<AuthBloc, AuthState>(
+      builder: (context, state) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            InkWell(
-              onTap: () => Navigator.pushNamed(context, '/forgotPassword'),
-              child: Text(
-                forgotPasswordText,
-                style: TextStyle(
-                  color: Color(blueColor),
-                  fontSize:
-                      SizeConfig.orientation(context) == Orientation.portrait
-                          ? SizeConfig.screenWidth! * 0.04
-                          : SizeConfig.screenWidth! * 0.025,
-                  fontWeight: FontWeight.w400,
-                ),
-                maxLines: 1,
-              ),
+            CustomTextField(
+              showTitle: true,
+              titleText: emailText,
+              hintText: emailHintText,
+              showSuffixIcon: false,
+              controller: _emailController,
+              focusNode: _emailFocusNode,
             ),
+            SizedBox(height: SizeConfig.blockSizeVertical! * 1),
+
+            CustomTextField(
+              showTitle: true,
+              titleText: passwordText,
+              hintText: passwordHintText,
+              showSuffixIcon: true,
+              obscureText: true,
+              controller: _passwordController,
+              focusNode: _passwordFocusNode,
+            ),
+            SizedBox(height: SizeConfig.blockSizeVertical! * 1),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                InkWell(
+                  onTap: () => Navigator.pushNamed(context, '/forgotPassword'),
+                  child: Text(
+                    forgotPasswordText,
+                    style: TextStyle(
+                      color: Color(blueColor),
+                      fontSize:
+                          SizeConfig.orientation(context) ==
+                                  Orientation.portrait
+                              ? SizeConfig.screenWidth! * 0.04
+                              : SizeConfig.screenWidth! * 0.025,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    maxLines: 1,
+                  ),
+                ),
+              ],
+            ),
+
+            SizedBox(height: SizeConfig.blockSizeVertical! * 1),
+
+            state is AuthLoading
+                ? Center(child: CircularProgressIndicator())
+                : CustomElevatedButton(
+                  buttonText: loginText,
+                  onPressed: () {
+                    context.read<AuthBloc>().add(
+                      LoginRequested(
+                        _emailController.text.trim(),
+                        _passwordController.text.trim(),
+                      ),
+                    );
+                  },
+                  height:
+                      SizeConfig.orientation(context) == Orientation.portrait
+                          ? SizeConfig.blockSizeVertical! * 6
+                          : SizeConfig.blockSizeHorizontal! * 5,
+                  borderRadius:
+                      SizeConfig.orientation(context) == Orientation.portrait
+                          ? SizeConfig.blockSizeHorizontal! * 3
+                          : SizeConfig.blockSizeHorizontal! * 1,
+                ),
           ],
-        ),
-
-        SizedBox(height: SizeConfig.blockSizeVertical! * 1),
-
-        CustomElevatedButton(
-          buttonText: loginText,
-          onPressed: () {
-            Navigator.pushNamed(context, '/base');
-          },
-          height:
-              SizeConfig.orientation(context) == Orientation.portrait
-                  ? SizeConfig.blockSizeVertical! * 6
-                  : SizeConfig.blockSizeHorizontal! * 5,
-          borderRadius:
-              SizeConfig.orientation(context) == Orientation.portrait
-                  ? SizeConfig.blockSizeHorizontal! * 3
-                  : SizeConfig.blockSizeHorizontal! * 1,
-        ),
-      ],
+        );
+      },
+      listener: (context, state) {
+        if (state is RequireOtpVerification) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder:
+                  (context) => VerifyOTPScreen(email: _emailController.text),
+            ),
+          );
+        } else if (state is AuthAuthenticated) {
+          Navigator.pushNamed(context, '/base');
+        } else if (state is AuthError) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.message)));
+        }
+      },
     );
   }
 }

@@ -1,5 +1,7 @@
 import 'package:class_app/core/constants/app_colors.dart';
 import 'package:class_app/core/constants/strings.dart';
+import 'package:class_app/core/service/shared_pref/shared_pref.dart';
+import 'package:class_app/core/utilities/dependency_injection.dart';
 import 'package:class_app/core/utilities/size_config.dart';
 import 'package:class_app/features/onboarding/data/onboarding_data.dart';
 import 'package:class_app/features/onboarding/widgets/custom_elevated_button.dart';
@@ -18,14 +20,17 @@ class OnboardingScreen extends StatefulWidget {
 class _Onboarding1ScreenState extends State<OnboardingScreen> {
   final PageController _controller = PageController();
   int _currentPage = 0;
+  final prefs = sl<SharedPrefService>();
 
-  void nextPage() {
+  void nextPage() async {
     if (_currentPage < onboardingData.length - 1) {
       _controller.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeIn,
       );
     } else {
+      await prefs.onboarded();
+      // ignore: use_build_context_synchronously
       Navigator.pushReplacementNamed(context, '/login');
     }
   }

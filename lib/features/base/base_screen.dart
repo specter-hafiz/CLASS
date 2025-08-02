@@ -28,6 +28,7 @@ class _BaseScreenState extends State<BaseScreen> {
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig().init(context);
     return Scaffold(
       floatingActionButton: Container(
         margin: EdgeInsets.only(bottom: SizeConfig.blockSizeVertical! * 1.5),

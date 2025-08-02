@@ -4,12 +4,14 @@ import 'package:class_app/core/constants/app_colors.dart';
 import 'package:class_app/core/utilities/size_config.dart';
 import 'package:class_app/features/tutor/home/presentation/widgets/recording_bottom_sheet.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:audio_waveforms/audio_waveforms.dart';
 
 class AudioPlaybackScreen extends StatefulWidget {
-  const AudioPlaybackScreen({super.key});
+  const AudioPlaybackScreen({super.key, required this.audioUrl});
+  final String audioUrl;
 
   @override
   State<AudioPlaybackScreen> createState() => _AudioPlaybackScreenState();
@@ -21,55 +23,45 @@ class _AudioPlaybackScreenState extends State<AudioPlaybackScreen> {
   Duration _currentPosition = Duration.zero;
   Duration _totalDuration = Duration.zero;
   bool _isPlaying = false;
-  String? _filePath;
+  String? _audioUrl;
 
   @override
   void initState() {
     super.initState();
     _audioPlayer = AudioPlayer();
     _waveformController = PlayerController();
-    _fetchLatestAudioFromCache();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final audioUrl = widget.audioUrl;
+      _loadAudio(audioUrl);
+    });
   }
 
-  Future<void> _fetchLatestAudioFromCache() async {
+  Future<void> _loadAudio(String url) async {
     try {
-      final cacheDir =
-          await getTemporaryDirectory(); // or getApplicationCacheDirectory()
-      final files = Directory(cacheDir.path).listSync();
-
-      // Filter for audio files (you can adjust extensions as needed)
-      final audioFiles =
-          files.whereType<File>().where((file) {
-            final name = file.path.toLowerCase();
-            return name.endsWith('.m4a') ||
-                name.endsWith('.mp3') ||
-                name.endsWith('.wav');
-          }).toList();
-
-      if (audioFiles.isEmpty) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("No audio files found in cache")),
-          );
+      if (url.startsWith('http')) {
+        final response = await http.get(Uri.parse(url));
+        if (response.statusCode == 200) {
+          final tempDir = await getTemporaryDirectory();
+          final file = File('${tempDir.path}/temp_audio.aac');
+          await file.writeAsBytes(response.bodyBytes);
+          _audioUrl = file.path;
+        } else {
+          throw Exception("Download failed with status ${response.statusCode}");
         }
-        return;
+      } else {
+        // Local file already
+        _audioUrl = url;
       }
 
-      // Sort files by modified date (latest first)
-      audioFiles.sort(
-        (a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()),
-      );
-
-      // Use the most recent one
-      _filePath = audioFiles.first.path;
-
-      _initAudio();
+      await _initAudio(); // Now safe to call
+      setState(() {}); // To rebuild with waveform
     } catch (e) {
-      debugPrint("Error fetching audio from cache: $e");
+      debugPrint("Error loading audio: $e");
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text("Error loading audio: $e")));
+        ).showSnackBar(SnackBar(content: Text("Audio load failed: $e")));
       }
     }
   }
@@ -77,11 +69,11 @@ class _AudioPlaybackScreenState extends State<AudioPlaybackScreen> {
   Future<void> _initAudio() async {
     try {
       await _waveformController.preparePlayer(
-        path: _filePath!,
+        path: _audioUrl!,
         shouldExtractWaveform: true,
       );
 
-      await _audioPlayer.setFilePath(_filePath!);
+      await _audioPlayer.setFilePath(_audioUrl!);
       _audioPlayer.durationStream.listen((duration) {
         if (duration != null) {
           setState(() {
@@ -131,12 +123,6 @@ class _AudioPlaybackScreenState extends State<AudioPlaybackScreen> {
     }
   }
 
-  void _stopAndReturn() async {
-    await _audioPlayer.stop();
-    await _waveformController.stopAllPlayers();
-    Navigator.pop(context, _filePath);
-  }
-
   @override
   void dispose() {
     _audioPlayer.dispose();
@@ -153,7 +139,7 @@ class _AudioPlaybackScreenState extends State<AudioPlaybackScreen> {
   @override
   Widget build(BuildContext context) {
     SizeConfig().init(context);
-    return _filePath == null
+    return _audioUrl == null
         ? const Center(child: CircularProgressIndicator())
         : SingleChildScrollView(
           child: Column(

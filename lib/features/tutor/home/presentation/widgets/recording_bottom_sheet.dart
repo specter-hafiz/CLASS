@@ -1,9 +1,15 @@
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:class_app/core/constants/app_colors.dart';
 import 'package:class_app/core/constants/strings.dart';
+import 'package:class_app/core/utilities/deadline_string_to_date_time.dart';
 import 'package:class_app/core/utilities/size_config.dart';
+import 'package:class_app/core/utilities/time_allowed_string.dart';
 import 'package:class_app/features/onboarding/widgets/custom_elevated_button.dart';
+import 'package:class_app/features/tutor/home/presentation/bloc/audio/audio_bloc.dart';
+import 'package:class_app/features/tutor/home/presentation/bloc/audio/audio_events.dart';
+import 'package:class_app/features/tutor/quiz/presentation/screens/set_quiz_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -75,13 +81,37 @@ class _RecordingBottomSheetState extends State<RecordingBottomSheet>
     }
   }
 
-  Future<void> _stopRecording() async {
+  Future<void> _stopRecording(BuildContext context, bool setQuiz) async {
     final path = await _recorderController.stop();
     setState(() {
       _isRecording = false;
       _audioPath = path;
     });
-    Navigator.pop(context); // Return the file path to parent
+    if (_audioPath != null) {
+      print("Transcribing file: $_audioPath");
+      if (setQuiz) {
+        final result = await showDialog(
+          context: context,
+          builder: (context) => SetQuizDialog(),
+        );
+        if (result == null) return; // User cancelled dialog
+        final expiresIn = deadlineStringToDateTime(result['deadline']);
+
+        context.read<AudioBloc>().add(
+          UploadAudioAndGenerateQuizRequested(
+            _audioPath!,
+            result['title'] ?? "Quiz Title Default",
+            expiresIn ?? DateTime.now().add(Duration(hours: 1)),
+            timeAllowedString(result['timeAllowed']) ?? '30mins',
+            result['accessPassword'] ?? 'password',
+          ),
+        );
+        Navigator.of(context).pop(); // Dismiss dialog
+      } else {
+        context.read<AudioBloc>().add(UploadAudioRequested(_audioPath!));
+        Navigator.of(context).pop(); // Dismiss dialog
+      }
+    }
   }
 
   @override
@@ -190,10 +220,7 @@ class _RecordingBottomSheetState extends State<RecordingBottomSheet>
                   child: CustomElevatedButton(
                     buttonText: transcribeText,
                     onPressed: () {
-                      _stopRecording();
-                      if (_audioPath != null && widget.onSave != null) {
-                        widget.onSave!(_audioPath!);
-                      }
+                      _stopRecording(context, false);
                     },
                     isOutlineButton: true,
                     showIcon: true,
@@ -207,7 +234,9 @@ class _RecordingBottomSheetState extends State<RecordingBottomSheet>
                     iconColor: whiteColor,
                     buttonText: setQuizText,
 
-                    onPressed: () {},
+                    onPressed: () {
+                      _stopRecording(context, true);
+                    },
                     showIcon: true,
 
                     iconPath: quizDocumentImage,

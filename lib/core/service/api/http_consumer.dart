@@ -1,0 +1,91 @@
+import 'dart:convert';
+
+import 'package:class_app/core/constants/app_secrets.dart';
+import 'package:class_app/core/service/errors/exceptions.dart';
+import 'package:class_app/features/auth/data/source/auth_remote_data_source.dart';
+import 'package:dio/dio.dart';
+
+class HttpConsumer {
+  final Dio _dio;
+
+  HttpConsumer(this._dio) {
+    _dio.options.baseUrl = AppSecrets.baseUrl;
+    _dio.options.connectTimeout = const Duration(seconds: 30);
+    _dio.options.receiveTimeout = const Duration(seconds: 30);
+    _dio.options.headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+  }
+
+  Future<Response> get(String path, {Map<String, dynamic>? query}) async {
+    try {
+      return await _dio.get(path, queryParameters: query);
+    } on DioException catch (e) {
+      _handleError(e);
+    }
+    throw ServerException("Unexpected error in GET");
+  }
+
+  Future<Response> post(
+    String path, {
+    Map<String, dynamic>? data,
+    String? token,
+  }) async {
+    try {
+      return await _dio.post(
+        path,
+        data: data,
+        options: Options(
+          headers: token != null ? {'Authorization': 'Bearer $token'} : null,
+        ),
+      );
+    } on DioException catch (e) {
+      logger.d("POST request failed: ${e.message}");
+      logger.d("Response data: ${e.response?.data}");
+      logger.d("Response status code: ${e.response?.statusCode}");
+      _handleError(e);
+    }
+    throw ServerException("Unexpected error in POST");
+  }
+
+  void _handleError(DioException e) {
+    final response = e.response;
+
+    late Map<String, dynamic> data;
+
+    try {
+      // Always convert to a Map<String, dynamic>
+      if (response?.data is String) {
+        data = jsonDecode(response!.data);
+      } else if (response?.data is Map) {
+        // Re-encode and decode to normalize the structure
+        data = jsonDecode(jsonEncode(response!.data));
+      } else {
+        throw ServerException("Unexpected error format");
+      }
+    } catch (err) {
+      throw ServerException("Failed to parse error: ${response?.data}");
+    }
+
+    final message = data['message']?.toString();
+    // ✅ Special handling for 403: unverified users
+
+    if (response.statusCode == 403) {
+      throw OTPVerificationException(message ?? "OTP verification required.");
+    }
+
+    if (message == "Validation error") {
+      final errors = data['errors'] as List?;
+      if (errors != null && errors.isNotEmpty) {
+        final first = errors.first;
+        final errorMessage = first['message'] ?? 'Unknown validation error';
+        throw ServerException(errorMessage);
+      } else {
+        throw ServerException("Validation error occurred.");
+      }
+    }
+
+    throw ServerException(message ?? 'An error occurred: ${e.message}');
+  }
+}
