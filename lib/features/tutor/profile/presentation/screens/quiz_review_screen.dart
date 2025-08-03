@@ -1,15 +1,20 @@
-import 'dart:math';
-
 import 'package:class_app/core/constants/strings.dart';
 import 'package:class_app/core/utilities/size_config.dart';
 import 'package:class_app/features/auth/presentation/widgets/custom_back_button.dart';
-import 'package:class_app/features/tutor/profile/data/question.dart';
 import 'package:class_app/features/tutor/profile/presentation/widgets/answer_widget.dart';
 import 'package:class_app/features/tutor/profile/presentation/widgets/question_widget.dart';
+import 'package:class_app/features/tutor/quiz/data/models/question_model.dart';
+import 'package:class_app/features/tutor/quiz/data/models/response_model.dart';
 import 'package:flutter/material.dart';
 
 class QuizReviewScreen extends StatelessWidget {
-  const QuizReviewScreen({super.key});
+  const QuizReviewScreen({
+    super.key,
+    required this.questions,
+    required this.response,
+  });
+  final List<Question> questions;
+  final ResponseModel response;
 
   @override
   Widget build(BuildContext context) {
@@ -46,21 +51,27 @@ class QuizReviewScreen extends StatelessWidget {
           horizontal: SizeConfig.horizontalPadding(context),
         ),
         child: ListView.builder(
-          itemCount: quizQuestions.length,
+          itemCount: questions.length,
           itemBuilder: (context, index) {
-            final question = quizQuestions[index];
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 QuestionWidget(
                   questionNumber: index + 1,
-                  totalQuestions: quizQuestions.length,
-                  questionText: question['question'] as String,
+                  totalQuestions: questions.length,
+                  questionText: questions[index].question,
                 ),
                 AnswersWidget(
-                  correctIndex: question['correctIndex'] as int?,
-                  answersList: question['options'] as List<String>,
-                  selectedIndex: Random().nextInt(question['options'].length),
+                  correctIndex: questions[index].options.indexOf(
+                    questions[index].answer,
+                  ),
+                  answersList: questions[index].options,
+                  selectedIndex:
+                      response.answers.isNotEmpty
+                          ? questions[index].options.indexOf(
+                            response.answers[index].answer,
+                          )
+                          : -1,
                   onChanged: null,
                 ),
                 SizedBox(height: SizeConfig.blockSizeVertical! * 2),

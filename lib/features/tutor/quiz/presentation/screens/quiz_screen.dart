@@ -5,6 +5,7 @@ import 'package:class_app/features/tutor/home/presentation/widgets/custom_contai
 import 'package:class_app/features/tutor/quiz/presentation/bloc/question_bloc.dart';
 import 'package:class_app/features/tutor/quiz/presentation/bloc/question_events.dart';
 import 'package:class_app/features/tutor/quiz/presentation/bloc/question_state.dart';
+import 'package:class_app/features/tutor/quiz/presentation/screens/quiz_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -88,7 +89,9 @@ class _QuizScreenState extends State<QuizScreen> {
               BlocBuilder<QuestionBloc, QuestionState>(
                 builder: (context, state) {
                   if (state is QuestionLoadingState) {
-                    return const Center(child: CircularProgressIndicator());
+                    return Expanded(
+                      child: const Center(child: CircularProgressIndicator()),
+                    );
                   } else if (state is QuestionErrorState) {
                     return Center(
                       child: Column(
@@ -126,13 +129,18 @@ class _QuizScreenState extends State<QuizScreen> {
                         itemBuilder: (context, index) {
                           final quiz = state.quizzes[index];
                           return CustomContainer(
-                            titleText: quiz['title'],
-                            subText: "${quiz['questions'].length} questions",
+                            titleText: quiz.title,
+                            subText: "${quiz.questions.length} questions",
                             iconPath: quizDocumentImage,
                             showTrailingIcon: true,
                             onTap: () {
                               // Handle tap action
-                              Navigator.pushNamed(context, '/quizDetail');
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder:
+                                      (context) => QuizDetailScreen(quiz: quiz),
+                                ),
+                              );
                             },
                             onMoreTap: () {
                               // Handle more action

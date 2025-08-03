@@ -7,8 +7,13 @@ class SubmitAssessmentUsecase {
 
   Future<Map<String, dynamic>> call(
     String id,
-    Map<String, dynamic> response,
+    List<Map<String, dynamic>> response,
+    String sharedId,
   ) async {
-    return await repository.submitAssessment(id: id, response: response);
+    return await repository.submitAssessment(
+      id: id,
+      sharedId: sharedId,
+      response: response,
+    );
   }
 }

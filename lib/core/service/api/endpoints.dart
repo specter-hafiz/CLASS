@@ -8,6 +8,7 @@ class Endpoints {
   static const String resetPassword = '/auth/reset-password';
   static const String changePassword = '/auth/change-password';
   static const String verifyOTP = '/auth/verify-otp';
+  static const String editProfile = '/auth/edit-profile';
 
   // AUDIO ROUTES
   static const String transcribeAudio = '/audio/transcribe';
@@ -25,4 +26,5 @@ class Endpoints {
   static String getQuestions(String id) => '/questions/shared/$id';
   static String submitAssessment(String id) => '/questions/response/$id';
   static const String fetchQuestions = '/questions/fetch';
+  static const String fetchSubmittedResponses = '/questions/fetch/responses';
 }

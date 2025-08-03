@@ -1,9 +1,12 @@
 import 'package:class_app/core/constants/strings.dart';
 import 'package:class_app/core/utilities/size_config.dart';
+import 'package:class_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:class_app/features/auth/presentation/bloc/auth_state.dart';
 import 'package:class_app/features/auth/presentation/widgets/custom_back_button.dart';
 import 'package:class_app/features/auth/presentation/widgets/custom_textfield.dart';
 import 'package:class_app/features/onboarding/widgets/custom_elevated_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class EditProfileScreen extends StatelessWidget {
   const EditProfileScreen({super.key});
@@ -33,25 +36,38 @@ class EditProfileScreen extends StatelessWidget {
           padding: EdgeInsets.symmetric(
             horizontal: SizeConfig.horizontalPadding(context),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CustomTextField(
-                hintText: userNameText,
-                titleText: oldPasswordText,
-                controller: TextEditingController(),
-                showTitle: true,
-                showSuffixIcon: true,
-              ),
-              SizedBox(
-                height:
-                    SizeConfig.orientation(context) == Orientation.portrait
-                        ? SizeConfig.blockSizeVertical! * 2
-                        : SizeConfig.blockSizeHorizontal! * 2,
-              ),
+          child: BlocBuilder<AuthBloc, AuthState>(
+            builder: (context, state) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomTextField(
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Username cannot be empty';
+                      }
+                      if (value.length < 3) {
+                        return 'Username must be at least 3 characters';
+                      }
+                      return null;
+                    },
+                    hintText: userNameHintText,
+                    titleText: userNameText,
+                    controller: TextEditingController(),
+                    showTitle: true,
+                    showSuffixIcon: true,
+                  ),
+                  SizedBox(
+                    height:
+                        SizeConfig.orientation(context) == Orientation.portrait
+                            ? SizeConfig.blockSizeVertical! * 2
+                            : SizeConfig.blockSizeHorizontal! * 2,
+                  ),
 
-              CustomElevatedButton(buttonText: saveText, onPressed: () {}),
-            ],
+                  CustomElevatedButton(buttonText: saveText, onPressed: () {}),
+                ],
+              );
+            },
           ),
         ),
       ),

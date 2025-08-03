@@ -27,6 +27,50 @@ class HttpConsumer {
     throw ServerException("Unexpected error in GET");
   }
 
+  Future<Response> patch(
+    String path, {
+    Map<String, dynamic>? data,
+    String? token,
+  }) async {
+    try {
+      return await _dio.patch(
+        path,
+        data: data,
+        options: Options(
+          headers: token != null ? {'Authorization': 'Bearer $token'} : null,
+        ),
+      );
+    } on DioException catch (e) {
+      logger.d("PUT request failed: ${e.message}");
+      logger.d("Response data: ${e.response?.data}");
+      logger.d("Response status code: ${e.response?.statusCode}");
+      _handleError(e);
+    }
+    throw ServerException("Unexpected error in PUT");
+  }
+
+  Future<Response> delete(
+    String path, {
+    Map<String, dynamic>? data,
+    String? token,
+  }) async {
+    try {
+      return await _dio.delete(
+        path,
+        data: data,
+        options: Options(
+          headers: token != null ? {'Authorization': 'Bearer $token'} : null,
+        ),
+      );
+    } on DioException catch (e) {
+      logger.d("DELETE request failed: ${e.message}");
+      logger.d("Response data: ${e.response?.data}");
+      logger.d("Response status code: ${e.response?.statusCode}");
+      _handleError(e);
+    }
+    throw ServerException("Unexpected error in DELETE");
+  }
+
   Future<Response> post(
     String path, {
     Map<String, dynamic>? data,

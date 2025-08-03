@@ -12,11 +12,18 @@ abstract class QuestionsRemoteDataSource {
     required String accessPassword,
   });
   Future<Map<String, dynamic>> fetchQuizzes();
-  Future<Map<String, dynamic>> getSharedQuestions(String id);
+  Future<Map<String, dynamic>> getSharedQuestions(
+    String id,
+    String sharedId,
+    String accessPassword,
+  );
   Future<Map<String, dynamic>> submitAssessment({
     required String id,
-    required Map<String, dynamic> response,
+    required String sharedId,
+    required List<Map<String, dynamic>> response,
   });
+
+  Future<Map<String, dynamic>> fetchSubmittedResponses();
 }
 
 class QuestionsRemoteDataSourceImpl implements QuestionsRemoteDataSource {
@@ -55,23 +62,41 @@ class QuestionsRemoteDataSourceImpl implements QuestionsRemoteDataSource {
   }
 
   @override
-  Future<Map<String, dynamic>> getSharedQuestions(String id) async {
+  Future<Map<String, dynamic>> getSharedQuestions(
+    String id,
+    String sharedId,
+    String accessPassword,
+  ) async {
     bool hasConnection = await NetworkConnectivity().isConnected;
     if (!hasConnection) {
       throw NetworkException("No internet connection");
     }
-    return http.getSharedQuestions(id: id);
+    return http.getSharedQuestions(
+      id: id,
+      sharedId: sharedId,
+      accessPassword: accessPassword,
+    );
   }
 
   @override
   Future<Map<String, dynamic>> submitAssessment({
     required String id,
-    required Map<String, dynamic> response,
+    required String sharedId,
+    required List<Map<String, dynamic>> response,
   }) async {
     bool hasConnection = await NetworkConnectivity().isConnected;
     if (!hasConnection) {
       throw NetworkException("No internet connection");
     }
-    return http.submitAssessment(id: id, answers: response);
+    return http.submitAssessment(id: id, answers: response, sharedId: sharedId);
+  }
+
+  @override
+  Future<Map<String, dynamic>> fetchSubmittedResponses() async {
+    bool hasConnection = await NetworkConnectivity().isConnected;
+    if (!hasConnection) {
+      throw NetworkException("No internet connection");
+    }
+    return http.fetchSubmittedResponses();
   }
 }

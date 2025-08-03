@@ -1,5 +1,8 @@
 import 'package:class_app/features/tutor/quiz/data/models/question_model.dart';
+import 'package:class_app/features/tutor/quiz/data/models/quiz_model.dart';
+import 'package:class_app/features/tutor/quiz/data/models/submitted_response_model.dart';
 import 'package:class_app/features/tutor/quiz/domain/usecase/fetch_quizzes_usecase.dart';
+import 'package:class_app/features/tutor/quiz/domain/usecase/fetch_submitted_responses.dart';
 import 'package:class_app/features/tutor/quiz/domain/usecase/generate_questions_usecase.dart';
 import 'package:class_app/features/tutor/quiz/domain/usecase/get_shared_questions_usecase.dart';
 import 'package:class_app/features/tutor/quiz/domain/usecase/submit_assessment_usecase.dart';
@@ -11,6 +14,7 @@ class QuestionBloc extends Bloc<QuestionEvent, QuestionState> {
   final FetchQuizzesUsecase fetchQuizzesUsecase;
   final GetSharedQuestionsUsecase getSharedQuestionsUsecase;
   final SubmitAssessmentUsecase submitAssessmentUsecase;
+  final FetchSubmittedResponsesUsecase fetchSubmittedResponsesUsecase;
   final GenerateQuestionsUsecase generateQuestionsUsecase;
 
   QuestionBloc(
@@ -18,6 +22,7 @@ class QuestionBloc extends Bloc<QuestionEvent, QuestionState> {
     this.getSharedQuestionsUsecase,
     this.submitAssessmentUsecase,
     this.generateQuestionsUsecase,
+    this.fetchSubmittedResponsesUsecase,
   ) : super(QuestionInitialState()) {
     on<GenerateQuestionsEventRequest>((event, emit) async {
       emit(QuestionLoadingState());
@@ -46,7 +51,14 @@ class QuestionBloc extends Bloc<QuestionEvent, QuestionState> {
       emit(QuestionLoadingState());
       try {
         final quizzes = await fetchQuizzesUsecase();
-        emit(QuizzesFetchedState(quizzes['quizzes']));
+        emit(
+          QuizzesFetchedState(
+            (quizzes['quizzes'] as List)
+                .map((q) => Quiz.fromJson(q as Map<String, dynamic>))
+                .toList(),
+          ),
+        );
+        print("Fetched Quizzes: ${quizzes['quizzes']}");
       } catch (e) {
         emit(QuestionErrorState(e.toString()));
       }
@@ -55,22 +67,58 @@ class QuestionBloc extends Bloc<QuestionEvent, QuestionState> {
     on<GetSharedQuestionsEvent>((event, emit) async {
       emit(QuestionLoadingState());
       try {
-        final sharedQuestions = await getSharedQuestionsUsecase(event.id);
-        emit(QuestionSharedState(sharedQuestions));
+        final sharedQuestions = await getSharedQuestionsUsecase(
+          event.id,
+          event.sharedId,
+          event.accessPassword,
+        );
+        emit(
+          QuestionSharedState(
+            (sharedQuestions['questions'] as List)
+                .map((q) => Question.fromJson(q as Map<String, dynamic>))
+                .toList(),
+            sharedQuestions['duration'] as String,
+            sharedQuestions['startedAt'] as String,
+            sharedQuestions['sharedLinkId'] as String,
+            sharedQuestions['id'] as String, // Ensure 'id' is included
+          ),
+        );
       } catch (e) {
+        print("Error fetching shared questions: ${e.toString()}");
         emit(QuestionErrorState(e.toString()));
       }
     });
     on<SubmitAssessmentEvent>((event, emit) async {
-      emit(QuestionLoadingState());
+      emit(SubmittingAssessmentState());
       try {
         final response = await submitAssessmentUsecase(
           event.id,
           event.response,
+          event.sharedId,
         );
-        emit(SubmitAssessmentState(response));
+        emit(SubmittedAssessmentState(response));
       } catch (e) {
         emit(QuestionErrorState(e.toString()));
+      }
+    });
+
+    on<FetchSubmittedResponsesEvent>((event, emit) async {
+      emit(FetchingResponsesState());
+      try {
+        final responses = await fetchSubmittedResponsesUsecase();
+        emit(
+          FetchedSubmittedResponsesState(
+            (responses['responses'] as List)
+                .map(
+                  (r) => SubmittedResponseModel.fromJson(
+                    r as Map<String, dynamic>,
+                  ),
+                )
+                .toList(),
+          ),
+        );
+      } catch (e) {
+        emit(FetchingResponsesErrorState(e.toString()));
       }
     });
   }

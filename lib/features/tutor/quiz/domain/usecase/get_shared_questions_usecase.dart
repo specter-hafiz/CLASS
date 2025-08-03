@@ -5,7 +5,11 @@ class GetSharedQuestionsUsecase {
 
   GetSharedQuestionsUsecase(this.repository);
 
-  Future<Map<String, dynamic>> call(String id) async {
-    return await repository.getSharedQuestions(id);
+  Future<Map<String, dynamic>> call(
+    String id,
+    String sharedId,
+    String accessPassword,
+  ) async {
+    return await repository.getSharedQuestions(id, sharedId, accessPassword);
   }
 }

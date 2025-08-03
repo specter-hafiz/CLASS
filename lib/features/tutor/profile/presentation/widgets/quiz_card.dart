@@ -1,10 +1,10 @@
 import 'package:class_app/core/constants/app_colors.dart';
 import 'package:class_app/core/utilities/size_config.dart';
-import 'package:class_app/features/tutor/profile/data/question.dart';
 import 'package:class_app/features/tutor/profile/presentation/widgets/answer_widget.dart'
     show AnswersWidget;
 import 'package:class_app/features/tutor/profile/presentation/widgets/question_widget.dart';
 import 'package:class_app/features/tutor/profile/presentation/widgets/stack_container.dart';
+import 'package:class_app/features/tutor/quiz/data/models/question_model.dart';
 import 'package:flutter/material.dart';
 
 class QuizCard extends StatelessWidget {
@@ -13,18 +13,21 @@ class QuizCard extends StatelessWidget {
     required this.questionIndex,
     required this.onOptionSelected,
     required this.selectedIndex,
+    required this.questionText,
+    required this.options,
+    required this.quizQuestions,
   });
 
   final int questionIndex;
   final ValueChanged<int> onOptionSelected;
   final int? selectedIndex;
+  final String questionText;
+  final List<Question> quizQuestions;
+  final List<String> options;
 
   @override
   Widget build(BuildContext context) {
     SizeConfig().init(context);
-    final questionData = quizQuestions[questionIndex];
-    final options = List<String>.from(questionData["options"]);
-    final questionText = questionData["question"];
 
     return Stack(
       clipBehavior: Clip.none,

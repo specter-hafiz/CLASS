@@ -16,6 +16,7 @@ class CustomTextField extends StatefulWidget {
     this.focusNode,
     this.readOnly,
     this.underlineInputBorder,
+    this.validator,
   });
   final String hintText;
   final String? titleText;
@@ -27,6 +28,7 @@ class CustomTextField extends StatefulWidget {
   final FocusNode? focusNode;
   final bool? readOnly;
   final bool? underlineInputBorder;
+  final FormFieldValidator<String>? validator;
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();
 }
@@ -62,6 +64,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
             ? SizedBox(height: SizeConfig.blockSizeVertical! * 1)
             : SizedBox.shrink(),
         TextFormField(
+          validator: widget.validator,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           readOnly: widget.readOnly ?? false,
 
           focusNode: widget.focusNode,

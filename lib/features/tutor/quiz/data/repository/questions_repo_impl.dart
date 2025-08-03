@@ -29,15 +29,33 @@ class QuestionsRepoImpl implements QuestionsRepository {
   }
 
   @override
-  Future<Map<String, dynamic>> getSharedQuestions(String id) async {
-    return await remoteDataSource.getSharedQuestions(id);
+  Future<Map<String, dynamic>> getSharedQuestions(
+    String id,
+    String sharedId,
+    String accessPassword,
+  ) async {
+    return await remoteDataSource.getSharedQuestions(
+      id,
+      sharedId,
+      accessPassword,
+    );
   }
 
   @override
   Future<Map<String, dynamic>> submitAssessment({
     required String id,
-    required Map<String, dynamic> response,
+    required String sharedId,
+    required List<Map<String, dynamic>> response,
   }) async {
-    return await remoteDataSource.submitAssessment(id: id, response: response);
+    return await remoteDataSource.submitAssessment(
+      id: id,
+      sharedId: sharedId,
+      response: response,
+    );
+  }
+
+  @override
+  Future<Map<String, dynamic>> fetchSubmittedResponses() async {
+    return await remoteDataSource.fetchSubmittedResponses();
   }
 }

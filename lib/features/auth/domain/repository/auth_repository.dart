@@ -9,4 +9,5 @@ abstract class AuthRepository {
     String password,
   );
   Future<Map<String, dynamic>> verifyToken(String email, String token);
+  Future<Map<String, dynamic>> editProfile(String username);
 }

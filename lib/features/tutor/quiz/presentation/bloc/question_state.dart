@@ -1,4 +1,6 @@
 import 'package:class_app/features/tutor/quiz/data/models/question_model.dart';
+import 'package:class_app/features/tutor/quiz/data/models/quiz_model.dart';
+import 'package:class_app/features/tutor/quiz/data/models/submitted_response_model.dart';
 import 'package:equatable/equatable.dart';
 
 class QuestionState extends Equatable {
@@ -9,6 +11,17 @@ class QuestionState extends Equatable {
 class QuestionInitialState extends QuestionState {}
 
 class QuestionLoadingState extends QuestionState {}
+
+class SubmittingAssessmentState extends QuestionState {}
+
+class SubmittedAssessmentState extends QuestionState {
+  final Map<String, dynamic> response;
+
+  SubmittedAssessmentState(this.response);
+
+  @override
+  List<Object?> get props => [response];
+}
 
 class QuestionGeneratedState extends QuestionState {
   final List<Question> questions;
@@ -22,12 +35,28 @@ class QuestionGeneratedState extends QuestionState {
 class QuestionsGeneratedCompletedState extends QuestionState {}
 
 class QuestionSharedState extends QuestionState {
-  final Map<String, dynamic> sharedQuestions;
+  final List<Question> sharedQuestions;
+  final String duration;
+  final String startedAt;
+  final String sharedLinkId;
+  final String id;
 
-  QuestionSharedState(this.sharedQuestions);
+  QuestionSharedState(
+    this.sharedQuestions,
+    this.duration,
+    this.startedAt,
+    this.sharedLinkId,
+    this.id,
+  );
 
   @override
-  List<Object?> get props => [sharedQuestions];
+  List<Object?> get props => [
+    sharedQuestions,
+    duration,
+    startedAt,
+    sharedLinkId,
+    id,
+  ];
 }
 
 class SubmitAssessmentState extends QuestionState {
@@ -40,12 +69,32 @@ class SubmitAssessmentState extends QuestionState {
 }
 
 class QuizzesFetchedState extends QuestionState {
-  final List<Map<String, dynamic>> quizzes;
+  final List<Quiz> quizzes;
 
   QuizzesFetchedState(this.quizzes);
 
   @override
   List<Object?> get props => [quizzes];
+}
+
+class FetchingResponsesState extends QuestionState {}
+
+class FetchedSubmittedResponsesState extends QuestionState {
+  final List<SubmittedResponseModel> responses;
+
+  FetchedSubmittedResponsesState(this.responses);
+
+  @override
+  List<Object?> get props => [responses];
+}
+
+class FetchingResponsesErrorState extends QuestionState {
+  final String message;
+
+  FetchingResponsesErrorState(this.message);
+
+  @override
+  List<Object?> get props => [message];
 }
 
 class QuestionErrorState extends QuestionState {

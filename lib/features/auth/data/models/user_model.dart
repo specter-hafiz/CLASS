@@ -1,10 +1,17 @@
+// ignore_for_file: overridden_fields
+
 import 'package:class_app/features/auth/domain/entities/user.dart';
 
 class UserModel extends User {
+  @override
   final String id;
+  @override
   final String name;
+  @override
   final String email;
+  @override
   final String role;
+  @override
   final bool isVerified;
   final String accessToken;
   final String refreshToken;

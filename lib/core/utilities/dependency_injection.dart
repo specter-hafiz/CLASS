@@ -28,6 +28,7 @@ import 'package:class_app/features/tutor/quiz/data/repository/questions_repo_imp
 import 'package:class_app/features/tutor/quiz/data/source/questions_remote_data_source.dart';
 import 'package:class_app/features/tutor/quiz/domain/repository/questions_repository.dart';
 import 'package:class_app/features/tutor/quiz/domain/usecase/fetch_quizzes_usecase.dart';
+import 'package:class_app/features/tutor/quiz/domain/usecase/fetch_submitted_responses.dart';
 import 'package:class_app/features/tutor/quiz/domain/usecase/generate_questions_usecase.dart';
 import 'package:class_app/features/tutor/quiz/domain/usecase/get_shared_questions_usecase.dart';
 import 'package:class_app/features/tutor/quiz/domain/usecase/submit_assessment_usecase.dart';
@@ -65,6 +66,7 @@ Future<void> initCore() async {
       sl<GetSharedQuestionsUsecase>(),
       sl<SubmitAssessmentUsecase>(),
       sl<GenerateQuestionsUsecase>(),
+      sl<FetchSubmittedResponsesUsecase>(),
     ),
   );
 
@@ -83,6 +85,7 @@ Future<void> initCore() async {
   sl.registerLazySingleton(() => GetSharedQuestionsUsecase(sl()));
   sl.registerLazySingleton(() => SubmitAssessmentUsecase(sl()));
   sl.registerLazySingleton(() => GenerateQuestionsUsecase(sl()));
+  sl.registerLazySingleton(() => FetchSubmittedResponsesUsecase(sl()));
 
   // Repository
   sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(sl()));

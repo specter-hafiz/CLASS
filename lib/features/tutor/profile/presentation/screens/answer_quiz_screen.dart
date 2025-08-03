@@ -1,18 +1,32 @@
 import 'dart:async';
-
 import 'package:class_app/core/constants/app_colors.dart';
 import 'package:class_app/core/constants/strings.dart';
 import 'package:class_app/core/utilities/size_config.dart';
 import 'package:class_app/features/auth/presentation/widgets/custom_back_button.dart';
 import 'package:class_app/features/onboarding/widgets/custom_elevated_button.dart';
-import 'package:class_app/features/tutor/profile/data/question.dart';
 import 'package:class_app/features/tutor/profile/presentation/screens/remarks_screen.dart';
 import 'package:class_app/features/tutor/profile/presentation/widgets/quiz_card.dart';
+import 'package:class_app/features/tutor/quiz/data/models/question_model.dart';
+import 'package:class_app/features/tutor/quiz/presentation/bloc/question_bloc.dart';
+import 'package:class_app/features/tutor/quiz/presentation/bloc/question_events.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 
 class AnswerQuizScreen extends StatefulWidget {
-  const AnswerQuizScreen({super.key});
+  const AnswerQuizScreen({
+    super.key,
+    required this.sharedQuestions,
+    required this.duration,
+    required this.startedAt,
+    required this.sharedLinkId,
+    required this.id,
+  });
+  final List<Question> sharedQuestions;
+  final String duration;
+  final String startedAt;
+  final String sharedLinkId;
+  final String id;
 
   @override
   State<AnswerQuizScreen> createState() => _AnswerQuizScreenState();
@@ -22,14 +36,31 @@ class _AnswerQuizScreenState extends State<AnswerQuizScreen> {
   int currentIndex = 0;
   int? selectedIndex;
   int score = 0;
-  List<int?> selectedAnswers = List.filled(quizQuestions.length, null);
+  late List<int?> selectedAnswers;
   late Timer _timer;
-  Duration remainingTime = Duration(minutes: 1);
+  late Duration remainingTime;
+
   bool quizEnded = false;
   @override
   void initState() {
     super.initState();
+
+    try {
+      final startedAtTime = DateTime.parse(widget.startedAt).toLocal();
+      final now = DateTime.now();
+
+      final parsedDuration = int.tryParse(widget.duration) ?? 1;
+      final endTime = startedAtTime.add(Duration(minutes: parsedDuration));
+
+      final remaining = endTime.difference(now);
+      remainingTime = remaining.isNegative ? Duration.zero : remaining;
+    } catch (e) {
+      remainingTime = Duration(minutes: 1); // fallback
+    }
+
+    selectedAnswers = List.filled(widget.sharedQuestions.length, null);
     selectedIndex = selectedAnswers[currentIndex];
+
     startTimer();
   }
 
@@ -49,20 +80,43 @@ class _AnswerQuizScreenState extends State<AnswerQuizScreen> {
     _timer.cancel();
 
     int finalScore = 0;
-    for (int i = 0; i < quizQuestions.length; i++) {
-      if (selectedAnswers[i] == quizQuestions[i]['correctIndex']) {
+    for (int i = 0; i < widget.sharedQuestions.length; i++) {
+      if (selectedAnswers[i] ==
+          widget.sharedQuestions[i].options.indexOf(
+            widget.sharedQuestions[i].answer,
+          )) {
         finalScore++;
       }
     }
 
-    final calculatedScore = ((finalScore / quizQuestions.length) * 100).round();
+    final calculatedScore =
+        ((finalScore / widget.sharedQuestions.length) * 100).round();
 
     setState(() {
       score = calculatedScore;
       quizEnded = true;
     });
 
+    final formattedAnswers = <Map<String, dynamic>>[];
+
+    for (int i = 0; i < widget.sharedQuestions.length; i++) {
+      final selected = selectedAnswers[i];
+      if (selected != null) {
+        formattedAnswers.add({
+          "questionId": widget.sharedQuestions[i].id,
+          "answer": widget.sharedQuestions[i].options[selected],
+        });
+      }
+    }
+
     if (isTimeUp) {
+      context.read<QuestionBloc>().add(
+        SubmitAssessmentEvent(
+          id: widget.id,
+          sharedId: widget.sharedLinkId,
+          response: formattedAnswers,
+        ),
+      );
       // Immediately navigate to remarks without showing dialog
       Navigator.pushReplacement(
         context,
@@ -94,7 +148,7 @@ class _AnswerQuizScreenState extends State<AnswerQuizScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    "Questions ${selectedAnswers.where((a) => a != null).length} / ${quizQuestions.length} answered",
+                    "Questions ${selectedAnswers.where((a) => a != null).length} / ${widget.sharedQuestions.length} answered",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize:
@@ -140,6 +194,13 @@ class _AnswerQuizScreenState extends State<AnswerQuizScreen> {
                       child: CustomElevatedButton(
                         buttonText: submitText,
                         onPressed: () {
+                          context.read<QuestionBloc>().add(
+                            SubmitAssessmentEvent(
+                              id: widget.id,
+                              sharedId: widget.sharedLinkId,
+                              response: formattedAnswers,
+                            ),
+                          );
                           Navigator.pop(context);
                           Navigator.pushReplacement(
                             context,
@@ -165,7 +226,7 @@ class _AnswerQuizScreenState extends State<AnswerQuizScreen> {
       selectedAnswers[currentIndex] = selectedIndex;
     }
 
-    if (currentIndex < quizQuestions.length - 1) {
+    if (currentIndex < widget.sharedQuestions.length - 1) {
       setState(() {
         currentIndex++;
         selectedIndex = selectedAnswers[currentIndex];
@@ -226,7 +287,7 @@ class _AnswerQuizScreenState extends State<AnswerQuizScreen> {
         automaticallyImplyLeading: false,
         title:
             isPortrait
-                ? Text("Q${currentIndex + 1}/${quizQuestions.length}")
+                ? Text("Q${currentIndex + 1}/${widget.sharedQuestions.length}")
                 : Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
@@ -237,7 +298,7 @@ class _AnswerQuizScreenState extends State<AnswerQuizScreen> {
                       width: screenWidth * 0.2,
                     ),
                     Text(
-                      "Q${currentIndex + 1}/${quizQuestions.length}",
+                      "Q${currentIndex + 1}/${widget.sharedQuestions.length}",
                       style: TextStyle(
                         fontSize: SizeConfig.blockSizeVertical! * 4,
                         fontWeight: FontWeight.w400,
@@ -309,6 +370,10 @@ class _AnswerQuizScreenState extends State<AnswerQuizScreen> {
                         });
                       },
                       selectedIndex: selectedIndex,
+                      quizQuestions: widget.sharedQuestions,
+                      questionText:
+                          widget.sharedQuestions[currentIndex].question,
+                      options: widget.sharedQuestions[currentIndex].options,
                     ),
                     SizedBox(height: SizeConfig.blockSizeVertical! * 6),
                   ],

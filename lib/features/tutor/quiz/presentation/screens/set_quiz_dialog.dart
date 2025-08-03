@@ -11,7 +11,6 @@ import 'package:class_app/core/constants/strings.dart'
 import 'package:class_app/core/utilities/size_config.dart';
 import 'package:class_app/features/auth/presentation/widgets/custom_textfield.dart';
 import 'package:class_app/features/tutor/profile/presentation/screens/assessment_screen.dart';
-import 'package:class_app/features/tutor/quiz/presentation/widgets/copy_share_quiz_url.dart';
 import 'package:class_app/features/tutor/quiz/presentation/widgets/drop_down_widget.dart';
 import 'package:flutter/material.dart';
 

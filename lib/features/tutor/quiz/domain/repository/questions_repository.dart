@@ -8,9 +8,15 @@ abstract class QuestionsRepository {
     required String duration,
     required String accessPassword,
   });
-  Future<Map<String, dynamic>> getSharedQuestions(String id);
+  Future<Map<String, dynamic>> getSharedQuestions(
+    String id,
+    String sharedId,
+    String accessPassword,
+  );
   Future<Map<String, dynamic>> submitAssessment({
     required String id,
-    required Map<String, dynamic> response,
+    required String sharedId,
+    required List<Map<String, dynamic>> response,
   });
+  Future<Map<String, dynamic>> fetchSubmittedResponses();
 }

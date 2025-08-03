@@ -1,15 +1,15 @@
 import 'package:class_app/core/constants/strings.dart';
 import 'package:class_app/core/utilities/size_config.dart';
 import 'package:class_app/features/auth/presentation/widgets/custom_back_button.dart';
-import 'package:class_app/features/tutor/profile/data/question.dart';
 import 'package:class_app/features/tutor/profile/presentation/widgets/answer_widget.dart';
 import 'package:class_app/features/tutor/profile/presentation/widgets/question_widget.dart';
-import 'package:class_app/features/tutor/quiz/presentation/screens/set_quiz_dialog.dart';
+import 'package:class_app/features/tutor/quiz/data/models/quiz_model.dart';
 import 'package:class_app/features/tutor/quiz/presentation/widgets/export_quiz_dialog.dart';
 import 'package:flutter/material.dart';
 
 class QuizDetailScreen extends StatelessWidget {
-  const QuizDetailScreen({super.key});
+  const QuizDetailScreen({super.key, required this.quiz});
+  final Quiz quiz;
 
   @override
   Widget build(BuildContext context) {
@@ -18,9 +18,8 @@ class QuizDetailScreen extends StatelessWidget {
       appBar: AppBar(
         leading: CustomBackButton(),
         automaticallyImplyLeading: false,
-        centerTitle: true,
         title: Text(
-          lectureWeekText,
+          quiz.title,
           style: TextStyle(
             fontSize:
                 SizeConfig.orientation(context) == Orientation.portrait
@@ -38,21 +37,19 @@ class QuizDetailScreen extends StatelessWidget {
               children: [
                 IconButton(
                   icon: const Icon(Icons.share_outlined),
-                  onPressed: () async {
-                    await showDialog(
-                      context: context,
-                      builder: (context) => const SetQuizDialog(),
-                    );
-                  },
+                  onPressed: quiz.questions.isEmpty ? null : () async {},
                 ),
                 IconButton(
                   icon: const Icon(Icons.download_outlined),
-                  onPressed: () async {
-                    await showDialog(
-                      context: context,
-                      builder: (context) => const ExportQuizDialog(),
-                    );
-                  },
+                  onPressed:
+                      quiz.questions.isEmpty
+                          ? null
+                          : () async {
+                            await showDialog(
+                              context: context,
+                              builder: (context) => const ExportQuizDialog(),
+                            );
+                          },
                 ),
               ],
             ),
@@ -63,28 +60,46 @@ class QuizDetailScreen extends StatelessWidget {
         padding: EdgeInsets.symmetric(
           horizontal: SizeConfig.horizontalPadding(context),
         ),
-        child: ListView.builder(
-          itemCount: quizQuestions.length,
-          itemBuilder: (context, index) {
-            final question = quizQuestions[index];
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                QuestionWidget(
-                  questionNumber: index + 1,
-                  totalQuestions: quizQuestions.length,
-                  questionText: question['question'] as String,
+        child:
+            quiz.questions.isEmpty
+                ? Center(
+                  child: Text(
+                    noQuestionsText,
+                    style: TextStyle(
+                      fontSize:
+                          SizeConfig.orientation(context) ==
+                                  Orientation.portrait
+                              ? SizeConfig.blockSizeHorizontal! * 5
+                              : SizeConfig.blockSizeVertical! * 3,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                )
+                : ListView.builder(
+                  itemCount: quiz.questions.length,
+                  itemBuilder: (context, index) {
+                    final question = quiz.questions[index];
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        QuestionWidget(
+                          questionNumber: index + 1,
+                          totalQuestions: quiz.questions.length,
+                          questionText: question.question,
+                        ),
+                        AnswersWidget(
+                          answersList: question.options,
+                          selectedIndex: question.options.indexOf(
+                            question.answer,
+                          ),
+                          onChanged: null,
+                        ),
+                        SizedBox(height: SizeConfig.blockSizeVertical! * 2),
+                      ],
+                    );
+                  },
                 ),
-                AnswersWidget(
-                  answersList: question['options'] as List<String>,
-                  selectedIndex: question['correctIndex'] as int? ?? -1,
-                  onChanged: null,
-                ),
-                SizedBox(height: SizeConfig.blockSizeVertical! * 2),
-              ],
-            );
-          },
-        ),
       ),
     );
   }

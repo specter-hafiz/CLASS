@@ -30,21 +30,30 @@ class GenerateQuestionsEventRequest extends QuestionEvent {
 
 class GetSharedQuestionsEvent extends QuestionEvent {
   final String id;
+  final String sharedId;
+  final String accessPassword;
 
-  GetSharedQuestionsEvent(this.id);
+  GetSharedQuestionsEvent(this.id, this.sharedId, this.accessPassword);
 
   @override
-  List<Object?> get props => [id];
+  List<Object?> get props => [id, sharedId, accessPassword];
 }
 
 class SubmitAssessmentEvent extends QuestionEvent {
   final String id;
-  final Map<String, dynamic> response;
+  final String sharedId;
+  final List<Map<String, dynamic>> response;
 
-  SubmitAssessmentEvent({required this.id, required this.response});
+  SubmitAssessmentEvent({
+    required this.id,
+    required this.sharedId,
+    required this.response,
+  });
 
   @override
   List<Object?> get props => [id, response];
 }
+
+class FetchSubmittedResponsesEvent extends QuestionEvent {}
 
 class FetchQuizzesEvent extends QuestionEvent {}

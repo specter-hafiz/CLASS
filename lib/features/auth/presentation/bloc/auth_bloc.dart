@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:class_app/core/service/errors/exceptions.dart';
 import 'package:class_app/features/auth/data/source/auth_remote_data_source.dart';
+import 'package:class_app/features/auth/domain/usecases/edit_profile_usecase.dart';
 import 'package:class_app/features/auth/domain/usecases/login_usecase.dart';
 import 'package:class_app/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:class_app/features/auth/domain/usecases/signup_usecase.dart';
@@ -14,12 +15,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LogoutUsecase logoutUseCase;
   final SignupUsecase registerUseCase;
   final VerifytokenUsecase verifyTokenUsecase;
+  final EditProfileUsecase editProfileUsecase;
 
   AuthBloc(
     this.loginUseCase,
     this.logoutUseCase,
     this.registerUseCase,
     this.verifyTokenUsecase,
+    this.editProfileUsecase,
   ) : super(AuthInitial()) {
     on<LoginRequested>((event, emit) async {
       emit(AuthLoading());

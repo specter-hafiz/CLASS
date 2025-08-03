@@ -25,6 +25,7 @@ abstract class AuthRemoteDataSource {
   /// Verifies the OTP token for the given email.
 
   Future<Map<String, dynamic>> verifyToken(String email, String otp);
+  Future<Map<String, dynamic>> editProfile(String username);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -46,12 +47,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
       final data = res.data is String ? jsonDecode(res.data) : res.data;
       final user = UserModel.fromJson(data['response']['user']);
+      print("User data: ${user.toJson()}");
       await SharedPrefService().saveToken(
         data['response']['user']['accessToken'],
       );
       await SharedPrefService().saveRefreshToken(
         data['response']['user']['refreshToken'],
       );
+      await SharedPrefService().saveUser(user);
       logger.i("Login response: $data");
       logger.i("User logged in: ${user.email}");
       return user;
@@ -99,5 +102,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
     debugPrint("Verify OTP response: $data");
     return data;
+  }
+
+  @override
+  Future<Map<String, dynamic>> editProfile(String username) async {
+    final res = await http.patch(
+      Endpoints.editProfile,
+      data: {'name': username},
+    );
+    if (res.statusCode != StatusCode.ok) {
+      throw ServerException(res.data['message'] ?? 'Failed to edit profile');
+    }
+    return res.data;
   }
 }

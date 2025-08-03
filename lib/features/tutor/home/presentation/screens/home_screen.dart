@@ -385,21 +385,22 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                     SizedBox(height: SizeConfig.blockSizeVertical! * 2),
-                    BlocBuilder<TranscriptBloc, TranscriptState>(
-                      builder: (context, state) {
-                        if (state is FetchingTranscripts) {
-                          return const Center(
-                            child: CircularProgressIndicator(
-                              color: Color(yellowColor),
-                            ),
-                          );
-                        } else if (state is TranscriptsFetched) {
-                          final transcripts = state.transcripts;
-                          transcripts.sort(
-                            (a, b) => b.createdAt.compareTo(a.createdAt),
-                          );
-                          return Expanded(
-                            child: ListView.builder(
+                    Expanded(
+                      child: BlocBuilder<TranscriptBloc, TranscriptState>(
+                        builder: (context, state) {
+                          if (state is FetchingTranscripts) {
+                            return const Center(
+                              child: CircularProgressIndicator(
+                                color: Color(yellowColor),
+                              ),
+                            );
+                          } else if (state is TranscriptsFetched) {
+                            final transcripts = state.transcripts;
+                            transcripts.sort(
+                              (a, b) => b.createdAt.compareTo(a.createdAt),
+                            );
+
+                            return ListView.builder(
                               shrinkWrap: true,
 
                               itemCount:
@@ -489,16 +490,51 @@ class _HomeScreenState extends State<HomeScreen> {
                                   },
                                 );
                               },
+                            );
+                          } else if (state is TranscriptError) {
+                            return Center(
+                              child: Column(
+                                children: [
+                                  Text(
+                                    state.message,
+                                    style: TextStyle(
+                                      color: Colors.red,
+                                      fontSize:
+                                          SizeConfig.orientation(context) ==
+                                                  Orientation.portrait
+                                              ? SizeConfig.screenWidth! * 0.04
+                                              : SizeConfig.screenWidth! * 0.025,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: SizeConfig.blockSizeVertical! * 2,
+                                  ),
+                                  CustomElevatedButton(
+                                    buttonText: retryText,
+                                    onPressed: () {
+                                      context.read<TranscriptBloc>().add(
+                                        FetchTranscriptsRequested(),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                          return Center(
+                            child: Text(
+                              'No transcriptions available',
+                              style: TextStyle(
+                                fontSize:
+                                    SizeConfig.orientation(context) ==
+                                            Orientation.portrait
+                                        ? SizeConfig.screenWidth! * 0.04
+                                        : SizeConfig.screenWidth! * 0.025,
+                              ),
                             ),
                           );
-                        } else if (state is TranscriptError) {
-                          return Center(child: Text(state.message));
-                        } else {
-                          return Container(
-                            color: Colors.red,
-                          ); // Or a default message
-                        }
-                      },
+                        },
+                      ),
                     ),
                   ],
                 ),

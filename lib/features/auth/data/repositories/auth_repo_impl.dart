@@ -31,4 +31,9 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Map<String, dynamic>> verifyToken(String email, String token) {
     return remote.verifyToken(email, token);
   }
+
+  @override
+  Future<Map<String, dynamic>> editProfile(String username) {
+    return remote.editProfile(username);
+  }
 }
