@@ -137,7 +137,7 @@ class _ResetPasswordFormState extends State<ResetPasswordForm> {
                   : CustomElevatedButton(
                     buttonText: resetPasswordText,
                     onPressed: () {
-                      if (!_formKey.currentState!.validate()) {
+                      if (_formKey.currentState!.validate()) {
                         context.read<AuthBloc>().add(
                           ResetPasswordRequested(
                             email: _email ?? '',

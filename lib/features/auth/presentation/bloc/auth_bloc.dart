@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:class_app/core/service/errors/exceptions.dart';
+import 'package:class_app/features/auth/data/models/user_model.dart';
 import 'package:class_app/features/auth/domain/usecases/change_password_usecase.dart';
 import 'package:class_app/features/auth/domain/usecases/edit_profile_usecase.dart';
 import 'package:class_app/features/auth/domain/usecases/forgot_password_usecase.dart';
@@ -74,9 +75,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<VerifyTokenRequested>((event, emit) async {
       emit(AuthLoading());
       try {
-        final response = await verifyTokenUsecase(event.email, event.otp);
+        final response = await verifyTokenUsecase(
+          event.email,
+          event.otp,
+          event.isLoginSignUp,
+        );
         debugPrint("Token verification response: $response");
-        emit(TokenVerified(response['msg']));
+        emit(
+          TokenVerified(
+            response['msg'],
+            user: UserModel.fromJson(response['results']['user']),
+          ),
+        );
       } catch (e) {
         emit(AuthError(e.toString()));
       }

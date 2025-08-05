@@ -1,3 +1,4 @@
+import 'package:class_app/core/service/errors/exceptions.dart';
 import 'package:class_app/features/tutor/home/domain/usecases/delete_transcript_usecase.dart';
 import 'package:class_app/features/tutor/home/domain/usecases/fetch_transcript_usecase.dart';
 import 'package:class_app/features/tutor/home/domain/usecases/fetch_transcripts_usecase.dart';
@@ -23,20 +24,10 @@ class TranscriptBloc extends Bloc<TranscriptEvents, TranscriptState> {
       try {
         final transcripts = await fetchTranscriptsUsecase();
         emit(TranscriptsFetched(transcripts));
+      } on CustomTimeoutException catch (e) {
+        emit(TranscriptError(e.toString()));
       } catch (e) {
         emit(TranscriptError("Failed to fetch transcripts: ${e.toString()}"));
-      }
-    });
-
-    on<FetchTranscriptRequested>((event, emit) async {
-      emit(TranscriptLoading());
-      try {
-        final transcript = await fetchTranscriptUsecase(
-          transcriptId: event.transcriptId,
-        );
-        emit(TranscriptFetched(transcript));
-      } catch (e) {
-        emit(TranscriptError("Failed to fetch transcript: ${e.toString()}"));
       }
     });
 

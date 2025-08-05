@@ -60,7 +60,13 @@ class VerifyOTPFormState extends State<VerifyOTPForm> {
     bool allFilled = _controllers.every((c) => c.text.isNotEmpty);
     if (allFilled) {
       final otp = _controllers.map((c) => c.text).join();
-      context.read<AuthBloc>().add(VerifyTokenRequested(email, otp));
+      context.read<AuthBloc>().add(
+        VerifyTokenRequested(
+          email,
+          otp,
+          widget.forgotPassword == true ? false : true,
+        ),
+      );
     }
   }
 
@@ -78,17 +84,19 @@ class VerifyOTPFormState extends State<VerifyOTPForm> {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is TokenVerified) {
-          widget.forgotPassword == true
-              ? Navigator.pushNamed(
-                context,
-                '/resetPassword',
-                arguments: {'email': widget.email},
-              ) // Navigate to reset password screen
-              : Navigator.pushNamedAndRemoveUntil(
-                context,
-                '/base',
-                (route) => false,
-              ); // Navigate to base screen
+          if (widget.forgotPassword == true) {
+            Navigator.pushNamed(
+              context,
+              '/resetPassword',
+              arguments: {'email': widget.email},
+            );
+          } else {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              '/base',
+              (route) => false,
+            );
+          }
         }
       },
       builder: (context, state) {
@@ -162,7 +170,11 @@ class VerifyOTPFormState extends State<VerifyOTPForm> {
                     }
                     final otp = _controllers.map((c) => c.text).join();
                     context.read<AuthBloc>().add(
-                      VerifyTokenRequested(widget.email, otp),
+                      VerifyTokenRequested(
+                        widget.email,
+                        otp,
+                        widget.forgotPassword == true ? false : true,
+                      ),
                     );
                   },
                 ),

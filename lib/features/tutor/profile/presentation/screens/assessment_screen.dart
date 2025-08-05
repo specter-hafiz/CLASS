@@ -193,7 +193,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
                         return Center(
                           child: Text(
                             'No assessments available',
-                            style: TextStyle(color: Colors.grey),
+                            style: TextStyle(color: Color(blackColor)),
                           ),
                         );
                       }

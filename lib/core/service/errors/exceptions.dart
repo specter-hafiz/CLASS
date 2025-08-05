@@ -24,3 +24,11 @@ class NetworkException implements Exception {
   @override
   String toString() => message;
 }
+
+class CustomTimeoutException implements Exception {
+  final String message;
+  CustomTimeoutException(this.message);
+
+  @override
+  String toString() => message;
+}

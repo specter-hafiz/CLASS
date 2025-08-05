@@ -10,9 +10,9 @@ import 'package:dio/dio.dart';
 class TrancriptService {
   final Dio _dio;
   TrancriptService(this._dio) {
-    _dio.options.baseUrl = AppSecrets.testUrl; // change this
-    _dio.options.sendTimeout = const Duration(minutes: 2);
-    _dio.options.receiveTimeout = const Duration(minutes: 5);
+    _dio.options.baseUrl = AppSecrets.baseUrl; // change this
+    _dio.options.sendTimeout = const Duration(seconds: 20);
+    _dio.options.receiveTimeout = const Duration(minutes: 1);
   }
 
   Future<List<Transcript>> fetchTranscripts() async {
@@ -39,6 +39,15 @@ class TrancriptService {
             ),
           )
           : [];
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.sendTimeout) {
+        throw CustomTimeoutException(
+          'Timed out, check your internet connection and try again',
+        );
+      }
+      throw Exception("Dio error: ${e.message}");
     } catch (e) {
       throw Exception("Failed to fetch transcript: ${e.toString()}");
     }

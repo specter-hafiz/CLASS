@@ -25,7 +25,11 @@ abstract class AuthRemoteDataSource {
 
   /// Verifies the OTP token for the given email.
 
-  Future<Map<String, dynamic>> verifyOTP(String email, String otp);
+  Future<Map<String, dynamic>> verifyOTP(
+    String email,
+    String otp,
+    bool? isLoginSignUp,
+  );
   Future<Map<String, dynamic>> editProfile(String username);
   Future<Map<String, dynamic>> loginWithGoogle(
     String username,
@@ -104,7 +108,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<Map<String, dynamic>> verifyOTP(String email, String token) async {
+  Future<Map<String, dynamic>> verifyOTP(
+    String email,
+    String token,
+    bool? isLoginSignUp,
+  ) async {
     bool hasConnection = await NetworkConnectivity().isConnected;
     if (!hasConnection) {
       throw NetworkException("No internet connection");
@@ -118,7 +126,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       throw Exception('Failed to verify OTP');
     }
     final data = res.data is String ? jsonDecode(res.data) : res.data;
-
+    if (isLoginSignUp == true) {
+      final user = UserModel.fromJson(data['results']['user']);
+      await SharedPrefService().saveToken(data['results']['accessToken']);
+      await SharedPrefService().saveRefreshToken(
+        data['results']['refreshToken'],
+      );
+      await SharedPrefService().saveUser(user);
+    }
     debugPrint("Verify OTP response: $data");
     return data;
   }
@@ -228,6 +243,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     if (res.statusCode != StatusCode.ok) {
       throw ServerException(res.data['message'] ?? 'Failed to reset password');
     }
+    print("Reset password response: ${res.data}");
     return res.data;
   }
 

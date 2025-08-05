@@ -28,8 +28,12 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Map<String, dynamic>> verifyOTP(String email, String token) {
-    return remote.verifyOTP(email, token);
+  Future<Map<String, dynamic>> verifyOTP(
+    String email,
+    String token,
+    bool? isLoginSignUp,
+  ) {
+    return remote.verifyOTP(email, token, isLoginSignUp);
   }
 
   @override

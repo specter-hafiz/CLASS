@@ -394,6 +394,23 @@ class _HomeScreenState extends State<HomeScreen> {
                             transcripts.sort(
                               (a, b) => b.createdAt.compareTo(a.createdAt),
                             );
+                            if (transcripts.isEmpty) {
+                              return Center(
+                                child: Text(
+                                  "No transcriptions available\nTap on the microphone to record\nor import audio",
+                                  style: TextStyle(
+                                    overflow: TextOverflow.ellipsis,
+                                    color: Color(blackColor),
+                                    fontSize:
+                                        SizeConfig.orientation(context) ==
+                                                Orientation.portrait
+                                            ? SizeConfig.screenWidth! * 0.04
+                                            : SizeConfig.screenWidth! * 0.025,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              );
+                            }
 
                             return ListView.builder(
                               shrinkWrap: true,

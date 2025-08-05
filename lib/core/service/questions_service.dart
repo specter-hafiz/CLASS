@@ -10,8 +10,8 @@ class QuestionsService {
   final Dio _dio;
   QuestionsService(this._dio) {
     _dio.options.baseUrl = AppSecrets.testUrl; // change this
-    _dio.options.sendTimeout = const Duration(minutes: 2);
-    _dio.options.receiveTimeout = const Duration(minutes: 5);
+    _dio.options.sendTimeout = const Duration(seconds: 20);
+    _dio.options.receiveTimeout = const Duration(minutes: 1);
   }
 
   Future<Map<String, dynamic>> generateQuestions({

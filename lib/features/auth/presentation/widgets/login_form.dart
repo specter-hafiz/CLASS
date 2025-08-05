@@ -53,6 +53,12 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
   void dispose() {
+    _emailFocusNode.removeListener(
+      () => _scrollIntoViewIfNeeded(_emailFocusNode),
+    );
+    _passwordFocusNode.removeListener(
+      () => _scrollIntoViewIfNeeded(_passwordFocusNode),
+    );
     _emailController.dispose();
     _passwordController.dispose();
     _emailFocusNode.dispose();

@@ -1,3 +1,4 @@
+import 'package:class_app/features/auth/data/models/user_model.dart';
 import 'package:class_app/features/auth/domain/entities/user.dart';
 import 'package:equatable/equatable.dart';
 
@@ -41,10 +42,11 @@ class AuthError extends AuthState {
 
 class TokenVerified extends AuthState {
   final String message;
+  final UserModel? user;
 
-  const TokenVerified(this.message);
+  const TokenVerified(this.message, {this.user});
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [message, user];
 }
 
 class EditProfileStarting extends AuthState {}

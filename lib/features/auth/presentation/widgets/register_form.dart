@@ -4,6 +4,7 @@ import 'package:class_app/core/utilities/size_config.dart';
 import 'package:class_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:class_app/features/auth/presentation/bloc/auth_event.dart';
 import 'package:class_app/features/auth/presentation/bloc/auth_state.dart';
+import 'package:class_app/features/auth/presentation/screens/verify_otp_screen.dart';
 import 'package:class_app/features/auth/presentation/widgets/custom_textfield.dart';
 import 'package:class_app/features/auth/presentation/widgets/rich_text_widget.dart';
 import 'package:class_app/features/onboarding/widgets/custom_elevated_button.dart';
@@ -184,11 +185,11 @@ class _RegisterFormState extends State<RegisterForm> {
             context,
           ).showSnackBar(SnackBar(content: Text(state.message)));
 
-          Navigator.pushNamed(
-            context,
-            '/verifyOtp',
-            arguments: state.email,
-          ); // Navigate to OTP verification screen
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => VerifyOTPScreen(email: state.email),
+            ),
+          );
         } else if (state is AuthError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

@@ -1,3 +1,4 @@
+import 'package:class_app/core/service/errors/exceptions.dart';
 import 'package:class_app/core/service/trancript_service.dart';
 import 'package:class_app/features/tutor/home/data/models/transcript_model.dart';
 
@@ -23,7 +24,9 @@ class TranscriptRemoteDataSourceImpl implements TranscriptRemoteDataSource {
         transcriptId: transcriptId,
       );
       return Transcript.fromJson(response['transcript']);
-    } catch (e) {
+    } on CustomTimeoutException {
+      rethrow;
+    } on Exception catch (e) {
       throw Exception("Failed to fetch transcript: ${e.toString()}");
     }
   }

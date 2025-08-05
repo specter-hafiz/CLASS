@@ -12,9 +12,9 @@ class AudioTranscriptionService {
   final Dio _dio;
 
   AudioTranscriptionService(this._dio) {
-    _dio.options.baseUrl = AppSecrets.testUrl; // change this
-    _dio.options.sendTimeout = const Duration(minutes: 2);
-    _dio.options.receiveTimeout = const Duration(minutes: 5);
+    _dio.options.baseUrl = AppSecrets.baseUrl; // change this
+    _dio.options.sendTimeout = const Duration(seconds: 20);
+    _dio.options.receiveTimeout = const Duration(minutes: 1);
   }
 
   Future<Map<String, dynamic>> uploadAudioForTranscription({

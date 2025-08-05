@@ -93,31 +93,40 @@ class _QuizScreenState extends State<QuizScreen> {
                       child: const Center(child: CircularProgressIndicator()),
                     );
                   } else if (state is QuestionErrorState) {
-                    return Center(
-                      child: Column(
-                        children: [
-                          Text(
-                            state.message,
-                            style: TextStyle(color: Colors.red),
-                          ),
-                          SizedBox(height: 20),
-                          ElevatedButton(
-                            onPressed: () {
-                              context.read<QuestionBloc>().add(
-                                FetchQuizzesEvent(),
-                              );
-                            },
-                            child: Text('Retry'),
-                          ),
-                        ],
+                    return Expanded(
+                      child: Center(
+                        child: Column(
+                          children: [
+                            Text(
+                              state.message,
+                              style: TextStyle(color: Colors.red),
+                            ),
+                            SizedBox(height: 20),
+                            ElevatedButton(
+                              onPressed: () {
+                                context.read<QuestionBloc>().add(
+                                  FetchQuizzesEvent(),
+                                );
+                              },
+                              child: Text('Retry'),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   } else if (state is QuizzesFetchedState) {
                     if (state.quizzes.isEmpty) {
-                      return Center(
-                        child: Text(
-                          'No quizzes available',
-                          style: TextStyle(color: Colors.grey),
+                      return Expanded(
+                        child: Center(
+                          child: Text(
+                            'No quizzes available\nQuizzes you create from your transcripts\nwill appear here.',
+                            style: TextStyle(
+                              color: Color(blackColor),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 3,
+                          ),
                         ),
                       );
                     }

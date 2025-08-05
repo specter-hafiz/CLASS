@@ -32,8 +32,9 @@ class EditProfileRequested extends AuthEvent {
 class VerifyTokenRequested extends AuthEvent {
   final String email;
   final String otp;
+  final bool? isLoginSignUp;
 
-  const VerifyTokenRequested(this.email, this.otp);
+  const VerifyTokenRequested(this.email, this.otp, this.isLoginSignUp);
 }
 
 class OTPVerificationRequested extends AuthEvent {
