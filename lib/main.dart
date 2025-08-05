@@ -9,11 +9,12 @@ import 'package:class_app/features/onboarding/screens/onboarding_screen.dart';
 import 'package:class_app/features/tutor/home/presentation/bloc/audio/audio_bloc.dart';
 import 'package:class_app/features/tutor/home/presentation/bloc/transcript/transcript_bloc.dart';
 import 'package:class_app/features/tutor/quiz/presentation/bloc/question_bloc.dart';
+import 'package:class_app/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Ensures bindings are ready
+  WidgetsFlutterBinding.ensureInitialized();
   await initCore();
   runApp(const MyApp());
 }
@@ -21,65 +22,51 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  Future<Map<String, bool>> loadAppState() async {
+    final isOnboarded = await sl<SharedPrefService>().isOnboarded();
+    final isLoggedIn = await sl<SharedPrefService>().hasToken();
+    return {'onboarded': isOnboarded, 'loggedIn': isLoggedIn};
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<AuthBloc>(create: (context) => sl<AuthBloc>()),
-        BlocProvider<AudioBloc>(create: (context) => sl<AudioBloc>()),
-        BlocProvider<TranscriptBloc>(create: (context) => sl<TranscriptBloc>()),
-        BlocProvider<QuestionBloc>(create: (context) => sl<QuestionBloc>()),
+        BlocProvider<AuthBloc>(create: (_) => sl<AuthBloc>()),
+        BlocProvider<AudioBloc>(create: (_) => sl<AudioBloc>()),
+        BlocProvider<TranscriptBloc>(create: (_) => sl<TranscriptBloc>()),
+        BlocProvider<QuestionBloc>(create: (_) => sl<QuestionBloc>()),
       ],
       child: MaterialApp(
         title: 'CLASS',
+        debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          scaffoldBackgroundColor: Color(whiteColor),
-          appBarTheme: AppBarTheme(
-            surfaceTintColor: Colors.transparent,
-
+          scaffoldBackgroundColor: const Color(whiteColor),
+          appBarTheme: const AppBarTheme(
             backgroundColor: Color(whiteColor),
             elevation: 0,
             iconTheme: IconThemeData(color: Color(blackColor)),
           ),
-          popupMenuTheme: PopupMenuThemeData(color: Color(whiteColor)),
           fontFamily: "Poppins",
-          textTheme: const TextTheme(
-            bodyMedium: TextStyle(fontWeight: FontWeight.w400),
-          ),
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         ),
-        home: Builder(
-          builder: (context) {
-            Future<bool> isOnboarded = sl<SharedPrefService>().isOnboarded();
-            Future<bool> isLoggedIn = sl<SharedPrefService>().hasToken();
-            return FutureBuilder<bool>(
-              future: isOnboarded,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError || !snapshot.data!) {
-                  return const OnboardingScreen();
-                } else {
-                  return FutureBuilder<bool>(
-                    future: isLoggedIn,
-                    builder: (context, loginSnapshot) {
-                      if (loginSnapshot.connectionState ==
-                          ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else if (loginSnapshot.hasError ||
-                          !(loginSnapshot.data ?? false)) {
-                        return const LoginScreen();
-                      } else {
-                        return const BaseScreen();
-                      }
-                    },
-                  );
-                }
-              },
-            );
+        routes: appRoutes,
+        home: FutureBuilder<Map<String, bool>>(
+          future: loadAppState(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return const SplashScreen();
+            }
+
+            final data = snapshot.data ?? {};
+            final isOnboarded = data['onboarded'] ?? false;
+            final isLoggedIn = data['loggedIn'] ?? false;
+
+            if (!isOnboarded) return const OnboardingScreen();
+            if (!isLoggedIn) return const LoginScreen();
+            return const BaseScreen();
           },
         ),
-        routes: appRoutes,
       ),
     );
   }

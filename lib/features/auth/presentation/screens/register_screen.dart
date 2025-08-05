@@ -56,6 +56,7 @@ class RegisterScreen extends StatelessWidget {
                   ),
                   maxLines: 1,
                 ),
+
                 SizedBox(height: SizeConfig.blockSizeVertical! * 1),
                 // Registration form widget goes here
                 RegisterForm(),
@@ -65,6 +66,7 @@ class RegisterScreen extends StatelessWidget {
                   text: "Already have an account? ",
                   actionText: loginText,
                   onTap: () {
+                    FocusScope.of(context).unfocus();
                     Navigator.pop(context);
                   },
                 ),

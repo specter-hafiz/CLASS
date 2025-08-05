@@ -4,7 +4,6 @@ import 'package:class_app/core/utilities/size_config.dart';
 import 'package:class_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:class_app/features/auth/presentation/bloc/auth_event.dart';
 import 'package:class_app/features/auth/presentation/bloc/auth_state.dart';
-import 'package:class_app/features/auth/presentation/widgets/continue_with_widget.dart';
 import 'package:class_app/features/auth/presentation/widgets/custom_textfield.dart';
 import 'package:class_app/features/auth/presentation/widgets/rich_text_widget.dart';
 import 'package:class_app/features/onboarding/widgets/custom_elevated_button.dart';
@@ -68,96 +67,115 @@ class _RegisterFormState extends State<RegisterForm> {
     }
   }
 
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(
       builder: (context, state) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CustomTextField(
-              showTitle: true,
-              titleText: userNameText,
-              hintText: userNameHintText,
-              showSuffixIcon: false,
-              controller: userNameController,
-            ),
-            SizedBox(height: SizeConfig.blockSizeVertical! * 1),
-            CustomTextField(
-              showTitle: true,
-              titleText: emailText,
-              hintText: emailHintText,
-              showSuffixIcon: false,
-              controller: emailController,
-            ),
-            SizedBox(height: SizeConfig.blockSizeVertical! * 1),
+        return Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CustomTextField(
+                showTitle: true,
+                titleText: userNameText,
+                hintText: userNameHintText,
+                showSuffixIcon: false,
+                controller: userNameController,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Username required';
+                  }
+                  if (value.length < 3) {
+                    return 'Username must be at least 3 characters';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: SizeConfig.blockSizeVertical! * 1),
+              CustomTextField(
+                showTitle: true,
+                titleText: emailText,
+                hintText: emailHintText,
+                showSuffixIcon: false,
+                controller: emailController,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return emailRequiredText;
+                  }
+                  if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                    return invalidEmailText;
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: SizeConfig.blockSizeVertical! * 1),
 
-            CustomTextField(
-              showTitle: true,
+              CustomTextField(
+                showTitle: true,
 
-              titleText: passwordText,
-              hintText: passwordHintText,
-              showSuffixIcon: true,
-              obscureText: true,
-              controller: passwordController,
-            ),
-            SizedBox(height: SizeConfig.blockSizeVertical! * 1),
-            Row(
-              children: [
-                // checkbox for terms and conditions
-                CustomCheckBox(),
-                SizedBox(width: SizeConfig.blockSizeHorizontal! * 0.5),
-                RichTextWidget(
-                  text: "I agree to the ",
-                  actionText: "Terms and Privacy Policy",
-                  onTap: () {
-                    // Handle terms and privacy policy tap
-                  },
-                ),
-              ],
-            ),
-            SizedBox(height: SizeConfig.blockSizeVertical! * 1),
+                titleText: passwordText,
+                hintText: passwordHintText,
+                showSuffixIcon: true,
+                obscureText: true,
+                controller: passwordController,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Password required';
+                  }
+                  if (value.length < 6) {
+                    return 'Password must be at least 6 characters';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: SizeConfig.blockSizeVertical! * 1),
+              Row(
+                children: [
+                  // checkbox for terms and conditions
+                  CustomCheckBox(),
+                  SizedBox(width: SizeConfig.blockSizeHorizontal! * 0.5),
+                  RichTextWidget(
+                    text: "I agree to the ",
+                    actionText: "Terms and Privacy Policy",
+                    onTap: () {
+                      // Handle terms and privacy policy tap
+                    },
+                  ),
+                ],
+              ),
+              SizedBox(height: SizeConfig.blockSizeVertical! * 1),
 
-            state is AuthLoading
-                ? Center(child: CircularProgressIndicator())
-                : CustomElevatedButton(
-                  buttonText: registerText,
-                  onPressed: () {
-                    // Trigger the registration event
-                    context.read<AuthBloc>().add(
-                      RegisterRequested(
-                        userNameController.text.trim(),
-                        emailController.text.trim(),
-                        passwordController.text.trim(),
-                      ),
-                    );
-                  },
-                  height:
-                      SizeConfig.orientation(context) == Orientation.portrait
-                          ? SizeConfig.blockSizeVertical! * 6
-                          : SizeConfig.blockSizeHorizontal! * 5,
-                  borderRadius:
-                      SizeConfig.orientation(context) == Orientation.portrait
-                          ? SizeConfig.blockSizeHorizontal! * 3
-                          : SizeConfig.blockSizeHorizontal! * 1,
-                ),
-            SizedBox(height: SizeConfig.blockSizeVertical! * 1),
-            ContinueWithWidget(),
-            SizedBox(height: SizeConfig.blockSizeVertical! * 1),
-            CustomElevatedButton(
-              buttonText: "Google",
-              showIcon: true,
-              onPressed: () {},
-              height:
-                  SizeConfig.orientation(context) == Orientation.portrait
-                      ? SizeConfig.blockSizeVertical! * 6
-                      : SizeConfig.blockSizeHorizontal! * 5,
-              borderRadius:
-                  SizeConfig.orientation(context) == Orientation.portrait
-                      ? SizeConfig.blockSizeHorizontal! * 3
-                      : SizeConfig.blockSizeHorizontal! * 1,
-            ),
-          ],
+              state is AuthLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : CustomElevatedButton(
+                    buttonText: registerText,
+                    onPressed: () {
+                      // Trigger the registration event
+                      if (_formKey.currentState!.validate()) {
+                        context.read<AuthBloc>().add(
+                          RegisterRequested(
+                            userNameController.text.trim(),
+                            emailController.text.trim(),
+                            passwordController.text.trim(),
+                          ),
+                        );
+                      }
+                    },
+                    height:
+                        SizeConfig.orientation(context) == Orientation.portrait
+                            ? SizeConfig.blockSizeVertical! * 6
+                            : SizeConfig.blockSizeHorizontal! * 5,
+                    borderRadius:
+                        SizeConfig.orientation(context) == Orientation.portrait
+                            ? SizeConfig.blockSizeHorizontal! * 3
+                            : SizeConfig.blockSizeHorizontal! * 1,
+                  ),
+              SizedBox(height: SizeConfig.blockSizeVertical! * 1),
+            ],
+          ),
         );
       },
       listener: (BuildContext context, AuthState state) {

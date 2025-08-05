@@ -55,4 +55,24 @@ class UserModel extends User {
       'refreshToken': refreshToken,
     };
   }
+
+  UserModel copyWith({
+    String? id,
+    String? name,
+    String? email,
+    String? role,
+    bool? isVerified,
+    String? accessToken,
+    String? refreshToken,
+  }) {
+    return UserModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      role: role ?? this.role,
+      isVerified: isVerified ?? this.isVerified,
+      accessToken: accessToken ?? this.accessToken,
+      refreshToken: refreshToken ?? this.refreshToken,
+    );
+  }
 }

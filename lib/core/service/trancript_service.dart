@@ -32,7 +32,6 @@ class TrancriptService {
           sendTimeout: const Duration(minutes: 2),
         ),
       );
-      print("Response: ${response.data}");
       return response.data['transcripts'] != null
           ? List<Transcript>.from(
             response.data['transcripts'].map(
@@ -66,7 +65,6 @@ class TrancriptService {
       );
       return response.data;
     } catch (e) {
-      print("Error fetching transcript: ${e.toString()}");
       throw Exception("Failed to fetch transcript: ${e.toString()}");
     }
   }
@@ -94,7 +92,6 @@ class TrancriptService {
       );
       return response.data;
     } catch (e) {
-      print("Error updating transcript: ${e.toString()}");
       throw Exception("Failed to update transcript: ${e.toString()}");
     }
   }

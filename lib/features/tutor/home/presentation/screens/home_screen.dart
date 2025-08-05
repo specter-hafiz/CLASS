@@ -111,7 +111,6 @@ class _HomeScreenState extends State<HomeScreen> {
         BlocListener<QuestionBloc, QuestionState>(
           listener: (context, state) {
             if (state is QuestionLoadingState) {
-              print("Loading questions...");
               showDialog(
                 barrierDismissible: false,
                 context: context,
@@ -123,7 +122,6 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             } else if (state is QuestionGeneratedState) {
               Navigator.of(context).pop(); // Close loading dialog
-              print("Questions generated: ${state.questions}");
               showDialog(
                 barrierDismissible: false,
                 context: context,
@@ -139,13 +137,11 @@ class _HomeScreenState extends State<HomeScreen> {
               });
             } else if (state is QuestionErrorState) {
               Navigator.of(context).pop(); // Close any open dialog
-              print("Error generating questions: ${state.message}");
               ScaffoldMessenger.of(
                 context,
               ).showSnackBar(SnackBar(content: Text(state.message)));
             } else if (state is QuestionErrorState) {
               Navigator.of(context).pop(); // Close any open dialog
-              print("Error generating questions: ${state.message}");
               ScaffoldMessenger.of(
                 context,
               ).showSnackBar(SnackBar(content: Text(state.message)));
@@ -254,7 +250,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                       rightButtonText: transcribeText,
                                       onRightButtonPressed: () {
                                         if (filePath != null) {
-                                          print("Transcribing file: $filePath");
                                           context.read<AudioBloc>().add(
                                             UploadAudioRequested(filePath!),
                                           );
@@ -454,7 +449,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                         );
                                         if (result != null) {
                                           // Handle the result from the dialog
-                                          print("Dialog result: $result");
                                           context.read<QuestionBloc>().add(
                                             GenerateQuestionsEventRequest(
                                               transcript: transcript.transcript,

@@ -60,81 +60,107 @@ class _LoginFormState extends State<LoginForm> {
     super.dispose();
   }
 
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     SizeConfig().init(context);
     return BlocConsumer<AuthBloc, AuthState>(
       builder: (context, state) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CustomTextField(
-              showTitle: true,
-              titleText: emailText,
-              hintText: emailHintText,
-              showSuffixIcon: false,
-              controller: _emailController,
-              focusNode: _emailFocusNode,
-            ),
-            SizedBox(height: SizeConfig.blockSizeVertical! * 1),
+        return Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CustomTextField(
+                showTitle: true,
+                titleText: emailText,
+                hintText: emailHintText,
+                showSuffixIcon: false,
+                controller: _emailController,
+                focusNode: _emailFocusNode,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return emailRequiredText;
+                  }
+                  if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                    return invalidEmailText;
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: SizeConfig.blockSizeVertical! * 1),
 
-            CustomTextField(
-              showTitle: true,
-              titleText: passwordText,
-              hintText: passwordHintText,
-              showSuffixIcon: true,
-              obscureText: true,
-              controller: _passwordController,
-              focusNode: _passwordFocusNode,
-            ),
-            SizedBox(height: SizeConfig.blockSizeVertical! * 1),
+              CustomTextField(
+                showTitle: true,
+                titleText: passwordText,
+                hintText: passwordHintText,
+                showSuffixIcon: true,
+                obscureText: true,
+                controller: _passwordController,
+                focusNode: _passwordFocusNode,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Password required';
+                  }
+                  if (value.length < 6) {
+                    return 'Password must be at least 6 characters';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: SizeConfig.blockSizeVertical! * 1),
 
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                InkWell(
-                  onTap: () => Navigator.pushNamed(context, '/forgotPassword'),
-                  child: Text(
-                    forgotPasswordText,
-                    style: TextStyle(
-                      color: Color(blueColor),
-                      fontSize:
-                          SizeConfig.orientation(context) ==
-                                  Orientation.portrait
-                              ? SizeConfig.screenWidth! * 0.04
-                              : SizeConfig.screenWidth! * 0.025,
-                      fontWeight: FontWeight.w400,
-                    ),
-                    maxLines: 1,
-                  ),
-                ),
-              ],
-            ),
-
-            SizedBox(height: SizeConfig.blockSizeVertical! * 1),
-
-            state is AuthLoading
-                ? Center(child: CircularProgressIndicator())
-                : CustomElevatedButton(
-                  buttonText: loginText,
-                  onPressed: () {
-                    context.read<AuthBloc>().add(
-                      LoginRequested(
-                        _emailController.text.trim(),
-                        _passwordController.text.trim(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  InkWell(
+                    onTap:
+                        () => Navigator.pushNamed(context, '/forgotPassword'),
+                    child: Text(
+                      forgotPasswordText,
+                      style: TextStyle(
+                        color: Color(blueColor),
+                        fontSize:
+                            SizeConfig.orientation(context) ==
+                                    Orientation.portrait
+                                ? SizeConfig.screenWidth! * 0.04
+                                : SizeConfig.screenWidth! * 0.025,
+                        fontWeight: FontWeight.w400,
                       ),
-                    );
-                  },
-                  height:
-                      SizeConfig.orientation(context) == Orientation.portrait
-                          ? SizeConfig.blockSizeVertical! * 6
-                          : SizeConfig.blockSizeHorizontal! * 5,
-                  borderRadius:
-                      SizeConfig.orientation(context) == Orientation.portrait
-                          ? SizeConfig.blockSizeHorizontal! * 3
-                          : SizeConfig.blockSizeHorizontal! * 1,
-                ),
-          ],
+                      maxLines: 1,
+                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: SizeConfig.blockSizeVertical! * 1),
+
+              state is AuthLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : CustomElevatedButton(
+                    buttonText: loginText,
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        context.read<AuthBloc>().add(
+                          LoginRequested(
+                            _emailController.text.trim(),
+                            _passwordController.text.trim(),
+                          ),
+                        );
+                      }
+                    },
+                    height:
+                        SizeConfig.orientation(context) == Orientation.portrait
+                            ? SizeConfig.blockSizeVertical! * 6
+                            : SizeConfig.blockSizeHorizontal! * 5,
+                    borderRadius:
+                        SizeConfig.orientation(context) == Orientation.portrait
+                            ? SizeConfig.blockSizeHorizontal! * 3
+                            : SizeConfig.blockSizeHorizontal! * 1,
+                  ),
+            ],
+          ),
         );
       },
       listener: (context, state) {
@@ -146,7 +172,7 @@ class _LoginFormState extends State<LoginForm> {
             ),
           );
         } else if (state is AuthAuthenticated) {
-          Navigator.pushNamed(context, '/base');
+          Navigator.pushNamedAndRemoveUntil(context, '/base', (route) => false);
         } else if (state is AuthError) {
           ScaffoldMessenger.of(
             context,

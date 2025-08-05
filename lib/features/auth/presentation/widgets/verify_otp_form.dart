@@ -10,8 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class VerifyOTPForm extends StatefulWidget {
-  const VerifyOTPForm({super.key, required this.email});
+  const VerifyOTPForm({super.key, required this.email, this.forgotPassword});
   final String email;
+  final bool? forgotPassword;
 
   @override
   State<VerifyOTPForm> createState() => VerifyOTPFormState();
@@ -77,10 +78,17 @@ class VerifyOTPFormState extends State<VerifyOTPForm> {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is TokenVerified) {
-          Navigator.pushNamed(
-            context,
-            '/base',
-          ); // Navigate to reset password screen
+          widget.forgotPassword == true
+              ? Navigator.pushNamed(
+                context,
+                '/resetPassword',
+                arguments: {'email': widget.email},
+              ) // Navigate to reset password screen
+              : Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/base',
+                (route) => false,
+              ); // Navigate to base screen
         }
       },
       builder: (context, state) {

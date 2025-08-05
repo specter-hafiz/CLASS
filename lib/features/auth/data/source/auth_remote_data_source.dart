@@ -6,6 +6,7 @@ import 'package:class_app/core/service/api/http_consumer.dart';
 import 'package:class_app/core/service/api/status_code.dart';
 import 'package:class_app/core/service/errors/exceptions.dart';
 import 'package:class_app/core/service/shared_pref/shared_pref.dart';
+import 'package:class_app/core/utilities/dependency_injection.dart';
 import 'package:flutter/material.dart';
 
 import '../models/user_model.dart';
@@ -24,8 +25,21 @@ abstract class AuthRemoteDataSource {
 
   /// Verifies the OTP token for the given email.
 
-  Future<Map<String, dynamic>> verifyToken(String email, String otp);
+  Future<Map<String, dynamic>> verifyOTP(String email, String otp);
   Future<Map<String, dynamic>> editProfile(String username);
+  Future<Map<String, dynamic>> loginWithGoogle(
+    String username,
+    String email,
+    String googleId,
+  );
+  Future<Map<String, dynamic>> forgotPassword(String email);
+  Future<Map<String, dynamic>> changePassword(
+    String userId,
+    String oldPassword,
+    String newPassword,
+  );
+  Future<Map<String, dynamic>> resetPassword(String email, String newPassword);
+  Future<Map<String, dynamic>> resendOTP(String email);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -40,14 +54,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       throw NetworkException("No internet connection");
     }
     try {
-      logger.i("Sending login request...");
       final res = await http.post(
         Endpoints.login,
         data: {'email': email, 'password': password},
       );
       final data = res.data is String ? jsonDecode(res.data) : res.data;
       final user = UserModel.fromJson(data['response']['user']);
-      print("User data: ${user.toJson()}");
       await SharedPrefService().saveToken(
         data['response']['user']['accessToken'],
       );
@@ -55,14 +67,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         data['response']['user']['refreshToken'],
       );
       await SharedPrefService().saveUser(user);
-      logger.i("Login response: $data");
-      logger.i("User logged in: ${user.email}");
       return user;
     } on OTPVerificationException {
       rethrow; // ✅ This is fine – it will be caught in BLoC
     } catch (e) {
       logger.e("Login failed: $e");
-      throw ServerException("An unexpected error occurred.");
+      throw ServerException(e.toString());
     }
   }
 
@@ -77,6 +87,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     String email,
     String password,
   ) async {
+    bool hasConnection = await NetworkConnectivity().isConnected;
+    if (!hasConnection) {
+      throw NetworkException("No internet connection");
+    }
     final res = await http.post(
       Endpoints.signup,
       data: {'name': name, 'email': email, 'password': password},
@@ -90,9 +104,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<Map<String, dynamic>> verifyToken(String email, String token) async {
+  Future<Map<String, dynamic>> verifyOTP(String email, String token) async {
+    bool hasConnection = await NetworkConnectivity().isConnected;
+    if (!hasConnection) {
+      throw NetworkException("No internet connection");
+    }
     final res = await http.post(
       Endpoints.verifyOTP,
+      token: token,
       data: {'email': email, 'otp': token},
     );
     if (res.statusCode != StatusCode.ok) {
@@ -106,12 +125,121 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<Map<String, dynamic>> editProfile(String username) async {
+    bool hasConnection = await NetworkConnectivity().isConnected;
+    if (!hasConnection) {
+      throw NetworkException("No internet connection");
+    }
+    final token = await sl<SharedPrefService>().getToken().then(
+      (value) => value ?? '',
+    );
+
     final res = await http.patch(
       Endpoints.editProfile,
       data: {'name': username},
+      token: token,
     );
     if (res.statusCode != StatusCode.ok) {
       throw ServerException(res.data['message'] ?? 'Failed to edit profile');
+    }
+    return res.data;
+  }
+
+  @override
+  Future<Map<String, dynamic>> loginWithGoogle(
+    String username,
+    String email,
+    String googleId,
+  ) async {
+    bool hasConnection = await NetworkConnectivity().isConnected;
+    if (!hasConnection) {
+      throw NetworkException("No internet connection");
+    }
+    final res = await http.post(
+      Endpoints.googleLogin,
+      data: {'name': username, 'email': email, 'googleId': googleId},
+    );
+    if (res.statusCode != StatusCode.ok) {
+      throw ServerException(
+        res.data['message'] ?? 'Failed to login with Google',
+      );
+    }
+    return res.data;
+  }
+
+  @override
+  Future<Map<String, dynamic>> forgotPassword(String email) async {
+    bool hasConnection = await NetworkConnectivity().isConnected;
+    if (!hasConnection) {
+      throw NetworkException("No internet connection");
+    }
+    final res = await http.post(
+      Endpoints.forgotPassword,
+      data: {'email': email},
+    );
+    res.data is String ? jsonDecode(res.data) : res.data;
+    if (res.statusCode != StatusCode.ok) {
+      throw ServerException(res.data['message'] ?? 'Failed to send OTP');
+    }
+    logger.i("Forgot password response: ${res.data}");
+    return res.data;
+  }
+
+  @override
+  Future<Map<String, dynamic>> changePassword(
+    String userId,
+    String oldPassword,
+    String newPassword,
+  ) async {
+    bool hasConnection = await NetworkConnectivity().isConnected;
+    if (!hasConnection) {
+      throw NetworkException("No internet connection");
+    }
+    final token = await sl<SharedPrefService>().getToken().then(
+      (value) => value ?? '',
+    );
+    final res = await http.post(
+      Endpoints.changePassword,
+      data: {
+        'userId': userId,
+        'oldPassword': oldPassword,
+        'newPassword': newPassword,
+      },
+      token: token,
+    );
+    if (res.statusCode != StatusCode.ok) {
+      throw ServerException(res.data['message'] ?? 'Failed to change password');
+    }
+    return res.data;
+  }
+
+  @override
+  Future<Map<String, dynamic>> resetPassword(
+    String email,
+    String newPassword,
+  ) async {
+    bool hasConnection = await NetworkConnectivity().isConnected;
+    if (!hasConnection) {
+      throw NetworkException("No internet connection");
+    }
+    final res = await http.post(
+      Endpoints.resetPassword,
+      data: {'email': email, 'newPassword': newPassword},
+    );
+    if (res.statusCode != StatusCode.ok) {
+      throw ServerException(res.data['message'] ?? 'Failed to reset password');
+    }
+    return res.data;
+  }
+
+  @override
+  Future<Map<String, dynamic>> resendOTP(String email) async {
+    bool hasConnection = await NetworkConnectivity().isConnected;
+    if (!hasConnection) {
+      throw NetworkException("No internet connection");
+    }
+    final res = await http.post(Endpoints.resendOTP, data: {'email': email});
+    if (res.statusCode != StatusCode.ok) {
+      throw ServerException(res.data['message'] ?? 'Failed to resend OTP');
     }
     return res.data;
   }

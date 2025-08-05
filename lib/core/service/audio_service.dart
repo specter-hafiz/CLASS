@@ -34,7 +34,6 @@ class AudioTranscriptionService {
       final token = await sl<SharedPrefService>().getToken().then(
         (value) => value ?? '',
       );
-      print("Auth Token: $token");
 
       final response = await _dio.post(
         Endpoints.uploadAudio,
@@ -54,10 +53,7 @@ class AudioTranscriptionService {
           sendTimeout: const Duration(minutes: 20),
         ),
       );
-      print("Response: ${response.data}");
       if (response.statusCode == 200) {
-        // final transcriptionResult = await transcribeAudio(audioUrl: audio);
-        // final transcript = transcriptionResult['transcript'];
         return response.data;
       } else {
         throw ServerException("Failed to transcribe audio file.");
@@ -90,7 +86,6 @@ class AudioTranscriptionService {
           sendTimeout: const Duration(minutes: 20),
         ),
       );
-      print("Transcription Response: ${response.data}");
       return response.data;
     } catch (e) {
       throw Exception("Transcription error: ${e.toString()}");

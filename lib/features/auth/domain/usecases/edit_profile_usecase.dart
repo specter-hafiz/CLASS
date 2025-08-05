@@ -5,7 +5,7 @@ class EditProfileUsecase {
 
   EditProfileUsecase(this.authRepository);
 
-  Future<Map<String, dynamic>> call(String username) async {
-    return await authRepository.editProfile(username);
+  Future<Map<String, dynamic>> call(String username) {
+    return authRepository.editProfile(username);
   }
 }

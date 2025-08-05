@@ -58,7 +58,6 @@ class QuestionBloc extends Bloc<QuestionEvent, QuestionState> {
                 .toList(),
           ),
         );
-        print("Fetched Quizzes: ${quizzes['quizzes']}");
       } catch (e) {
         emit(QuestionErrorState(e.toString()));
       }
@@ -84,7 +83,6 @@ class QuestionBloc extends Bloc<QuestionEvent, QuestionState> {
           ),
         );
       } catch (e) {
-        print("Error fetching shared questions: ${e.toString()}");
         emit(QuestionErrorState(e.toString()));
       }
     });

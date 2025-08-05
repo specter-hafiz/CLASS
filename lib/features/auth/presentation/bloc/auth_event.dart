@@ -23,6 +23,12 @@ class RegisterRequested extends AuthEvent {
   const RegisterRequested(this.name, this.email, this.password);
 }
 
+class EditProfileRequested extends AuthEvent {
+  final String name;
+
+  const EditProfileRequested(this.name);
+}
+
 class VerifyTokenRequested extends AuthEvent {
   final String email;
   final String otp;
@@ -37,4 +43,40 @@ class OTPVerificationRequested extends AuthEvent {
 
   @override
   List<Object?> get props => [message];
+}
+
+class ChangePasswordRequested extends AuthEvent {
+  final String userId;
+  final String oldPassword;
+  final String newPassword;
+  const ChangePasswordRequested(
+    this.userId,
+    this.oldPassword,
+    this.newPassword,
+  );
+
+  @override
+  List<Object?> get props => [userId, oldPassword, newPassword];
+}
+
+class ForgotPasswordRequested extends AuthEvent {
+  final String email;
+
+  const ForgotPasswordRequested({required this.email});
+
+  @override
+  List<Object?> get props => [email];
+}
+
+class ResetPasswordRequested extends AuthEvent {
+  final String email;
+  final String newPassword;
+
+  const ResetPasswordRequested({
+    required this.email,
+    required this.newPassword,
+  });
+
+  @override
+  List<Object?> get props => [email, newPassword];
 }

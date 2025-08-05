@@ -9,6 +9,7 @@ class Endpoints {
   static const String changePassword = '/auth/change-password';
   static const String verifyOTP = '/auth/verify-otp';
   static const String editProfile = '/auth/edit-profile';
+  static const String resendOTP = '/auth/resend-otp';
 
   // AUDIO ROUTES
   static const String transcribeAudio = '/audio/transcribe';

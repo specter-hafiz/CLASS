@@ -9,7 +9,7 @@ class HttpConsumer {
   final Dio _dio;
 
   HttpConsumer(this._dio) {
-    _dio.options.baseUrl = AppSecrets.baseUrl;
+    _dio.options.baseUrl = AppSecrets.testUrl;
     _dio.options.connectTimeout = const Duration(seconds: 30);
     _dio.options.receiveTimeout = const Duration(seconds: 30);
     _dio.options.headers = {

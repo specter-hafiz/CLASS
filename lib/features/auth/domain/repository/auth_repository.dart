@@ -8,6 +8,19 @@ abstract class AuthRepository {
     String email,
     String password,
   );
-  Future<Map<String, dynamic>> verifyToken(String email, String token);
+  Future<Map<String, dynamic>> verifyOTP(String email, String token);
   Future<Map<String, dynamic>> editProfile(String username);
+  Future<Map<String, dynamic>> loginWithGoogle(
+    String username,
+    String email,
+    String googleId,
+  );
+  Future<Map<String, dynamic>> forgotPassword(String email);
+  Future<Map<String, dynamic>> changePassword(
+    String userId,
+    String oldPassword,
+    String newPassword,
+  );
+  Future<Map<String, dynamic>> resetPassword(String email, String newPassword);
+  Future<Map<String, dynamic>> resendOTP(String email);
 }

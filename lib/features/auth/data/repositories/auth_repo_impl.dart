@@ -28,12 +28,45 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Map<String, dynamic>> verifyToken(String email, String token) {
-    return remote.verifyToken(email, token);
+  Future<Map<String, dynamic>> verifyOTP(String email, String token) {
+    return remote.verifyOTP(email, token);
   }
 
   @override
   Future<Map<String, dynamic>> editProfile(String username) {
     return remote.editProfile(username);
+  }
+
+  @override
+  Future<Map<String, dynamic>> loginWithGoogle(
+    String username,
+    String email,
+    String googleId,
+  ) {
+    return remote.loginWithGoogle(username, email, googleId);
+  }
+
+  @override
+  Future<Map<String, dynamic>> forgotPassword(String email) {
+    return remote.forgotPassword(email);
+  }
+
+  @override
+  Future<Map<String, dynamic>> changePassword(
+    String userId,
+    String oldPassword,
+    String newPassword,
+  ) {
+    return remote.changePassword(userId, oldPassword, newPassword);
+  }
+
+  @override
+  Future<Map<String, dynamic>> resetPassword(String email, String newPassword) {
+    return remote.resetPassword(email, newPassword);
+  }
+
+  @override
+  Future<Map<String, dynamic>> resendOTP(String email) {
+    return remote.resendOTP(email);
   }
 }

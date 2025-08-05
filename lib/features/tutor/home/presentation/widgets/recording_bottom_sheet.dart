@@ -88,7 +88,6 @@ class _RecordingBottomSheetState extends State<RecordingBottomSheet>
       _audioPath = path;
     });
     if (_audioPath != null) {
-      print("Transcribing file: $_audioPath");
       if (setQuiz) {
         final result = await showDialog(
           context: context,

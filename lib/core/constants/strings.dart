@@ -128,6 +128,12 @@ const userNameText = "Username";
 const retryText = "Retry";
 const userNameHintText = "johnny";
 const emailText = "Email";
+const emailRequiredText = "Email is required";
+const passwordRequiredText = "Password is required";
+
+const invalidEmailText = "Invalid email format";
+const logoutConfirmationText =
+    "Are you sure you want to logout? You will have to login next time.";
 const emailHintText = "johndoe@mail.com";
 const passwordText = "Password";
 const confirmPasswordText = "Confirm Password";

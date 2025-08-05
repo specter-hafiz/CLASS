@@ -83,6 +83,8 @@ class LoginScreen extends StatelessWidget {
                   text: "Don't have an account? ",
                   actionText: registerText,
                   onTap: () {
+                    FocusScope.of(context).unfocus();
+
                     Navigator.pushNamed(context, '/register');
                   },
                 ),

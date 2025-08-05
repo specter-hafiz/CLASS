@@ -5,10 +5,16 @@ import 'package:class_app/core/utilities/size_config.dart';
 import 'package:class_app/features/auth/data/repositories/auth_repo_impl.dart';
 import 'package:class_app/features/auth/data/source/auth_remote_data_source.dart';
 import 'package:class_app/features/auth/domain/repository/auth_repository.dart';
+import 'package:class_app/features/auth/domain/usecases/change_password_usecase.dart';
+import 'package:class_app/features/auth/domain/usecases/edit_profile_usecase.dart';
+import 'package:class_app/features/auth/domain/usecases/forgot_password_usecase.dart';
+import 'package:class_app/features/auth/domain/usecases/google_login_usecase.dart';
 import 'package:class_app/features/auth/domain/usecases/login_usecase.dart';
 import 'package:class_app/features/auth/domain/usecases/logout_usecase.dart';
+import 'package:class_app/features/auth/domain/usecases/resend_otp_usecase.dart';
+import 'package:class_app/features/auth/domain/usecases/reset_password_usecase.dart';
 import 'package:class_app/features/auth/domain/usecases/signup_usecase.dart';
-import 'package:class_app/features/auth/domain/usecases/verify_token_usecase.dart';
+import 'package:class_app/features/auth/domain/usecases/verify_otp_usecase.dart';
 import 'package:class_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:class_app/features/tutor/home/data/repository/audio_repo_impl.dart';
 import 'package:class_app/features/tutor/home/data/repository/transcript_repo_impl.dart';
@@ -57,7 +63,9 @@ Future<void> initCore() async {
   //! Features - Auth
 
   // Bloc
-  sl.registerFactory(() => AuthBloc(sl(), sl(), sl(), sl()));
+  sl.registerFactory(
+    () => AuthBloc(sl(), sl(), sl(), sl(), sl(), sl(), sl(), sl(), sl(), sl()),
+  );
   sl.registerFactory(() => AudioBloc(sl(), sl()));
   sl.registerFactory(() => TranscriptBloc(sl(), sl(), sl(), sl()));
   sl.registerFactory(
@@ -75,6 +83,12 @@ Future<void> initCore() async {
   sl.registerLazySingleton(() => UploadAudioUseCase(sl()));
   sl.registerLazySingleton(() => LoginUseCase(sl()));
   sl.registerLazySingleton(() => SignupUsecase(sl()));
+  sl.registerLazySingleton(() => GoogleLoginUsecase(sl()));
+  sl.registerLazySingleton(() => ForgotPasswordUsecase(sl()));
+  sl.registerLazySingleton(() => ResetPasswordUsecase(sl()));
+  sl.registerLazySingleton(() => EditProfileUsecase(sl()));
+  sl.registerLazySingleton(() => ResendOtpUsecase(sl()));
+  sl.registerLazySingleton(() => ChangePasswordUsecase(sl()));
   sl.registerLazySingleton(() => LogoutUsecase(sl()));
   sl.registerLazySingleton(() => VerifytokenUsecase(sl()));
   sl.registerLazySingleton(() => FetchTranscriptsUsecase(sl()));

@@ -6,6 +6,6 @@ class VerifytokenUsecase {
   VerifytokenUsecase(this.repository);
 
   Future<Map<String, dynamic>> call(String email, String token) {
-    return repository.verifyToken(email, token);
+    return repository.verifyOTP(email, token);
   }
 }

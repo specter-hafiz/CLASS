@@ -1,11 +1,15 @@
 import 'package:bloc/bloc.dart';
 import 'package:class_app/core/service/errors/exceptions.dart';
-import 'package:class_app/features/auth/data/source/auth_remote_data_source.dart';
+import 'package:class_app/features/auth/domain/usecases/change_password_usecase.dart';
 import 'package:class_app/features/auth/domain/usecases/edit_profile_usecase.dart';
+import 'package:class_app/features/auth/domain/usecases/forgot_password_usecase.dart';
+import 'package:class_app/features/auth/domain/usecases/google_login_usecase.dart';
 import 'package:class_app/features/auth/domain/usecases/login_usecase.dart';
 import 'package:class_app/features/auth/domain/usecases/logout_usecase.dart';
+import 'package:class_app/features/auth/domain/usecases/resend_otp_usecase.dart';
+import 'package:class_app/features/auth/domain/usecases/reset_password_usecase.dart';
 import 'package:class_app/features/auth/domain/usecases/signup_usecase.dart';
-import 'package:class_app/features/auth/domain/usecases/verify_token_usecase.dart';
+import 'package:class_app/features/auth/domain/usecases/verify_otp_usecase.dart';
 import 'package:class_app/features/auth/presentation/bloc/auth_event.dart';
 import 'package:class_app/features/auth/presentation/bloc/auth_state.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +19,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LogoutUsecase logoutUseCase;
   final SignupUsecase registerUseCase;
   final VerifytokenUsecase verifyTokenUsecase;
-  final EditProfileUsecase editProfileUsecase;
+  final EditProfileUsecase editProfileUsecase; //
+  final GoogleLoginUsecase googleLoginUsecase; //
+  final ForgotPasswordUsecase forgotPasswordUsecase; //
+  final ChangePasswordUsecase changePasswordUsecase; //
+  final ResetPasswordUsecase resetPasswordUsecase; //
+  final ResendOtpUsecase resendOtpUsecase;
 
   AuthBloc(
     this.loginUseCase,
@@ -23,22 +32,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     this.registerUseCase,
     this.verifyTokenUsecase,
     this.editProfileUsecase,
+    this.googleLoginUsecase,
+    this.forgotPasswordUsecase,
+    this.changePasswordUsecase,
+    this.resetPasswordUsecase,
+    this.resendOtpUsecase,
   ) : super(AuthInitial()) {
     on<LoginRequested>((event, emit) async {
       emit(AuthLoading());
       try {
         final user = await loginUseCase(event.email, event.password);
         emit(AuthAuthenticated(user));
-        debugPrint("Login successful: ${user.email}");
       } on NetworkException catch (e) {
-        logger.e(e.message);
         emit(AuthError(e.message));
       } on OTPVerificationException {
-        logger.i("OTPVerificationException caught in BLoC");
         emit(RequireOtpVerification());
-      } catch (e, stackTrace) {
-        logger.e('Login failed', error: e, stackTrace: stackTrace);
-        emit(AuthError("Login problem: ${e.toString()}"));
+      } catch (e) {
+        emit(AuthError(e.toString()));
       }
     });
 
@@ -69,6 +79,53 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(TokenVerified(response['msg']));
       } catch (e) {
         emit(AuthError(e.toString()));
+      }
+    });
+
+    on<EditProfileRequested>((event, emit) async {
+      emit(EditProfileStarting());
+      try {
+        final response = await editProfileUsecase(event.name);
+        emit(EditProfileSuccess(response['message']));
+      } catch (e) {
+        emit(EditProfileError(e.toString()));
+      }
+    });
+
+    on<ChangePasswordRequested>((event, emit) async {
+      emit(ChangingPassword());
+      try {
+        final response = await changePasswordUsecase(
+          event.userId,
+          event.oldPassword,
+          event.newPassword,
+        );
+        emit(ChangePasswordSuccess(response['message']));
+      } catch (e) {
+        emit(ChangePasswordError(e.toString()));
+      }
+    });
+
+    on<ForgotPasswordRequested>((event, emit) async {
+      emit(ForgotPasswordStarting());
+      try {
+        final response = await forgotPasswordUsecase(event.email);
+        emit(ForgotPasswordSuccess(response['message'], response['email']));
+      } catch (e) {
+        emit(ForgotPasswordError(e.toString()));
+      }
+    });
+
+    on<ResetPasswordRequested>((event, emit) async {
+      emit(ResetPasswordStarting());
+      try {
+        final response = await resetPasswordUsecase(
+          event.email,
+          event.newPassword,
+        );
+        emit(ResetPasswordSuccess(response['message']));
+      } catch (e) {
+        emit(ResetPasswordError(e.toString()));
       }
     });
   }

@@ -120,18 +120,6 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
                     );
 
                     if (results != null) {
-                      if (results is Map<String, String>) {
-                        // Handle the results from the dialog
-                        final id = results['id'];
-                        final sharedId = results['sharedId'];
-                        final accessPassword = results['accessPassword'];
-
-                        // You can now use these values as needed
-                        print('ID: $id');
-                        print('Shared ID: $sharedId');
-                        print('Access Password: $accessPassword');
-                      }
-                      // Navigate to answer quiz screen with results
                       context.read<QuestionBloc>().add(
                         GetSharedQuestionsEvent(
                           results['id'] ?? '',
@@ -261,17 +249,20 @@ class _CustomAlertDialogState extends State<CustomAlertDialog> {
       backgroundColor: Color(whiteColor),
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       contentPadding: const EdgeInsets.all(16),
-      content: SizedBox(
-        width:
-            widget.width ??
-            (SizeConfig.orientation(context) == Orientation.portrait
-                ? widget.screenWidth * 0.9
-                : widget.screenWidth * 0.4), // optional: control width too
-        height:
-            widget.height ??
-            (SizeConfig.orientation(context) == Orientation.portrait
-                ? widget.screenHeight * 0.38
-                : widget.screenHeight * 0.8), // 👈 manually control height here
+      content: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight:
+              widget.height ??
+              (SizeConfig.orientation(context) == Orientation.portrait
+                  ? widget.screenHeight * 0.38
+                  : widget.screenHeight *
+                      0.8), // 👈 manually control height here
+          maxWidth:
+              widget.width ??
+              (SizeConfig.orientation(context) == Orientation.portrait
+                  ? widget.screenWidth * 0.9
+                  : widget.screenWidth * 0.4), // optional: control width too
+        ),
 
         child: SingleChildScrollView(
           child: Column(

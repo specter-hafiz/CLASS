@@ -46,3 +46,74 @@ class TokenVerified extends AuthState {
   @override
   List<Object?> get props => [message];
 }
+
+class EditProfileStarting extends AuthState {}
+
+class EditProfileSuccess extends AuthState {
+  final String message;
+
+  const EditProfileSuccess(this.message);
+  @override
+  List<Object?> get props => [message];
+}
+
+class EditProfileError extends AuthState {
+  final String message;
+
+  const EditProfileError(this.message);
+  @override
+  List<Object?> get props => [message];
+}
+
+class ChangingPassword extends AuthState {}
+
+class ChangePasswordSuccess extends AuthState {
+  final String message;
+  const ChangePasswordSuccess(this.message);
+  @override
+  List<Object?> get props => [message];
+}
+
+class ChangePasswordError extends AuthState {
+  final String message;
+  const ChangePasswordError(this.message);
+  @override
+  List<Object?> get props => [message];
+}
+
+class ForgotPasswordSuccess extends AuthState {
+  final String message;
+  final String email;
+
+  const ForgotPasswordSuccess(this.message, this.email);
+  @override
+  List<Object?> get props => [message, email];
+}
+
+class ForgotPasswordError extends AuthState {
+  final String message;
+
+  const ForgotPasswordError(this.message);
+  @override
+  List<Object?> get props => [message];
+}
+
+class ForgotPasswordStarting extends AuthState {}
+
+class ResetPasswordSuccess extends AuthState {
+  final String message;
+
+  const ResetPasswordSuccess(this.message);
+  @override
+  List<Object?> get props => [message];
+}
+
+class ResetPasswordError extends AuthState {
+  final String message;
+
+  const ResetPasswordError(this.message);
+  @override
+  List<Object?> get props => [message];
+}
+
+class ResetPasswordStarting extends AuthState {}
