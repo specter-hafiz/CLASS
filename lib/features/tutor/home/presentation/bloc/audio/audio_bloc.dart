@@ -53,6 +53,7 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
             expiresAt: event.expiresAt,
             duration: event.duration,
             accessPassword: event.accessPassword,
+            numberOfQuestions: event.numberOfQuestions,
           ),
         );
       } catch (e) {

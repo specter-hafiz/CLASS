@@ -2,6 +2,7 @@ import 'package:class_app/core/constants/app_colors.dart';
 import 'package:class_app/core/constants/strings.dart';
 import 'package:class_app/core/utilities/size_config.dart';
 import 'package:class_app/features/tutor/home/presentation/widgets/custom_container.dart';
+import 'package:class_app/features/tutor/profile/presentation/screens/assessment_screen.dart';
 import 'package:class_app/features/tutor/quiz/presentation/bloc/question_bloc.dart';
 import 'package:class_app/features/tutor/quiz/presentation/bloc/question_events.dart';
 import 'package:class_app/features/tutor/quiz/presentation/bloc/question_state.dart';
@@ -151,8 +152,71 @@ class _QuizScreenState extends State<QuizScreen> {
                                 ),
                               );
                             },
-                            onMoreTap: () {
-                              // Handle more action
+                            onMoreButton: (context) {
+                              return [
+                                PopupMenuItem(
+                                  value: 'password',
+                                  child: Text('Password'),
+                                ),
+                                PopupMenuItem(
+                                  value: 'delete',
+                                  child: Text('Delete'),
+                                ),
+                              ];
+                            },
+                            onMoreTap: (value) async {
+                              if (value == "password") {
+                                await showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return CustomAlertDialog(
+                                      width: SizeConfig.screenWidth! * 0.8,
+                                      height: SizeConfig.screenHeight! * 0.4,
+                                      body: Column(
+                                        children: [
+                                          RichText(
+                                            text: TextSpan(
+                                              text: "Your quiz password is ",
+                                              style: TextStyle(
+                                                fontSize:
+                                                    SizeConfig.screenWidth! *
+                                                    0.05,
+                                                fontWeight: FontWeight.w400,
+                                                color: Color(blackColor),
+                                              ),
+                                              children: [
+                                                TextSpan(
+                                                  text: quiz.accessPassword,
+                                                  style: TextStyle(
+                                                    color: Color(blueColor),
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                                TextSpan(
+                                                  text: " and the Shared Id is",
+                                                ),
+                                                TextSpan(
+                                                  text: quiz.sharedLinkId,
+                                                  style: TextStyle(
+                                                    color: Color(blueColor),
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      leftButtonText: "Ok",
+                                      showRightButton: false,
+                                      screenWidth:
+                                          SizeConfig.screenWidth! * 0.8,
+                                      screenHeight:
+                                          SizeConfig.screenHeight! * 0.4,
+                                    );
+                                  },
+                                );
+                              } else if (value == "delete") {}
                             },
                           );
                         },
@@ -168,4 +232,13 @@ class _QuizScreenState extends State<QuizScreen> {
       ),
     );
   }
+}
+
+RelativeRect? relativeRectFromLTRB() {
+  return RelativeRect.fromLTRB(
+    SizeConfig.screenWidth! * 0.65,
+    SizeConfig.screenHeight! * 0.34,
+    SizeConfig.screenWidth! * 0.055,
+    0,
+  );
 }

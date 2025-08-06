@@ -81,36 +81,50 @@ class _RecordingBottomSheetState extends State<RecordingBottomSheet>
     }
   }
 
+  Future<void> _handleQuizUpload(BuildContext context) async {
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) => const SetQuizDialog(),
+    );
+
+    if (result == null || _audioPath == null) return;
+
+    final expiresIn = deadlineStringToDateTime(result['deadline']);
+
+    context.read<AudioBloc>().add(
+      UploadAudioAndGenerateQuizRequested(
+        _audioPath!,
+        result['title'] ?? "Quiz Title Default",
+        expiresIn ?? DateTime.now().add(Duration(hours: 1)),
+        timeAllowedString(result['timeAllowed']) ?? '30mins',
+        result['accessPassword'] ?? 'password',
+        int.tryParse(result['numberOfQuestions'] ?? '10') ?? 10,
+      ),
+    );
+
+    if (mounted) Navigator.of(context).pop();
+  }
+
   Future<void> _stopRecording(BuildContext context, bool setQuiz) async {
     final path = await _recorderController.stop();
     setState(() {
       _isRecording = false;
       _audioPath = path;
     });
-    if (_audioPath != null) {
-      if (setQuiz) {
-        final result = await showDialog(
-          context: context,
-          builder: (context) => SetQuizDialog(),
-        );
-        if (result == null) return; // User cancelled dialog
-        final expiresIn = deadlineStringToDateTime(result['deadline']);
 
-        context.read<AudioBloc>().add(
-          UploadAudioAndGenerateQuizRequested(
-            _audioPath!,
-            result['title'] ?? "Quiz Title Default",
-            expiresIn ?? DateTime.now().add(Duration(hours: 1)),
-            timeAllowedString(result['timeAllowed']) ?? '30mins',
-            result['accessPassword'] ?? 'password',
-          ),
-        );
-        Navigator.of(context).pop(); // Dismiss dialog
-      } else {
-        context.read<AudioBloc>().add(UploadAudioRequested(_audioPath!));
-        Navigator.of(context).pop(); // Dismiss dialog
-      }
+    if (_audioPath == null) return;
+
+    if (setQuiz) {
+      await _handleQuizUpload(context);
+    } else {
+      _uploadPlainAudio(context);
     }
+  }
+
+  void _uploadPlainAudio(BuildContext context) {
+    context.read<AudioBloc>().add(UploadAudioRequested(_audioPath!));
+    if (!mounted) return;
+    Navigator.of(context).pop();
   }
 
   @override

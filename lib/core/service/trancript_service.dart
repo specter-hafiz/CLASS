@@ -12,7 +12,7 @@ class TrancriptService {
   TrancriptService(this._dio) {
     _dio.options.baseUrl = AppSecrets.baseUrl; // change this
     _dio.options.sendTimeout = const Duration(seconds: 20);
-    _dio.options.receiveTimeout = const Duration(minutes: 1);
+    _dio.options.receiveTimeout = const Duration(minutes: 20);
   }
 
   Future<List<Transcript>> fetchTranscripts() async {

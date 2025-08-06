@@ -98,6 +98,17 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
                   }
                   return null;
                 },
+                textInputAction: TextInputAction.done,
+                onFieldSubmitted: (_) {
+                  FocusScope.of(context).unfocus();
+                  if (_formKey.currentState!.validate()) {
+                    context.read<AuthBloc>().add(
+                      ForgotPasswordRequested(
+                        email: _emailController.text.trim(),
+                      ),
+                    );
+                  }
+                },
               ),
               SizedBox(height: SizeConfig.blockSizeVertical! * 2),
               state is ForgotPasswordStarting

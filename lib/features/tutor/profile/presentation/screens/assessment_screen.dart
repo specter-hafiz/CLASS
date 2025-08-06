@@ -164,7 +164,8 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
                             return CustomContainer(
                               iconPath: quizImage,
                               titleText: state.responses[index].title,
-                              subText: "89/100",
+                              subText:
+                                  "Score: ${state.responses[index].score.toString()}",
                               onTap: () {
                                 Navigator.push(
                                   context,
@@ -175,6 +176,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
                                               state.responses[index].questions,
                                           response:
                                               state.responses[index].response,
+                                          title: state.responses[index].title,
                                         ),
                                   ),
                                 );
@@ -221,8 +223,9 @@ class CustomAlertDialog extends StatefulWidget {
     this.width,
     this.height,
     this.body,
+    this.showRightButton = true,
   });
-
+  final bool? showRightButton;
   final double screenWidth;
   final double screenHeight;
   final String? leftButtonText;
@@ -232,7 +235,7 @@ class CustomAlertDialog extends StatefulWidget {
   final void Function()? onRightButtonPressed;
   final double? width;
   final double? height;
-  final Column? body;
+  final Widget? body;
 
   @override
   State<CustomAlertDialog> createState() => _CustomAlertDialogState();
@@ -242,6 +245,7 @@ class _CustomAlertDialogState extends State<CustomAlertDialog> {
   TextEditingController idController = TextEditingController();
   TextEditingController accessPasswordController = TextEditingController();
   TextEditingController sharedIdController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     SizeConfig().init(context);
@@ -268,51 +272,86 @@ class _CustomAlertDialogState extends State<CustomAlertDialog> {
           child: Column(
             children: [
               widget.body ??
-                  Column(
-                    children: [
-                      Text(
-                        detailsForAssessmentText,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize:
-                              SizeConfig.orientation(context) ==
-                                      Orientation.portrait
-                                  ? SizeConfig.blockSizeHorizontal! * 6
-                                  : SizeConfig.blockSizeVertical! * 6,
-                          fontWeight: FontWeight.w600,
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        Text(
+                          detailsForAssessmentText,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize:
+                                SizeConfig.orientation(context) ==
+                                        Orientation.portrait
+                                    ? SizeConfig.blockSizeHorizontal! * 6
+                                    : SizeConfig.blockSizeVertical! * 6,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      CustomTextField(
-                        hintText: "Enter ID",
-                        controller: idController,
-                        showTitle: true,
-                        showSuffixIcon: false,
-                        titleText: idText,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'ID cannot be empty';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: SizeConfig.blockSizeVertical! * 1),
-                      CustomTextField(
-                        hintText: "Enter shared ID",
-                        controller: sharedIdController,
-                        showTitle: true,
-                        showSuffixIcon: false,
-                        titleText: sharedIdText,
-                      ),
-                      SizedBox(height: SizeConfig.blockSizeVertical! * 1),
+                        CustomTextField(
+                          hintText: "Enter ID",
+                          controller: idController,
+                          showTitle: true,
+                          showSuffixIcon: false,
+                          titleText: idText,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'ID cannot be empty';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: SizeConfig.blockSizeVertical! * 1),
+                        CustomTextField(
+                          hintText: "Enter shared ID",
+                          controller: sharedIdController,
+                          showTitle: true,
+                          showSuffixIcon: false,
+                          titleText: sharedIdText,
+                          textInputAction: TextInputAction.next,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Shared ID cannot be empty';
+                            }
+                            if (value.length < 6) {
+                              return 'Shared ID must be at least 6 characters';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: SizeConfig.blockSizeVertical! * 1),
 
-                      CustomTextField(
-                        hintText: accessPassTextHint,
-                        controller: accessPasswordController,
-                        showTitle: true,
-                        showSuffixIcon: true,
-                        titleText: accessPassText,
-                      ),
-                    ],
+                        CustomTextField(
+                          hintText: accessPassTextHint,
+                          controller: accessPasswordController,
+                          showTitle: true,
+                          showSuffixIcon: true,
+                          titleText: accessPassText,
+                          textInputAction: TextInputAction.done,
+                          onFieldSubmitted: (p0) {
+                            if (_formKey.currentState!.validate()) {
+                              // Dismiss the keyboard
+                              FocusScope.of(context).unfocus();
+
+                              Navigator.pop(context, {
+                                'id': idController.text,
+                                'sharedId': sharedIdController.text,
+                                'accessPassword': accessPasswordController.text,
+                              });
+                            }
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Access password cannot be empty';
+                            }
+                            if (value.length < 5) {
+                              return 'Access password must be at least 6 characters';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
+                    ),
                   ),
               SizedBox(height: SizeConfig.blockSizeVertical! * 2),
               Row(
@@ -328,21 +367,29 @@ class _CustomAlertDialogState extends State<CustomAlertDialog> {
                           },
                     ),
                   ),
-                  SizedBox(width: SizeConfig.blockSizeHorizontal! * 2),
-                  Expanded(
-                    child: CustomElevatedButton(
-                      buttonText: widget.rightButtonText ?? startNowText,
-                      onPressed:
-                          widget.onRightButtonPressed ??
-                          () {
-                            Navigator.pop(context, {
-                              'id': idController.text,
-                              'sharedId': sharedIdController.text,
-                              'accessPassword': accessPasswordController.text,
-                            });
-                          },
-                    ),
-                  ),
+                  widget.showRightButton == true
+                      ? SizedBox(width: SizeConfig.blockSizeHorizontal! * 2)
+                      : SizedBox.shrink(),
+                  widget.showRightButton == true
+                      ? Expanded(
+                        child: CustomElevatedButton(
+                          buttonText: widget.rightButtonText ?? startNowText,
+                          onPressed:
+                              widget.onRightButtonPressed ??
+                              () {
+                                if (!_formKey.currentState!.validate()) {
+                                  return;
+                                }
+                                Navigator.pop(context, {
+                                  'id': idController.text,
+                                  'sharedId': sharedIdController.text,
+                                  'accessPassword':
+                                      accessPasswordController.text,
+                                });
+                              },
+                        ),
+                      )
+                      : SizedBox.shrink(),
                 ],
               ),
             ],

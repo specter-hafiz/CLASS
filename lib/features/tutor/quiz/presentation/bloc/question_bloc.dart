@@ -4,6 +4,8 @@ import 'package:class_app/features/tutor/quiz/data/models/submitted_response_mod
 import 'package:class_app/features/tutor/quiz/domain/usecase/fetch_quizzes_usecase.dart';
 import 'package:class_app/features/tutor/quiz/domain/usecase/fetch_submitted_responses.dart';
 import 'package:class_app/features/tutor/quiz/domain/usecase/generate_questions_usecase.dart';
+import 'package:class_app/features/tutor/quiz/domain/usecase/get_analytics_usecase.dart';
+import 'package:class_app/features/tutor/quiz/domain/usecase/get_quiz_analytics_usecase.dart';
 import 'package:class_app/features/tutor/quiz/domain/usecase/get_shared_questions_usecase.dart';
 import 'package:class_app/features/tutor/quiz/domain/usecase/submit_assessment_usecase.dart';
 import 'package:class_app/features/tutor/quiz/presentation/bloc/question_events.dart';
@@ -16,13 +18,16 @@ class QuestionBloc extends Bloc<QuestionEvent, QuestionState> {
   final SubmitAssessmentUsecase submitAssessmentUsecase;
   final FetchSubmittedResponsesUsecase fetchSubmittedResponsesUsecase;
   final GenerateQuestionsUsecase generateQuestionsUsecase;
-
+  final GetAnalyticsUsecase getAnalyticsUsecase;
+  final GetQuizAnalyticsUsecase getQuizAnalyticsUsecase;
   QuestionBloc(
     this.fetchQuizzesUsecase,
     this.getSharedQuestionsUsecase,
     this.submitAssessmentUsecase,
     this.generateQuestionsUsecase,
     this.fetchSubmittedResponsesUsecase,
+    this.getAnalyticsUsecase,
+    this.getQuizAnalyticsUsecase,
   ) : super(QuestionInitialState()) {
     on<GenerateQuestionsEventRequest>((event, emit) async {
       emit(QuestionLoadingState());
@@ -94,9 +99,14 @@ class QuestionBloc extends Bloc<QuestionEvent, QuestionState> {
           event.response,
           event.sharedId,
         );
-        emit(SubmittedAssessmentState(response));
+        emit(
+          SubmittedAssessmentState(
+            response['score'] as int,
+            response['totalQuestions'] as int,
+          ),
+        );
       } catch (e) {
-        emit(QuestionErrorState(e.toString()));
+        emit(SubmittingAssessmentError(e.toString()));
       }
     });
 
@@ -117,6 +127,28 @@ class QuestionBloc extends Bloc<QuestionEvent, QuestionState> {
         );
       } catch (e) {
         emit(FetchingResponsesErrorState(e.toString()));
+      }
+    });
+
+    on<GetAnalyticsEvent>((event, emit) async {
+      emit(GetAnalyticsLoadingState());
+      try {
+        final analytics = await getAnalyticsUsecase();
+        emit(
+          GetAnalyticsLoadedState(List<Map<String, dynamic>>.from(analytics)),
+        );
+      } catch (e) {
+        emit(GetAnalyticsErrorState(e.toString()));
+      }
+    });
+
+    on<GetQuizAnalyticsEvent>((event, emit) async {
+      emit(GetQuizAnalyticsLoadingState());
+      try {
+        final analytics = await getQuizAnalyticsUsecase(event.id);
+        emit(GetQuizAnalyticsLoadedState(analytics));
+      } catch (e) {
+        emit(GetQuizAnalyticsErrorState(e.toString()));
       }
     });
   }

@@ -4,7 +4,6 @@ import 'package:class_app/features/auth/presentation/screens/register_screen.dar
 import 'package:class_app/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:class_app/features/base/base_screen.dart';
 import 'package:class_app/features/onboarding/screens/onboarding_screen.dart';
-import 'package:class_app/features/tutor/analytics/presentation/screens/detail_analytics_screen.dart';
 import 'package:class_app/features/tutor/home/presentation/screens/transcription_screen.dart';
 import 'package:class_app/features/tutor/profile/presentation/screens/assessment_screen.dart';
 import 'package:class_app/features/tutor/profile/presentation/screens/change_password_screen.dart';
@@ -26,6 +25,5 @@ Map<String, Widget Function(BuildContext context)> appRoutes = {
   '/base': (context) => BaseScreen(),
   '/transcribe': (context) => TranscriptionScreen(),
   // Placeholder for transcript audio screen
-  '/detail_analytics': (context) => DetailAnalyticsScreen(),
   // Placeholder for audio recorder
 };

@@ -7,7 +7,7 @@ class GenerateQuestionsUsecase {
 
   Future<Map<String, dynamic>> call({
     required String transcript,
-    int numberOfQuestions = 5,
+    required int numberOfQuestions,
     String title = "Generated Questions",
     required DateTime expiresAt,
     required String duration,

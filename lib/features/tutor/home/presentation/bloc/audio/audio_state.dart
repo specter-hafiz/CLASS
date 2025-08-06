@@ -43,11 +43,13 @@ class AudioError extends AudioState {
 class GenerateQuestionsEvent extends AudioState {
   final String transcript;
   final String title;
+  final int numberOfQuestions;
   final DateTime expiresAt;
   final String duration;
   final String accessPassword;
 
   const GenerateQuestionsEvent({
+    required this.numberOfQuestions,
     required this.transcript,
     required this.title,
     required this.expiresAt,

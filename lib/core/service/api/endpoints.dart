@@ -28,4 +28,6 @@ class Endpoints {
   static String submitAssessment(String id) => '/questions/response/$id';
   static const String fetchQuestions = '/questions/fetch';
   static const String fetchSubmittedResponses = '/questions/fetch/responses';
+  static const String getAnalytics = '/questions/analytics';
+  static String getQuizAnalytics(String id) => '/questions/analytics/$id';
 }

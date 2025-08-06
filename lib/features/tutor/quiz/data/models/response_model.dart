@@ -5,12 +5,14 @@ class ResponseModel {
   final String userId;
   final List<AnswerModel> answers;
   final DateTime submittedAt;
+  final int score;
 
   ResponseModel({
     required this.id,
     required this.userId,
     required this.answers,
     required this.submittedAt,
+    required this.score,
   });
 
   factory ResponseModel.fromJson(Map<String, dynamic> json) {
@@ -22,6 +24,7 @@ class ResponseModel {
           (json['answers'] as List)
               .map((a) => AnswerModel.fromJson(a))
               .toList(),
+      score: json['score'] ?? 0, // Default to 0 if score is not provided
     );
   }
 
@@ -30,5 +33,6 @@ class ResponseModel {
     'userId': userId,
     'submittedAt': submittedAt.toIso8601String(),
     'answers': answers.map((a) => a.toJson()).toList(),
+    'score': score,
   };
 }

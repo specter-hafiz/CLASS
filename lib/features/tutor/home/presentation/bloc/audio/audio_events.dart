@@ -41,13 +41,16 @@ class UploadAudioAndGenerateQuizRequested extends AudioEvent {
   final DateTime expiresAt;
   final String duration;
   final String accessPassword;
+  final int numberOfQuestions;
 
   const UploadAudioAndGenerateQuizRequested(
     this.filePath,
+
     this.title,
     this.expiresAt,
     this.duration,
     this.accessPassword,
+    this.numberOfQuestions,
   );
   @override
   List<Object?> get props => [

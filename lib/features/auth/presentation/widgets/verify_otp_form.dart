@@ -59,6 +59,8 @@ class VerifyOTPFormState extends State<VerifyOTPForm> {
     // check if all boxes are filled
     bool allFilled = _controllers.every((c) => c.text.isNotEmpty);
     if (allFilled) {
+      FocusScope.of(context).requestFocus(FocusNode());
+
       final otp = _controllers.map((c) => c.text).join();
       context.read<AuthBloc>().add(
         VerifyTokenRequested(
@@ -143,6 +145,7 @@ class VerifyOTPFormState extends State<VerifyOTPForm> {
                           ),
                         ),
                       ),
+
                       onChanged:
                           (value) =>
                               _onChanged(value, i, context, widget.email),
@@ -168,6 +171,8 @@ class VerifyOTPFormState extends State<VerifyOTPForm> {
                       );
                       return;
                     }
+                    //close the keyboard
+                    FocusScope.of(context).requestFocus(FocusNode());
                     final otp = _controllers.map((c) => c.text).join();
                     context.read<AuthBloc>().add(
                       VerifyTokenRequested(

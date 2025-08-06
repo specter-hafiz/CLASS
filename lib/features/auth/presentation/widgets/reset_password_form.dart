@@ -108,6 +108,13 @@ class _ResetPasswordFormState extends State<ResetPasswordForm> {
                   }
                   return null;
                 },
+                onFieldSubmitted: (value) {
+                  if (_formKey.currentState!.validate()) {
+                    _confirmPasswordFocus.requestFocus();
+                  }
+                },
+                textInputAction: TextInputAction.next,
+                readOnly: state is ResetPasswordStarting,
               ),
               SizedBox(height: SizeConfig.blockSizeVertical! * 2),
               CustomTextField(
@@ -130,6 +137,19 @@ class _ResetPasswordFormState extends State<ResetPasswordForm> {
                   }
                   return null;
                 },
+                onFieldSubmitted: (value) {
+                  if (_formKey.currentState!.validate()) {
+                    FocusScope.of(context).unfocus();
+                    context.read<AuthBloc>().add(
+                      ResetPasswordRequested(
+                        email: _email ?? '',
+                        newPassword: _confirmPasswordController.text.trim(),
+                      ),
+                    );
+                  }
+                },
+                textInputAction: TextInputAction.done,
+                readOnly: state is ResetPasswordStarting,
               ),
               SizedBox(height: SizeConfig.blockSizeVertical! * 3),
               state is ResetPasswordStarting
@@ -138,6 +158,7 @@ class _ResetPasswordFormState extends State<ResetPasswordForm> {
                     buttonText: resetPasswordText,
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
+                        FocusScope.of(context).unfocus();
                         context.read<AuthBloc>().add(
                           ResetPasswordRequested(
                             email: _email ?? '',

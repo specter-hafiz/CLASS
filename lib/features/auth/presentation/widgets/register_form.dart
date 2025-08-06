@@ -35,6 +35,13 @@ class _RegisterFormState extends State<RegisterForm> {
     userNameFocusNode = FocusNode();
     emailFocusNode = FocusNode();
     passwordFocusNode = FocusNode();
+    userNameFocusNode.addListener(
+      () => _scrollIntoViewIfNeeded(userNameFocusNode),
+    );
+    emailFocusNode.addListener(() => _scrollIntoViewIfNeeded(emailFocusNode));
+    passwordFocusNode.addListener(
+      () => _scrollIntoViewIfNeeded(passwordFocusNode),
+    );
   }
 
   @override
@@ -45,11 +52,13 @@ class _RegisterFormState extends State<RegisterForm> {
     userNameFocusNode.dispose();
     emailFocusNode.dispose();
     passwordFocusNode.dispose();
-    userNameFocusNode.addListener(
+    userNameFocusNode.removeListener(
       () => _scrollIntoViewIfNeeded(userNameFocusNode),
     );
-    emailFocusNode.addListener(() => _scrollIntoViewIfNeeded(emailFocusNode));
-    passwordFocusNode.addListener(
+    emailFocusNode.removeListener(
+      () => _scrollIntoViewIfNeeded(emailFocusNode),
+    );
+    passwordFocusNode.removeListener(
       () => _scrollIntoViewIfNeeded(passwordFocusNode),
     );
     super.dispose();
@@ -80,6 +89,9 @@ class _RegisterFormState extends State<RegisterForm> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CustomTextField(
+                readOnly: state is AuthLoading,
+                focusNode: userNameFocusNode,
+
                 showTitle: true,
                 titleText: userNameText,
                 hintText: userNameHintText,
@@ -94,9 +106,14 @@ class _RegisterFormState extends State<RegisterForm> {
                   }
                   return null;
                 },
+                onFieldSubmitted:
+                    (_) => FocusScope.of(context).requestFocus(emailFocusNode),
+                textInputAction: TextInputAction.next,
               ),
               SizedBox(height: SizeConfig.blockSizeVertical! * 1),
               CustomTextField(
+                readOnly: state is AuthLoading,
+                focusNode: emailFocusNode,
                 showTitle: true,
                 titleText: emailText,
                 hintText: emailHintText,
@@ -111,12 +128,17 @@ class _RegisterFormState extends State<RegisterForm> {
                   }
                   return null;
                 },
+
+                onFieldSubmitted: (_) {
+                  FocusScope.of(context).requestFocus(passwordFocusNode);
+                },
+                textInputAction: TextInputAction.next,
               ),
               SizedBox(height: SizeConfig.blockSizeVertical! * 1),
 
               CustomTextField(
                 showTitle: true,
-
+                focusNode: passwordFocusNode,
                 titleText: passwordText,
                 hintText: passwordHintText,
                 showSuffixIcon: true,
@@ -131,6 +153,21 @@ class _RegisterFormState extends State<RegisterForm> {
                   }
                   return null;
                 },
+                onFieldSubmitted: (_) {
+                  if (_formKey.currentState!.validate()) {
+                    // Dismiss the keyboard
+                    FocusScope.of(context).unfocus();
+
+                    context.read<AuthBloc>().add(
+                      RegisterRequested(
+                        userNameController.text.trim(),
+                        emailController.text.trim(),
+                        passwordController.text.trim(),
+                      ),
+                    );
+                  }
+                },
+                readOnly: state is AuthLoading,
               ),
               SizedBox(height: SizeConfig.blockSizeVertical! * 1),
               Row(

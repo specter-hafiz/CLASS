@@ -9,6 +9,7 @@ import 'package:class_app/features/tutor/profile/presentation/widgets/quiz_card.
 import 'package:class_app/features/tutor/quiz/data/models/question_model.dart';
 import 'package:class_app/features/tutor/quiz/presentation/bloc/question_bloc.dart';
 import 'package:class_app/features/tutor/quiz/presentation/bloc/question_events.dart';
+import 'package:class_app/features/tutor/quiz/presentation/bloc/question_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -35,7 +36,6 @@ class AnswerQuizScreen extends StatefulWidget {
 class _AnswerQuizScreenState extends State<AnswerQuizScreen> {
   int currentIndex = 0;
   int? selectedIndex;
-  int score = 0;
   late List<int?> selectedAnswers;
   late Timer _timer;
   late Duration remainingTime;
@@ -44,7 +44,15 @@ class _AnswerQuizScreenState extends State<AnswerQuizScreen> {
   @override
   void initState() {
     super.initState();
-
+    // if (sharedQuestions.isEmpty) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(
+    //       content: Text("No questions available to answer."),
+    //       backgroundColor: Colors.red,
+    //     ),
+    //   );
+    //   return;
+    // }
     try {
       final startedAtTime = DateTime.parse(widget.startedAt).toLocal();
       final now = DateTime.now();
@@ -77,23 +85,7 @@ class _AnswerQuizScreenState extends State<AnswerQuizScreen> {
   }
 
   void submitQuiz({bool isTimeUp = false}) {
-    _timer.cancel();
-
-    int finalScore = 0;
-    for (int i = 0; i < widget.sharedQuestions.length; i++) {
-      if (selectedAnswers[i] ==
-          widget.sharedQuestions[i].options.indexOf(
-            widget.sharedQuestions[i].answer,
-          )) {
-        finalScore++;
-      }
-    }
-
-    final calculatedScore =
-        ((finalScore / widget.sharedQuestions.length) * 100).round();
-
     setState(() {
-      score = calculatedScore;
       quizEnded = true;
     });
 
@@ -110,6 +102,8 @@ class _AnswerQuizScreenState extends State<AnswerQuizScreen> {
     }
 
     if (isTimeUp) {
+      _timer.cancel();
+
       context.read<QuestionBloc>().add(
         SubmitAssessmentEvent(
           id: widget.id,
@@ -118,12 +112,6 @@ class _AnswerQuizScreenState extends State<AnswerQuizScreen> {
         ),
       );
       // Immediately navigate to remarks without showing dialog
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => RemarksScreen(score: score.toString()),
-        ),
-      );
     } else {
       // Show confirmation dialog before submitting manually
       showDialog(
@@ -194,6 +182,10 @@ class _AnswerQuizScreenState extends State<AnswerQuizScreen> {
                       child: CustomElevatedButton(
                         buttonText: submitText,
                         onPressed: () {
+                          _timer.cancel();
+                          setState(() {
+                            quizEnded = true;
+                          });
                           context.read<QuestionBloc>().add(
                             SubmitAssessmentEvent(
                               id: widget.id,
@@ -202,14 +194,6 @@ class _AnswerQuizScreenState extends State<AnswerQuizScreen> {
                             ),
                           );
                           Navigator.pop(context);
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (context) =>
-                                      RemarksScreen(score: score.toString()),
-                            ),
-                          );
                         },
                       ),
                     ),
@@ -231,8 +215,6 @@ class _AnswerQuizScreenState extends State<AnswerQuizScreen> {
         currentIndex++;
         selectedIndex = selectedAnswers[currentIndex];
       });
-    } else {
-      submitQuiz();
     }
   }
 
@@ -282,7 +264,19 @@ class _AnswerQuizScreenState extends State<AnswerQuizScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: CustomBackButton(),
+        leading: CustomBackButton(
+          onTap: () {
+            if (quizEnded) {
+              Navigator.pop(context);
+            } else {
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (_) => WarningDialog(),
+              );
+            }
+          },
+        ),
         centerTitle: true,
         automaticallyImplyLeading: false,
         title:
@@ -354,54 +348,152 @@ class _AnswerQuizScreenState extends State<AnswerQuizScreen> {
         padding: EdgeInsets.symmetric(
           horizontal: SizeConfig.horizontalPadding(context),
         ),
-        child: Column(
-          children: [
-            Flexible(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    SizedBox(height: SizeConfig.blockSizeVertical! * 2),
-                    QuizCard(
-                      questionIndex: currentIndex,
-                      onOptionSelected: (index) {
-                        setState(() {
-                          selectedIndex = index;
-                          selectedAnswers[currentIndex] = index;
-                        });
-                      },
-                      selectedIndex: selectedIndex,
-                      quizQuestions: widget.sharedQuestions,
-                      questionText:
-                          widget.sharedQuestions[currentIndex].question,
-                      options: widget.sharedQuestions[currentIndex].options,
-                    ),
-                    SizedBox(height: SizeConfig.blockSizeVertical! * 6),
-                  ],
+        child: BlocListener<QuestionBloc, QuestionState>(
+          listener: (context, state) {
+            if (state is SubmittingAssessmentState) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text("Submitting your answers..."),
+                  backgroundColor: Colors.blue,
+                ),
+              );
+            }
+            if (state is SubmittingAssessmentError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+            if (state is SubmittedAssessmentState) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) => RemarksScreen(
+                        score:
+                            (state.score / state.numberOfQuestions * 100)
+                                .toString(),
+                      ),
+                ),
+              );
+            }
+          },
+          child: Column(
+            children: [
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      SizedBox(height: SizeConfig.blockSizeVertical! * 2),
+                      QuizCard(
+                        questionIndex: currentIndex,
+                        onOptionSelected: (index) {
+                          setState(() {
+                            selectedIndex = index;
+                            selectedAnswers[currentIndex] = index;
+                          });
+                        },
+                        selectedIndex: selectedIndex,
+                        quizQuestions: widget.sharedQuestions,
+                        questionText:
+                            widget.sharedQuestions[currentIndex].question,
+                        options: widget.sharedQuestions[currentIndex].options,
+                      ),
+                      SizedBox(height: SizeConfig.blockSizeVertical! * 6),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            if (isPortrait)
-              Row(
-                children: [
-                  Expanded(
-                    child: CustomElevatedButton(
-                      buttonText: backText,
-                      onPressed: previousQuestion,
-                      isOutlineButton: true,
+              if (isPortrait)
+                Row(
+                  children: [
+                    Expanded(
+                      child: CustomElevatedButton(
+                        buttonText: backText,
+                        onPressed: previousQuestion,
+                        isOutlineButton: true,
+                      ),
                     ),
-                  ),
-                  SizedBox(width: SizeConfig.blockSizeHorizontal! * 2),
-                  Expanded(
-                    child: CustomElevatedButton(
-                      buttonText: nextText,
-                      onPressed: nextQuestion,
+                    SizedBox(width: SizeConfig.blockSizeHorizontal! * 2),
+                    Expanded(
+                      child:
+                          currentIndex == widget.sharedQuestions.length - 1
+                              ? CustomElevatedButton(
+                                buttonText: submitText,
+                                onPressed: () {
+                                  submitQuiz(); // User must confirm via dialog
+                                },
+                              )
+                              : CustomElevatedButton(
+                                buttonText: nextText,
+                                onPressed: nextQuestion,
+                              ),
                     ),
-                  ),
-                ],
-              ),
-          ],
+                  ],
+                ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class WarningDialog extends StatelessWidget {
+  const WarningDialog({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: Color(whiteColor),
+      icon: Icon(Icons.warning_amber_rounded, color: Color(blueColor)),
+      title: Text(
+        warningText,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize:
+              SizeConfig.orientation(context) == Orientation.portrait
+                  ? SizeConfig.blockSizeHorizontal! * 6
+                  : SizeConfig.blockSizeVertical! * 6,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      content: Text(
+        "Are you sure you want to exit? Your progress will be lost.",
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize:
+              SizeConfig.orientation(context) == Orientation.portrait
+                  ? SizeConfig.blockSizeHorizontal! * 4
+                  : SizeConfig.blockSizeVertical! * 4,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      actions: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: CustomElevatedButton(
+                buttonText: cancelText,
+                isOutlineButton: true,
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+            SizedBox(width: SizeConfig.blockSizeHorizontal! * 2),
+            Expanded(
+              child: CustomElevatedButton(
+                buttonText: "Exit",
+                onPressed: () {
+                  Navigator.popUntil(context, (route) => route.isFirst);
+                },
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

@@ -2,7 +2,10 @@ import 'package:class_app/core/constants/app_colors.dart';
 import 'package:class_app/core/constants/strings.dart';
 import 'package:class_app/core/utilities/size_config.dart';
 import 'package:class_app/features/onboarding/widgets/custom_elevated_button.dart';
+import 'package:class_app/features/tutor/quiz/presentation/bloc/question_bloc.dart';
+import 'package:class_app/features/tutor/quiz/presentation/bloc/question_events.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class RemarksScreen extends StatelessWidget {
@@ -74,7 +77,12 @@ class RemarksScreen extends StatelessWidget {
               backgroundColor: whiteColor,
               textColor: blueColor,
               buttonText: reviewText,
-              onPressed: () {},
+              onPressed: () {
+                Navigator.of(context).pop();
+                context.read<QuestionBloc>().add(
+                  FetchSubmittedResponsesEvent(),
+                );
+              },
             ),
           ],
         ),

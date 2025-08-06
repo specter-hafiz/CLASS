@@ -24,6 +24,8 @@ abstract class QuestionsRemoteDataSource {
   });
 
   Future<Map<String, dynamic>> fetchSubmittedResponses();
+  Future<List<Map<String, dynamic>>> fetchAnalytics();
+  Future<List<Map<String, dynamic>>> getQuizAnalytics(String id);
 }
 
 class QuestionsRemoteDataSourceImpl implements QuestionsRemoteDataSource {
@@ -98,5 +100,23 @@ class QuestionsRemoteDataSourceImpl implements QuestionsRemoteDataSource {
       throw NetworkException("No internet connection");
     }
     return http.fetchSubmittedResponses();
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchAnalytics() async {
+    bool hasConnection = await NetworkConnectivity().isConnected;
+    if (!hasConnection) {
+      throw NetworkException("No internet connection");
+    }
+    return http.fetchAnalytics();
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getQuizAnalytics(String id) async {
+    bool hasConnection = await NetworkConnectivity().isConnected;
+    if (!hasConnection) {
+      throw NetworkException("No internet connection");
+    }
+    return http.getQuizAnalytics(id);
   }
 }

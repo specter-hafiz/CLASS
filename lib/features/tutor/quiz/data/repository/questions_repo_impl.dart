@@ -58,4 +58,14 @@ class QuestionsRepoImpl implements QuestionsRepository {
   Future<Map<String, dynamic>> fetchSubmittedResponses() async {
     return await remoteDataSource.fetchSubmittedResponses();
   }
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchAnalytics() async {
+    return await remoteDataSource.fetchAnalytics();
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getQuizAnalytics(String id) async {
+    return await remoteDataSource.getQuizAnalytics(id);
+  }
 }

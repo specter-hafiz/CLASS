@@ -15,12 +15,22 @@ class QuestionLoadingState extends QuestionState {}
 class SubmittingAssessmentState extends QuestionState {}
 
 class SubmittedAssessmentState extends QuestionState {
-  final Map<String, dynamic> response;
+  final int score;
+  final int numberOfQuestions;
 
-  SubmittedAssessmentState(this.response);
+  SubmittedAssessmentState(this.score, this.numberOfQuestions);
 
   @override
-  List<Object?> get props => [response];
+  List<Object?> get props => [score, numberOfQuestions];
+}
+
+class SubmittingAssessmentError extends QuestionState {
+  final String message;
+
+  SubmittingAssessmentError(this.message);
+
+  @override
+  List<Object?> get props => [message];
 }
 
 class QuestionGeneratedState extends QuestionState {
@@ -101,6 +111,46 @@ class QuestionErrorState extends QuestionState {
   final String message;
 
   QuestionErrorState(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class GetAnalyticsLoadingState extends QuestionState {}
+
+class GetAnalyticsLoadedState extends QuestionState {
+  final List<Map<String, dynamic>> analytics;
+
+  GetAnalyticsLoadedState(this.analytics);
+
+  @override
+  List<Object?> get props => [analytics];
+}
+
+class GetQuizAnalyticsLoadedState extends QuestionState {
+  final List<Map<String, dynamic>> analytics;
+
+  GetQuizAnalyticsLoadedState(this.analytics);
+
+  @override
+  List<Object?> get props => [analytics];
+}
+
+class GetQuizAnalyticsLoadingState extends QuestionState {}
+
+class GetQuizAnalyticsErrorState extends QuestionState {
+  final String message;
+
+  GetQuizAnalyticsErrorState(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class GetAnalyticsErrorState extends QuestionState {
+  final String message;
+
+  GetAnalyticsErrorState(this.message);
 
   @override
   List<Object?> get props => [message];

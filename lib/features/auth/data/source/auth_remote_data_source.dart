@@ -243,7 +243,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     if (res.statusCode != StatusCode.ok) {
       throw ServerException(res.data['message'] ?? 'Failed to reset password');
     }
-    print("Reset password response: ${res.data}");
     return res.data;
   }
 

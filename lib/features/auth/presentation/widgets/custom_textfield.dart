@@ -17,6 +17,9 @@ class CustomTextField extends StatefulWidget {
     this.readOnly,
     this.underlineInputBorder,
     this.validator,
+    this.textInputAction,
+    this.onFieldSubmitted,
+    this.keyboardType,
   });
   final String hintText;
   final String? titleText;
@@ -29,6 +32,9 @@ class CustomTextField extends StatefulWidget {
   final bool? readOnly;
   final bool? underlineInputBorder;
   final FormFieldValidator<String>? validator;
+  final TextInputAction? textInputAction;
+  final Function(String)? onFieldSubmitted;
+  final TextInputType? keyboardType;
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();
 }
@@ -64,6 +70,12 @@ class _CustomTextFieldState extends State<CustomTextField> {
             ? SizedBox(height: SizeConfig.blockSizeVertical! * 1)
             : SizedBox.shrink(),
         TextFormField(
+          onTapOutside: (event) {
+            FocusScope.of(context).unfocus();
+          },
+          keyboardType: widget.keyboardType,
+          onFieldSubmitted: widget.onFieldSubmitted,
+          textInputAction: widget.textInputAction,
           validator: widget.validator,
           autovalidateMode: AutovalidateMode.onUserInteraction,
           readOnly: widget.readOnly ?? false,
@@ -85,6 +97,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                       ? SizeConfig.blockSizeHorizontal! * 4
                       : SizeConfig.blockSizeHorizontal! * 6,
             ),
+
             suffixIcon:
                 widget.showSuffixIcon
                     ? InkWell(

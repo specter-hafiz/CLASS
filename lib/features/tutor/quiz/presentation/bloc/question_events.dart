@@ -20,12 +20,19 @@ class GenerateQuestionsEventRequest extends QuestionEvent {
     required this.duration,
     required this.accessPassword,
     required this.transcript,
-    this.numberOfQuestions = 5,
+    required this.numberOfQuestions,
     required this.title,
   });
 
   @override
-  List<Object?> get props => [transcript, numberOfQuestions, title];
+  List<Object?> get props => [
+    transcript,
+    numberOfQuestions,
+    title,
+    expiresAt,
+    duration,
+    accessPassword,
+  ];
 }
 
 class GetSharedQuestionsEvent extends QuestionEvent {
@@ -57,3 +64,14 @@ class SubmitAssessmentEvent extends QuestionEvent {
 class FetchSubmittedResponsesEvent extends QuestionEvent {}
 
 class FetchQuizzesEvent extends QuestionEvent {}
+
+class GetAnalyticsEvent extends QuestionEvent {}
+
+class GetQuizAnalyticsEvent extends QuestionEvent {
+  final String id;
+
+  GetQuizAnalyticsEvent(this.id);
+
+  @override
+  List<Object?> get props => [id];
+}

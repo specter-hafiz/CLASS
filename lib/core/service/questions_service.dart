@@ -11,7 +11,7 @@ class QuestionsService {
   QuestionsService(this._dio) {
     _dio.options.baseUrl = AppSecrets.testUrl; // change this
     _dio.options.sendTimeout = const Duration(seconds: 20);
-    _dio.options.receiveTimeout = const Duration(minutes: 1);
+    _dio.options.receiveTimeout = const Duration(seconds: 20);
   }
 
   Future<Map<String, dynamic>> generateQuestions({
@@ -52,6 +52,16 @@ class QuestionsService {
       );
 
       return response.data;
+    } on DioException catch (e) {
+      if (e.response != null && e.response?.data != null) {
+        // Server responded with error data
+        final errorMessage =
+            e.response?.data['message'] ?? 'Unexpected error occurred';
+        throw Exception(errorMessage); // Or custom exception
+      } else {
+        // No response from server or other Dio issues
+        throw Exception('Network error. Please try again.');
+      }
     } catch (e) {
       throw Exception("Error generating questions: ${e.toString()}");
     }
@@ -78,6 +88,16 @@ class QuestionsService {
         ),
       );
       return response.data;
+    } on DioException catch (e) {
+      if (e.response != null && e.response?.data != null) {
+        // Server responded with error data
+        final errorMessage =
+            e.response?.data['message'] ?? 'Unexpected error occurred';
+        throw Exception(errorMessage); // Or custom exception
+      } else {
+        // No response from server or other Dio issues
+        throw Exception('Network error. Please try again.');
+      }
     } catch (e) {
       throw Exception("Error fetching questions: ${e.toString()}");
     }
@@ -109,6 +129,16 @@ class QuestionsService {
         ),
       );
       return response.data;
+    } on DioException catch (e) {
+      if (e.response != null && e.response?.data != null) {
+        // Server responded with error data
+        final errorMessage =
+            e.response?.data['message'] ?? 'Unexpected error occurred';
+        throw Exception(errorMessage); // Or custom exception
+      } else {
+        // No response from server or other Dio issues
+        throw Exception('Network error. Please try again.');
+      }
     } catch (e) {
       throw Exception("Error fetching shared questions: ${e.toString()}");
     }
@@ -139,9 +169,21 @@ class QuestionsService {
           sendTimeout: const Duration(minutes: 2),
         ),
       );
+      print("Submit Response: ${response.data}");
       return response.data;
+    } on DioException catch (e) {
+      if (e.response != null && e.response?.data != null) {
+        // Server responded with error data
+        final errorMessage =
+            e.response?.data['message'] ?? 'Unexpected error occurred';
+        throw Exception(errorMessage); // Or custom exception
+      } else {
+        // No response from server or other Dio issues
+        throw Exception('Network error. Please try again.');
+      }
     } catch (e) {
-      throw Exception("Error submitting assessment: ${e.toString()}");
+      print("Error submitting assessment: ${e.toString()}");
+      throw Exception(e.toString());
     }
   }
 
@@ -165,9 +207,86 @@ class QuestionsService {
           sendTimeout: const Duration(minutes: 2),
         ),
       );
+      print("Submitted Responses: ${response.data}");
       return response.data;
+    } on DioException catch (e) {
+      if (e.response != null && e.response?.data != null) {
+        // Server responded with error data
+        final errorMessage =
+            e.response?.data['message'] ?? 'Unexpected error occurred';
+        throw Exception(errorMessage); // Or custom exception
+      } else {
+        // No response from server or other Dio issues
+        throw Exception('Network error. Please try again.');
+      }
     } catch (e) {
       throw Exception("Error fetching submitted responses: ${e.toString()}");
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchAnalytics() async {
+    try {
+      bool hasConnection = await NetworkConnectivity().isConnected;
+      if (!hasConnection) {
+        throw NetworkException("No internet connection");
+      }
+      final token = await sl<SharedPrefService>().getToken().then(
+        (value) => value ?? '',
+      );
+      final response = await _dio.get(
+        Endpoints.getAnalytics,
+        options: Options(
+          headers: {'Authorization': 'Bearer $token'},
+          receiveTimeout: const Duration(minutes: 5),
+          sendTimeout: const Duration(minutes: 2),
+        ),
+      );
+      return List<Map<String, dynamic>>.from(response.data['analytics']);
+    } on DioException catch (e) {
+      if (e.response != null && e.response?.data != null) {
+        // Server responded with error data
+        final errorMessage =
+            e.response?.data['message'] ?? 'Unexpected error occurred';
+        throw Exception(errorMessage); // Or custom exception
+      } else {
+        // No response from server or other Dio issues
+        throw Exception('Network error. Please try again.');
+      }
+    } catch (e) {
+      throw Exception("Error fetching quiz analytics: ${e.toString()}");
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getQuizAnalytics(String id) async {
+    try {
+      bool hasConnection = await NetworkConnectivity().isConnected;
+      if (!hasConnection) {
+        throw NetworkException("No internet connection");
+      }
+      final token = await sl<SharedPrefService>().getToken().then(
+        (value) => value ?? '',
+      );
+      final response = await _dio.get(
+        Endpoints.getQuizAnalytics(id),
+        options: Options(
+          headers: {'Authorization': 'Bearer $token'},
+          receiveTimeout: const Duration(minutes: 5),
+          sendTimeout: const Duration(minutes: 2),
+        ),
+      );
+      return List<Map<String, dynamic>>.from(response.data['analytics']);
+    } on DioException catch (e) {
+      if (e.response != null && e.response?.data != null) {
+        // Server responded with error data
+        final errorMessage =
+            e.response?.data['message'] ?? 'Unexpected error occurred';
+        throw Exception(errorMessage); // Or custom exception
+      } else {
+        // No response from server or other Dio issues
+        throw Exception('Network error. Please try again.');
+      }
+    } catch (e) {
+      throw Exception("Error fetching quiz analytics: ${e.toString()}");
     }
   }
 }

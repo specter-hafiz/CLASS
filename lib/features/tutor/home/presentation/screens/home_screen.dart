@@ -85,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
               context.read<QuestionBloc>().add(
                 GenerateQuestionsEventRequest(
                   transcript: state.transcript,
-                  numberOfQuestions: 30,
+                  numberOfQuestions: state.numberOfQuestions,
                   title: state.title,
                   expiresAt: state.expiresAt,
                   duration: state.duration,
@@ -96,11 +96,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 SnackBar(content: Text("Quiz generation started")),
               );
             } else if (state is AudioUploaded) {
+              if (!mounted) return;
               Navigator.of(context).pop(); // Close upload dialog
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text("Audio uploaded successfully")),
               );
             } else if (state is AudioError) {
+              if (!mounted) return;
               Navigator.of(context).pop(); // Close any open dialog
               ScaffoldMessenger.of(
                 context,
@@ -121,6 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
               );
             } else if (state is QuestionGeneratedState) {
+              if (!mounted) return;
               Navigator.of(context).pop(); // Close loading dialog
               showDialog(
                 barrierDismissible: false,
@@ -133,14 +136,17 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             } else if (state is QuestionsGeneratedCompletedState) {
               Future.delayed(const Duration(seconds: 3), () {
+                if (!mounted) return;
                 Navigator.of(context).pop(); // Close success dialog
               });
             } else if (state is QuestionErrorState) {
+              if (!mounted) return;
               Navigator.of(context).pop(); // Close any open dialog
               ScaffoldMessenger.of(
                 context,
               ).showSnackBar(SnackBar(content: Text(state.message)));
             } else if (state is QuestionErrorState) {
+              if (!mounted) return;
               Navigator.of(context).pop(); // Close any open dialog
               ScaffoldMessenger.of(
                 context,
@@ -346,36 +352,19 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     SizedBox(height: SizeConfig.blockSizeVertical! * 3),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Text(
-                            recentTranscriptionsText,
-                            style: TextStyle(
-                              fontSize:
-                                  SizeConfig.orientation(context) ==
-                                          Orientation.portrait
-                                      ? SizeConfig.screenWidth! * 0.06
-                                      : SizeConfig.screenWidth! * 0.025,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            maxLines: 1,
+                        Text(
+                          recentTranscriptionsText,
+                          style: TextStyle(
+                            fontSize:
+                                SizeConfig.orientation(context) ==
+                                        Orientation.portrait
+                                    ? SizeConfig.screenWidth! * 0.06
+                                    : SizeConfig.screenWidth! * 0.025,
+                            fontWeight: FontWeight.bold,
                           ),
-                        ),
-                        InkWell(
-                          onTap: () {},
-                          child: Text(
-                            viewAllText,
-                            style: TextStyle(
-                              color: Color(blueColor),
-                              fontSize:
-                                  SizeConfig.orientation(context) ==
-                                          Orientation.portrait
-                                      ? SizeConfig.screenWidth! * 0.04
-                                      : SizeConfig.screenWidth! * 0.025,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            maxLines: 1,
-                          ),
+                          maxLines: 1,
                         ),
                       ],
                     ),
@@ -391,9 +380,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             );
                           } else if (state is TranscriptsFetched) {
                             final transcripts = state.transcripts;
-                            transcripts.sort(
-                              (a, b) => b.createdAt.compareTo(a.createdAt),
-                            );
+
                             if (transcripts.isEmpty) {
                               return Center(
                                 child: Text(
@@ -412,41 +399,35 @@ class _HomeScreenState extends State<HomeScreen> {
                               );
                             }
 
-                            return ListView.builder(
-                              shrinkWrap: true,
-
-                              itemCount:
-                                  transcripts.length > 7
-                                      ? 7
-                                      : transcripts.length,
-                              itemBuilder: (context, index) {
-                                final transcript = transcripts[index];
-                                return CustomContainer(
-                                  titleText: 'Transcription ${index + 1}',
-                                  subText:
-                                      '${transcript.id} | ${transcript.userId} words',
-                                  showTrailingIcon: true,
-                                  onTap: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder:
-                                            (context) => TranscriptAudioScreen(
-                                              transcript: transcript,
-                                            ),
-                                      ),
-                                    );
-                                  },
-                                  onMoreTap: () async {
-                                    // Handle options like edit/delete
-                                    await showMenu(
-                                      position: RelativeRect.fromLTRB(
-                                        SizeConfig.screenWidth! * 0.65,
-                                        SizeConfig.screenHeight! * 0.34,
-                                        SizeConfig.screenWidth! * 0.055,
-                                        0,
-                                      ),
-                                      context: context,
-                                      items: [
+                            return RefreshIndicator(
+                              onRefresh: () async {
+                                context.read<TranscriptBloc>().add(
+                                  FetchTranscriptsRequested(),
+                                );
+                              },
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: transcripts.length,
+                                itemBuilder: (context, index) {
+                                  final transcript = transcripts[index];
+                                  return CustomContainer(
+                                    titleText: 'Transcription ${index + 1}',
+                                    subText:
+                                        '${transcript.id} | ${transcript.userId} words',
+                                    showTrailingIcon: true,
+                                    onTap: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder:
+                                              (context) =>
+                                                  TranscriptAudioScreen(
+                                                    transcript: transcript,
+                                                  ),
+                                        ),
+                                      );
+                                    },
+                                    onMoreButton: (context) {
+                                      return [
                                         PopupMenuItem(
                                           value: 'quiz',
                                           child: Text('Set Quiz'),
@@ -455,8 +436,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                           value: 'delete',
                                           child: Text('Delete'),
                                         ),
-                                      ],
-                                    ).then((value) async {
+                                      ];
+                                    },
+                                    onMoreTap: (value) async {
                                       if (value == 'quiz') {
                                         final result = await showDialog(
                                           context: context,
@@ -469,7 +451,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                           context.read<QuestionBloc>().add(
                                             GenerateQuestionsEventRequest(
                                               transcript: transcript.transcript,
-                                              numberOfQuestions: 30,
+                                              numberOfQuestions: int.parse(
+                                                result['numberOfQuestions'] ??
+                                                    10,
+                                              ),
                                               title:
                                                   result['title'] ??
                                                   "Quiz Title Default",
@@ -491,16 +476,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                           );
                                         }
                                       } else if (value == 'delete') {
-                                        context.read<TranscriptBloc>().add(
-                                          DeleteTranscriptRequested(
-                                            transcript.id,
-                                          ),
-                                        );
+                                        // context.read<TranscriptBloc>().add(
+                                        //   DeleteTranscriptRequested(
+                                        //     transcript.id,
+                                        //   ),
+                                        // );
                                       }
-                                    });
-                                  },
-                                );
-                              },
+                                    },
+                                  );
+                                },
+                              ),
                             );
                           } else if (state is TranscriptError) {
                             return Center(
@@ -531,19 +516,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ],
                               ),
                             );
+                          } else {
+                            return SizedBox();
                           }
-                          return Center(
-                            child: Text(
-                              'No transcriptions available',
-                              style: TextStyle(
-                                fontSize:
-                                    SizeConfig.orientation(context) ==
-                                            Orientation.portrait
-                                        ? SizeConfig.screenWidth! * 0.04
-                                        : SizeConfig.screenWidth! * 0.025,
-                              ),
-                            ),
-                          );
                         },
                       ),
                     ),

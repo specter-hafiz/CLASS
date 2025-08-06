@@ -1,4 +1,3 @@
-import 'package:class_app/core/constants/strings.dart';
 import 'package:class_app/core/utilities/size_config.dart';
 import 'package:class_app/features/auth/presentation/widgets/custom_back_button.dart';
 import 'package:class_app/features/tutor/profile/presentation/widgets/answer_widget.dart';
@@ -12,8 +11,10 @@ class QuizReviewScreen extends StatelessWidget {
     super.key,
     required this.questions,
     required this.response,
+    required this.title,
   });
   final List<Question> questions;
+  final String title;
   final ResponseModel response;
 
   @override
@@ -23,9 +24,8 @@ class QuizReviewScreen extends StatelessWidget {
       appBar: AppBar(
         leading: CustomBackButton(),
         automaticallyImplyLeading: false,
-        centerTitle: true,
         title: Text(
-          lectureWeekText,
+          title,
           style: TextStyle(
             fontSize:
                 SizeConfig.orientation(context) == Orientation.portrait
@@ -67,11 +67,15 @@ class QuizReviewScreen extends StatelessWidget {
                   ),
                   answersList: questions[index].options,
                   selectedIndex:
-                      response.answers.isNotEmpty
+                      (response.answers.length > index &&
+                              questions[index].options.contains(
+                                response.answers[index].answer,
+                              ))
                           ? questions[index].options.indexOf(
                             response.answers[index].answer,
                           )
                           : -1,
+
                   onChanged: null,
                 ),
                 SizedBox(height: SizeConfig.blockSizeVertical! * 2),

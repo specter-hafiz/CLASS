@@ -79,6 +79,7 @@ class _LoginFormState extends State<LoginForm> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CustomTextField(
+                readOnly: state is AuthLoading,
                 showTitle: true,
                 titleText: emailText,
                 hintText: emailHintText,
@@ -94,10 +95,15 @@ class _LoginFormState extends State<LoginForm> {
                   }
                   return null;
                 },
+                textInputAction: TextInputAction.next,
+                onFieldSubmitted:
+                    (_) =>
+                        FocusScope.of(context).requestFocus(_passwordFocusNode),
               ),
               SizedBox(height: SizeConfig.blockSizeVertical! * 1),
 
               CustomTextField(
+                readOnly: state is AuthLoading,
                 showTitle: true,
                 titleText: passwordText,
                 hintText: passwordHintText,
@@ -113,6 +119,20 @@ class _LoginFormState extends State<LoginForm> {
                     return 'Password must be at least 6 characters';
                   }
                   return null;
+                },
+                textInputAction: TextInputAction.done,
+                onFieldSubmitted: (_) {
+                  if (_formKey.currentState!.validate()) {
+                    // Dismiss the keyboard
+                    FocusScope.of(context).unfocus();
+
+                    context.read<AuthBloc>().add(
+                      LoginRequested(
+                        _emailController.text.trim(),
+                        _passwordController.text.trim(),
+                      ),
+                    );
+                  }
                 },
               ),
               SizedBox(height: SizeConfig.blockSizeVertical! * 1),

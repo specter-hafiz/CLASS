@@ -1,75 +1,91 @@
 import 'package:class_app/core/constants/app_colors.dart';
-import 'package:class_app/core/utilities/size_config.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
-class ScoreFrequencyChart extends StatelessWidget {
-  final Map<int, int> scoreFrequency;
+class AccuracyBarChart extends StatelessWidget {
+  final List<Map<String, dynamic>> analytics;
 
-  const ScoreFrequencyChart({super.key, required this.scoreFrequency});
+  const AccuracyBarChart({super.key, required this.analytics});
 
   @override
   Widget build(BuildContext context) {
-    // Convert map entries to spots (x = score, y = frequency)
-    final List<FlSpot> spots =
-        scoreFrequency.entries
-            .map((e) => FlSpot(e.key.toDouble(), e.value.toDouble()))
-            .toList()
-          ..sort((a, b) => a.x.compareTo(b.x)); // sort by score
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Padding(
-          padding: EdgeInsets.only(top: SizeConfig.blockSizeVertical! * 2),
-          child: AspectRatio(
-            aspectRatio: 1.4, // Responsive layout
-            child: LineChart(
-              LineChartData(
-                titlesData: FlTitlesData(
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(showTitles: true),
-                  ),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      interval: 5,
-                      getTitlesWidget: (value, meta) {
-                        return Text(
-                          value.toInt().toString(),
-                          style: const TextStyle(fontSize: 10),
-                        );
-                      },
-                    ),
-                  ),
-                  rightTitles: AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  topTitles: AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                ),
-                borderData: FlBorderData(show: true),
-                lineBarsData: [
-                  LineChartBarData(
-                    spots: spots,
-                    isCurved: true,
-                    barWidth: 1,
-                    color: Color(blueColor),
-                    dotData: FlDotData(show: false),
-                    belowBarData: BarAreaData(show: false),
-                  ),
-                ],
-                minX: spots.first.x,
-                maxX: spots.last.x,
-                minY: 0,
-                maxY:
-                    (scoreFrequency.values.reduce((a, b) => a > b ? a : b) + 2)
-                        .toDouble(), // Add padding above max frequency
+    return AspectRatio(
+      aspectRatio: 1.4,
+      child: BarChart(
+        BarChartData(
+          maxY: 100,
+          barGroups: _buildBarGroups(),
+          titlesData: FlTitlesData(
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(showTitles: true, reservedSize: 28),
+            ),
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 32,
+                getTitlesWidget: _getBottomTitles,
               ),
             ),
+            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
           ),
-        );
-      },
+          gridData: FlGridData(show: true),
+          borderData: FlBorderData(show: false),
+          barTouchData: BarTouchData(
+            enabled: true,
+            touchTooltipData: BarTouchTooltipData(
+              getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                final percentage = rod.toY.toStringAsFixed(1);
+                return BarTooltipItem(
+                  "Q${group.x + 1}\n$percentage%",
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
     );
+  }
+
+  List<BarChartGroupData> _buildBarGroups() {
+    return List.generate(analytics.length, (index) {
+      final item = analytics[index];
+      final int correct = item['correctAnswers'] ?? 0;
+      final int total = item['totalSubmissions'] ?? 1;
+      final double percentage = (correct / total) * 100;
+
+      final Color color =
+          percentage >= 70
+              ? Color(blueColor)
+              : (percentage >= 50 ? Colors.orange : Colors.red);
+
+      return BarChartGroupData(
+        x: index,
+        barRods: [
+          BarChartRodData(
+            toY: percentage,
+            color: color,
+            width: 14,
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ],
+      );
+    });
+  }
+
+  Widget _getBottomTitles(double value, TitleMeta meta) {
+    final index = value.toInt();
+    if (index >= 0 && index < analytics.length) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 8.0),
+        child: Text(
+          "Q${index + 1}",
+          style: const TextStyle(fontSize: 10),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+    return const SizedBox.shrink();
   }
 }

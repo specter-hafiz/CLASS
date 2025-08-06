@@ -31,6 +31,18 @@ class TranscriptBloc extends Bloc<TranscriptEvents, TranscriptState> {
       }
     });
 
+    on<FetchTranscriptRequested>((event, emit) async {
+      emit(TranscriptLoading());
+      try {
+        final transcript = await fetchTranscriptUsecase(
+          transcriptId: event.transcriptId,
+        );
+        emit(TranscriptFetched(transcript));
+      } catch (e) {
+        emit(TranscriptError("Failed to fetch transcript: ${e.toString()}"));
+      }
+    });
+
     on<UpdateTranscriptRequested>((event, emit) async {
       emit(TranscriptLoading()); // Optional: Show loading UI
       try {

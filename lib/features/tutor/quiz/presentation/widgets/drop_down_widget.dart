@@ -10,6 +10,7 @@ class CustomDropDownTextField extends StatelessWidget {
     required TextEditingController controller,
     required List<String> options,
     required this.label,
+    this.validator,
     this.hintText,
   }) : _controller = controller,
        _options = options;
@@ -18,6 +19,7 @@ class CustomDropDownTextField extends StatelessWidget {
   final List<String> _options;
   final String label;
   final String? hintText;
+  final FormFieldValidator<String>? validator;
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +40,7 @@ class CustomDropDownTextField extends StatelessWidget {
         ),
         SizedBox(height: SizeConfig.blockSizeVertical! * 0.5),
         TextFormField(
+          validator: validator,
           controller: _controller,
           readOnly: true, // Prevent text input
           cursorColor: Color(blueColor),

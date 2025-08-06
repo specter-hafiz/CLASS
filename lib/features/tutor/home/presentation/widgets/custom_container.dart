@@ -13,13 +13,15 @@ class CustomContainer extends StatelessWidget {
     this.showTrailingIcon,
     this.onTap,
     this.onMoreTap,
+    this.onMoreButton,
   });
   final String titleText;
   final String subText;
   final String? iconPath;
   final bool? showTrailingIcon;
   final void Function()? onTap;
-  final void Function()? onMoreTap;
+  final Function(String value)? onMoreTap;
+  final List<PopupMenuEntry<String>> Function(BuildContext)? onMoreButton;
 
   @override
   Widget build(BuildContext context) {
@@ -108,18 +110,19 @@ class CustomContainer extends StatelessWidget {
                 ),
               ),
             ),
-            showTrailingIcon != null
-                ? IconButton(
-                  style: IconButton.styleFrom(
-                    visualDensity: VisualDensity.standard,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: SizeConfig.blockSizeHorizontal! * 0.5,
-                    ),
-                  ),
-                  icon: Icon(Icons.more_vert_outlined, color: Color(blueColor)),
-                  onPressed: onMoreTap,
-                )
-                : SizedBox.shrink(),
+            if (showTrailingIcon == true && onMoreButton != null)
+              PopupMenuButton<String>(
+                iconColor: Color(blueColor),
+                color: Colors.white,
+
+                icon: Icon(Icons.more_vert),
+                itemBuilder: (context) => onMoreButton!(context),
+                onSelected: (value) {
+                  if (onMoreTap != null) onMoreTap!(value);
+                },
+              )
+            else
+              SizedBox.shrink(),
           ],
         ),
       ),
