@@ -9,7 +9,7 @@ class HttpConsumer {
   final Dio _dio;
 
   HttpConsumer(this._dio) {
-    _dio.options.baseUrl = AppSecrets.testUrl;
+    _dio.options.baseUrl = AppSecrets.baseUrl; // change this
     _dio.options.connectTimeout = const Duration(seconds: 20);
     _dio.options.receiveTimeout = const Duration(seconds: 20);
     _dio.options.headers = {
@@ -115,9 +115,9 @@ class HttpConsumer {
     final message = data['message']?.toString();
     // ✅ Special handling for 403: unverified users
 
-    if (response.statusCode == 403) {
-      throw OTPVerificationException(message ?? "OTP verification required.");
-    }
+    // if (response.statusCode == 403) {
+    //   throw OTPVerificationException(message ?? "OTP verification required.");
+    // }
 
     if (message == "Validation error") {
       final errors = data['errors'] as List?;

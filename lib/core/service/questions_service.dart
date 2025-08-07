@@ -9,7 +9,7 @@ import 'package:dio/dio.dart';
 class QuestionsService {
   final Dio _dio;
   QuestionsService(this._dio) {
-    _dio.options.baseUrl = AppSecrets.testUrl; // change this
+    _dio.options.baseUrl = AppSecrets.baseUrl; // change this
     _dio.options.sendTimeout = const Duration(seconds: 20);
     _dio.options.receiveTimeout = const Duration(seconds: 20);
   }
