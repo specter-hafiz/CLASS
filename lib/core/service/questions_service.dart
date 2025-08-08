@@ -23,10 +23,6 @@ class QuestionsService {
     required String accessPassword,
   }) async {
     try {
-      bool hasConnection = await NetworkConnectivity().isConnected;
-      if (!hasConnection) {
-        throw NetworkException("No internet connection");
-      }
       final token = await sl<SharedPrefService>().getToken().then(
         (value) => value ?? '',
       );
@@ -63,16 +59,12 @@ class QuestionsService {
         throw Exception('Network error. Please try again.');
       }
     } catch (e) {
-      throw Exception("Error generating questions: ${e.toString()}");
+      throw Exception(e.toString());
     }
   }
 
   Future<Map<String, dynamic>> fetchQuizzes() async {
     try {
-      bool hasConnection = await NetworkConnectivity().isConnected;
-      if (!hasConnection) {
-        throw NetworkException("No internet connection");
-      }
       final token = await sl<SharedPrefService>().getToken().then(
         (value) => value ?? '',
       );
@@ -99,7 +91,7 @@ class QuestionsService {
         throw Exception('Network error. Please try again.');
       }
     } catch (e) {
-      throw Exception("Error fetching questions: ${e.toString()}");
+      throw Exception(e.toString());
     }
   }
 
@@ -109,10 +101,6 @@ class QuestionsService {
     required String accessPassword,
   }) async {
     try {
-      bool hasConnection = await NetworkConnectivity().isConnected;
-      if (!hasConnection) {
-        throw NetworkException("No internet connection");
-      }
       final token = await sl<SharedPrefService>().getToken().then(
         (value) => value ?? '',
       );
@@ -140,7 +128,7 @@ class QuestionsService {
         throw Exception('Network error. Please try again.');
       }
     } catch (e) {
-      throw Exception("Error fetching shared questions: ${e.toString()}");
+      throw Exception(e.toString());
     }
   }
 
@@ -150,10 +138,6 @@ class QuestionsService {
     required List<Map<String, dynamic>> answers,
   }) async {
     try {
-      bool hasConnection = await NetworkConnectivity().isConnected;
-      if (!hasConnection) {
-        throw NetworkException("No internet connection");
-      }
       final token = await sl<SharedPrefService>().getToken().then(
         (value) => value ?? '',
       );
@@ -169,7 +153,6 @@ class QuestionsService {
           sendTimeout: const Duration(minutes: 2),
         ),
       );
-      print("Submit Response: ${response.data}");
       return response.data;
     } on DioException catch (e) {
       if (e.response != null && e.response?.data != null) {
@@ -182,17 +165,12 @@ class QuestionsService {
         throw Exception('Network error. Please try again.');
       }
     } catch (e) {
-      print("Error submitting assessment: ${e.toString()}");
       throw Exception(e.toString());
     }
   }
 
   Future<Map<String, dynamic>> fetchSubmittedResponses() async {
     try {
-      bool hasConnection = await NetworkConnectivity().isConnected;
-      if (!hasConnection) {
-        throw NetworkException("No internet connection");
-      }
       final token = await sl<SharedPrefService>().getToken().then(
         (value) => value ?? '',
       );
@@ -207,7 +185,6 @@ class QuestionsService {
           sendTimeout: const Duration(minutes: 2),
         ),
       );
-      print("Submitted Responses: ${response.data}");
       return response.data;
     } on DioException catch (e) {
       if (e.response != null && e.response?.data != null) {
@@ -220,16 +197,12 @@ class QuestionsService {
         throw Exception('Network error. Please try again.');
       }
     } catch (e) {
-      throw Exception("Error fetching submitted responses: ${e.toString()}");
+      throw Exception(e.toString());
     }
   }
 
   Future<List<Map<String, dynamic>>> fetchAnalytics() async {
     try {
-      bool hasConnection = await NetworkConnectivity().isConnected;
-      if (!hasConnection) {
-        throw NetworkException("No internet connection");
-      }
       final token = await sl<SharedPrefService>().getToken().then(
         (value) => value ?? '',
       );
@@ -253,16 +226,12 @@ class QuestionsService {
         throw Exception('Network error. Please try again.');
       }
     } catch (e) {
-      throw Exception("Error fetching quiz analytics: ${e.toString()}");
+      throw Exception(e.toString());
     }
   }
 
   Future<List<Map<String, dynamic>>> getQuizAnalytics(String id) async {
     try {
-      bool hasConnection = await NetworkConnectivity().isConnected;
-      if (!hasConnection) {
-        throw NetworkException("No internet connection");
-      }
       final token = await sl<SharedPrefService>().getToken().then(
         (value) => value ?? '',
       );
@@ -286,7 +255,36 @@ class QuestionsService {
         throw Exception('Network error. Please try again.');
       }
     } catch (e) {
-      throw Exception("Error fetching quiz analytics: ${e.toString()}");
+      throw Exception(e.toString());
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchResults(String id) async {
+    try {
+      bool hasConnection = await NetworkConnectivity().isConnected;
+      if (!hasConnection) {
+        throw NetworkException("No internet connection");
+      }
+      final response = await _dio.get(
+        Endpoints.getResults(id),
+        options: Options(
+          receiveTimeout: const Duration(minutes: 2),
+          sendTimeout: const Duration(minutes: 1),
+        ),
+      );
+      return List<Map<String, dynamic>>.from(response.data['responses']);
+    } on DioException catch (e) {
+      if (e.response != null && e.response?.data != null) {
+        // Server responded with error data
+        final errorMessage =
+            e.response?.data['message'] ?? 'Unexpected error occurred';
+        throw Exception(errorMessage); // Or custom exception
+      } else {
+        // No response from server or other Dio issues
+        throw Exception('Network error. Please try again.');
+      }
+    } catch (e) {
+      throw Exception("Error fetching quiz results");
     }
   }
 }

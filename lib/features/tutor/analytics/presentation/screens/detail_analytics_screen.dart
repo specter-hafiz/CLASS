@@ -1,5 +1,6 @@
 import 'package:class_app/core/constants/app_colors.dart';
 import 'package:class_app/core/constants/strings.dart';
+import 'package:class_app/core/utilities/quiz_results_export_service.dart';
 import 'package:class_app/core/utilities/size_config.dart';
 import 'package:class_app/features/auth/presentation/widgets/custom_back_button.dart';
 import 'package:class_app/features/onboarding/widgets/custom_elevated_button.dart';
@@ -59,22 +60,23 @@ class _DetailAnalyticsScreenState extends State<DetailAnalyticsScreen> {
         automaticallyImplyLeading: false,
       ),
       body: BlocBuilder<QuestionBloc, QuestionState>(
+        buildWhen:
+            (previous, current) =>
+                current is GetQuizAnalyticsLoadedState ||
+                current is GetQuizAnalyticsErrorState ||
+                current is GetQuizAnalyticsLoadingState,
         builder: (context, state) {
           if (state is GetQuizAnalyticsLoadingState) {
             return const Center(child: CircularProgressIndicator());
-          }
-
-          if (state is GetQuizAnalyticsErrorState) {
+          } else if (state is GetQuizAnalyticsErrorState) {
             return Center(child: Text(state.message));
-          }
-
-          if (state is GetQuizAnalyticsLoadedState) {
+          } else if (state is GetQuizAnalyticsLoadedState) {
             final analytics = state.analytics;
 
             if (analytics.isEmpty) {
               return const Center(
                 child: Text(
-                  "No analytics found.\nNo responses received yet.",
+                  "No responses received yet.",
                   style: TextStyle(color: Color(blackColor)),
                   textAlign: TextAlign.center,
                 ),
@@ -96,12 +98,56 @@ class _DetailAnalyticsScreenState extends State<DetailAnalyticsScreen> {
                       horizontal: SizeConfig.horizontalPadding(context),
                     ),
                     children: [
+                      SizedBox(height: SizeConfig.blockSizeVertical! * 1),
+
                       AccuracyBarChart(analytics: analytics),
                       SizedBox(height: SizeConfig.blockSizeVertical! * 2),
-                      CustomElevatedButton(
-                        buttonText: exportResultsText,
-                        onPressed: () {
-                          // handle export
+                      BlocConsumer<QuestionBloc, QuestionState>(
+                        listener: (context, state) async {
+                          if (state is FetchQuizResultsErrorState) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(state.message)),
+                            );
+                          }
+
+                          if (state is FetchQuizResultsSuccessState) {
+                            final filePath =
+                                await QuizResultExportService.exportToPdf(
+                                  quizTitle: widget.title,
+                                  responses: state.results,
+                                  fileName: '${widget.title}_quiz_results',
+                                );
+                            if (filePath != null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Check your downloads folder for file.',
+                                  ),
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Permission denied or error occurred.',
+                                  ),
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        builder: (context, state) {
+                          return CustomElevatedButton(
+                            buttonText:
+                                state is FetchingQuizResultsState
+                                    ? exportingResultsText
+                                    : exportResultsText,
+                            onPressed: () {
+                              context.read<QuestionBloc>().add(
+                                FetchQuizResultsEvent(widget.id),
+                              );
+                            },
+                          );
                         },
                       ),
                       SizedBox(height: SizeConfig.blockSizeVertical! * 2),
@@ -158,9 +204,10 @@ class _DetailAnalyticsScreenState extends State<DetailAnalyticsScreen> {
                 ),
               ],
             );
+          } else {
+            // Handle unexpected states
+            return const Center(child: Text("Unexpected state encountered."));
           }
-
-          return const Center(child: Text("No analytics found."));
         },
       ),
     );
@@ -169,77 +216,93 @@ class _DetailAnalyticsScreenState extends State<DetailAnalyticsScreen> {
 
 class QuestionAnalyticsBarChart extends StatelessWidget {
   final List<Map<String, dynamic>> analytics;
+  final int totalQuestions;
 
-  const QuestionAnalyticsBarChart({super.key, required this.analytics});
+  const QuestionAnalyticsBarChart({
+    super.key,
+    required this.analytics,
+    required this.totalQuestions,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return BarChart(
-      BarChartData(
-        maxY: _getMaxY().toDouble(),
-        barGroups: _buildBarGroups(),
-        titlesData: FlTitlesData(
-          leftTitles: AxisTitles(
-            sideTitles: SideTitles(showTitles: true, reservedSize: 28),
-          ),
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              getTitlesWidget: _getBottomTitles,
-              reservedSize: 48,
+    // Fill missing questions with zero data
+    final filledAnalytics = List.generate(totalQuestions, (index) {
+      return analytics.length > index
+          ? analytics[index]
+          : {'correctAnswers': 0, 'wrongAnswers': 0};
+    });
+
+    final chartWidth = totalQuestions * 28.0; // Adjust spacing per question
+
+    return SizedBox(
+      height: 300,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: SizedBox(
+          width: chartWidth,
+          child: BarChart(
+            BarChartData(
+              maxY: _getMaxY(filledAnalytics).toDouble(),
+              barGroups: _buildBarGroups(filledAnalytics),
+              titlesData: FlTitlesData(
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: true, reservedSize: 28),
+                ),
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    getTitlesWidget: (value, meta) {
+                      final index = value.toInt();
+                      if (index < totalQuestions) {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 6.0),
+                          child: Text(
+                            "Q${index + 1}",
+                            style: const TextStyle(fontSize: 10),
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                    reservedSize: 32,
+                  ),
+                ),
+              ),
+              gridData: FlGridData(show: false),
+              borderData: FlBorderData(show: false),
+              barTouchData: BarTouchData(enabled: true),
             ),
           ),
         ),
-        gridData: FlGridData(show: false),
-        borderData: FlBorderData(show: false),
-        barTouchData: BarTouchData(enabled: true),
       ),
     );
   }
 
-  int _getMaxY() {
+  int _getMaxY(List<Map<String, dynamic>> data) {
     int max = 0;
-    for (var item in analytics) {
-      int sum = item['correctAnswers'] + item['wrongAnswers'];
-      if (sum > max) max = sum;
+    for (var item in data) {
+      int correct = item['correctAnswers'] ?? 0;
+      if (correct > max) max = correct;
     }
-    return (max + 2); // for padding
+    return max + 2;
   }
 
-  List<BarChartGroupData> _buildBarGroups() {
-    return List.generate(analytics.length, (index) {
-      final item = analytics[index];
+  List<BarChartGroupData> _buildBarGroups(List<Map<String, dynamic>> data) {
+    return List.generate(data.length, (index) {
+      final item = data[index];
       return BarChartGroupData(
         x: index,
         barRods: [
           BarChartRodData(
             toY: (item['correctAnswers'] as int).toDouble(),
-            color: Color(blueColor),
-            width: SizeConfig.blockSizeHorizontal! * 6,
-          ),
-          BarChartRodData(
-            toY: (item['wrongAnswers'] as int).toDouble(),
-            color: Colors.red,
-            width: 14,
+            color: Colors.green,
+            width: 12,
+            borderRadius: BorderRadius.circular(2),
           ),
         ],
-        barsSpace: 4,
+        barsSpace: 2,
       );
     });
-  }
-
-  Widget _getBottomTitles(double value, TitleMeta meta) {
-    final index = value.toInt();
-    if (index >= 0 && index < analytics.length) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 8.0),
-        child: Text(
-          "Q${index + 1}",
-          style: TextStyle(fontSize: 12),
-          textAlign: TextAlign.center,
-        ),
-      );
-    }
-    return const SizedBox.shrink();
   }
 }

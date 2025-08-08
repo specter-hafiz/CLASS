@@ -5,6 +5,7 @@ import 'package:class_app/features/auth/presentation/widgets/custom_back_button.
 import 'package:class_app/features/auth/presentation/widgets/custom_textfield.dart';
 import 'package:class_app/features/onboarding/widgets/custom_elevated_button.dart';
 import 'package:class_app/features/tutor/home/presentation/screens/animated_process_screen.dart';
+import 'package:class_app/features/tutor/home/presentation/screens/home_screen.dart';
 import 'package:class_app/features/tutor/home/presentation/widgets/custom_container.dart';
 import 'package:class_app/features/tutor/profile/presentation/screens/answer_quiz_screen.dart';
 import 'package:class_app/features/tutor/profile/presentation/screens/quiz_review_screen.dart';
@@ -156,7 +157,9 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
                   child: BlocBuilder<QuestionBloc, QuestionState>(
                     builder: (context, state) {
                       if (state is FetchingResponsesState) {
-                        return Center(child: CircularProgressIndicator());
+                        return LoadingWidget(
+                          loadingText: "Loading assessments...",
+                        );
                       } else if (state is FetchedSubmittedResponsesState) {
                         return ListView.builder(
                           itemCount: state.responses.length,
@@ -185,11 +188,13 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
                           },
                         );
                       } else if (state is QuestionErrorState) {
-                        return Center(
-                          child: Text(
-                            state.message,
-                            style: TextStyle(color: Colors.red),
-                          ),
+                        return CustomErrorWidget(
+                          message: state.message,
+                          onRetry: () {
+                            context.read<QuestionBloc>().add(
+                              FetchSubmittedResponsesEvent(),
+                            );
+                          },
                         );
                       } else {
                         return Center(
@@ -207,6 +212,29 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
           ),
         );
       },
+    );
+  }
+}
+
+class CustomErrorWidget extends StatelessWidget {
+  const CustomErrorWidget({super.key, required this.message, this.onRetry});
+  final String message;
+  final Function()? onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    SizeConfig().init(context);
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(message, style: TextStyle(color: Colors.red)),
+          SizedBox(height: SizeConfig.blockSizeVertical! * 2),
+          TextButton(onPressed: onRetry, child: Text(retryText)),
+        ],
+      ),
     );
   }
 }

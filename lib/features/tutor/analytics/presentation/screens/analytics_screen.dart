@@ -2,7 +2,9 @@ import 'package:class_app/core/constants/app_colors.dart';
 import 'package:class_app/core/constants/strings.dart';
 import 'package:class_app/core/utilities/size_config.dart';
 import 'package:class_app/features/tutor/analytics/presentation/screens/detail_analytics_screen.dart';
+import 'package:class_app/features/tutor/home/presentation/screens/home_screen.dart';
 import 'package:class_app/features/tutor/home/presentation/widgets/custom_container.dart';
+import 'package:class_app/features/tutor/profile/presentation/screens/assessment_screen.dart';
 import 'package:class_app/features/tutor/quiz/presentation/bloc/question_bloc.dart';
 import 'package:class_app/features/tutor/quiz/presentation/bloc/question_events.dart';
 import 'package:class_app/features/tutor/quiz/presentation/bloc/question_state.dart';
@@ -88,32 +90,28 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               ),
               Expanded(
                 child: BlocListener<QuestionBloc, QuestionState>(
-                  listener: (context, state) {
-                    if (state is GetAnalyticsErrorState) {
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text(state.message)));
-                    }
-                  },
+                  listener: (context, state) {},
                   child: BlocBuilder<QuestionBloc, QuestionState>(
                     builder: (context, state) {
                       if (state is GetAnalyticsLoadingState) {
-                        return Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: const [
-                              CircularProgressIndicator(),
-                              SizedBox(height: 16),
-                              Text("Loading analytics..."),
-                            ],
-                          ),
+                        return LoadingWidget(
+                          loadingText: "Loading analytics...",
+                        );
+                      } else if (state is GetAnalyticsErrorState) {
+                        return CustomErrorWidget(
+                          message: state.message,
+                          onRetry: () {
+                            context.read<QuestionBloc>().add(
+                              GetAnalyticsEvent(),
+                            );
+                          },
                         );
                       } else if (state is GetAnalyticsLoadedState) {
                         final analytics = state.analytics;
 
                         if (analytics.isEmpty) {
                           return const Center(
-                            child: Text("No assessments found."),
+                            child: Text("No Analytics found."),
                           );
                         }
 

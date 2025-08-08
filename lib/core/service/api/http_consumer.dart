@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:class_app/core/constants/app_secrets.dart';
 import 'package:class_app/core/service/errors/exceptions.dart';
-import 'package:class_app/features/auth/data/source/auth_remote_data_source.dart';
 import 'package:dio/dio.dart';
 
 class HttpConsumer {
@@ -41,12 +40,9 @@ class HttpConsumer {
         ),
       );
     } on DioException catch (e) {
-      logger.d("PUT request failed: ${e.message}");
-      logger.d("Response data: ${e.response?.data}");
-      logger.d("Response status code: ${e.response?.statusCode}");
       _handleError(e);
     }
-    throw ServerException("Unexpected error in PUT");
+    throw ServerException("Unexpected error occurred.");
   }
 
   Future<Response> delete(
@@ -63,9 +59,6 @@ class HttpConsumer {
         ),
       );
     } on DioException catch (e) {
-      logger.d("DELETE request failed: ${e.message}");
-      logger.d("Response data: ${e.response?.data}");
-      logger.d("Response status code: ${e.response?.statusCode}");
       _handleError(e);
     }
     throw ServerException("Unexpected error in DELETE");
@@ -85,9 +78,6 @@ class HttpConsumer {
         ),
       );
     } on DioException catch (e) {
-      logger.d("POST request failed: ${e.message}");
-      logger.d("Response data: ${e.response?.data}");
-      logger.d("Response status code: ${e.response?.statusCode}");
       _handleError(e);
     }
     throw ServerException("Unexpected error in POST");
@@ -109,15 +99,15 @@ class HttpConsumer {
         throw ServerException("Unexpected error format");
       }
     } catch (err) {
-      throw ServerException("Failed to parse error: ${response?.data}");
+      throw ServerException("response?.data}");
     }
 
     final message = data['message']?.toString();
     // ✅ Special handling for 403: unverified users
 
-    // if (response.statusCode == 403) {
-    //   throw OTPVerificationException(message ?? "OTP verification required.");
-    // }
+    if (response.statusCode == 399) {
+      throw OTPVerificationException(message ?? "OTP verification required.");
+    }
 
     if (message == "Validation error") {
       final errors = data['errors'] as List?;

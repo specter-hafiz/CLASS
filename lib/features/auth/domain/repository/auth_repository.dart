@@ -8,7 +8,10 @@ abstract class AuthRepository {
     String email,
     String password,
   );
-  Future<Map<String, dynamic>> verifyOTP(String email, String token,     bool? isLoginSignUp,
+  Future<Map<String, dynamic>> verifyOTP(
+    String email,
+    String token,
+    bool? isLoginSignUp,
   );
   Future<Map<String, dynamic>> editProfile(String username);
   Future<Map<String, dynamic>> loginWithGoogle(
@@ -24,4 +27,5 @@ abstract class AuthRepository {
   );
   Future<Map<String, dynamic>> resetPassword(String email, String newPassword);
   Future<Map<String, dynamic>> resendOTP(String email);
+  Future<Map<String, dynamic>> uploadProfileImage(String imagePath);
 }

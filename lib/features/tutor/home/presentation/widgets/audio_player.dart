@@ -47,7 +47,7 @@ class _AudioPlaybackScreenState extends State<AudioPlaybackScreen> {
           await file.writeAsBytes(response.bodyBytes);
           _audioUrl = file.path;
         } else {
-          throw Exception("Download failed with status ${response.statusCode}");
+          throw Exception("Download failed");
         }
       } else {
         // Local file already
@@ -57,11 +57,10 @@ class _AudioPlaybackScreenState extends State<AudioPlaybackScreen> {
       await _initAudio(); // Now safe to call
       setState(() {}); // To rebuild with waveform
     } catch (e) {
-      debugPrint("Error loading audio: $e");
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text("Audio load failed: $e")));
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
       }
     }
   }

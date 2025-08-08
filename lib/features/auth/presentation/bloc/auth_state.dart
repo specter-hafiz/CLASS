@@ -51,6 +51,23 @@ class TokenVerified extends AuthState {
 
 class EditProfileStarting extends AuthState {}
 
+class UploadingProfileImage extends AuthState {}
+
+class UploadProfileImageSuccess extends AuthState {
+  final String? message;
+  final String? url;
+
+  const UploadProfileImageSuccess(this.message, this.url);
+}
+
+class UploadProfileImageError extends AuthState {
+  final String message;
+
+  const UploadProfileImageError(this.message);
+  @override
+  List<Object?> get props => [message];
+}
+
 class EditProfileSuccess extends AuthState {
   final String message;
 

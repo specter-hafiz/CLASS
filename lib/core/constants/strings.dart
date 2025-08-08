@@ -63,6 +63,7 @@ you a notification once transcription
 is available.''';
 const exportQuestionText = 'Export Questions';
 const exportResultsText = 'Export Results';
+const exportingResultsText = "Exporting Results...";
 const exportText = 'Export';
 const fileNameText = 'File Name';
 const fileFormatText = 'File Format';

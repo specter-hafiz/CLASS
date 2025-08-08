@@ -21,4 +21,5 @@ abstract class QuestionsRepository {
   Future<Map<String, dynamic>> fetchSubmittedResponses();
   Future<List<Map<String, dynamic>>> fetchAnalytics();
   Future<List<Map<String, dynamic>>> getQuizAnalytics(String id);
+  Future<List<Map<String, dynamic>>> fetchResults(String id);
 }

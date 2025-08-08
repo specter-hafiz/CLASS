@@ -59,7 +59,7 @@ class AudioTranscriptionService {
         throw ServerException("Failed to transcribe audio file.");
       }
     } catch (e) {
-      throw Exception("Transcription error: ${e.toString()}");
+      throw Exception(e.toString());
     }
   }
 
@@ -88,7 +88,7 @@ class AudioTranscriptionService {
       );
       return response.data;
     } catch (e) {
-      throw Exception("Transcription error: ${e.toString()}");
+      throw Exception(e.toString());
     }
   }
 }

@@ -9,38 +9,55 @@ class AccuracyBarChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 1.4,
-      child: BarChart(
-        BarChartData(
-          maxY: 100,
-          barGroups: _buildBarGroups(),
-          titlesData: FlTitlesData(
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(showTitles: true, reservedSize: 28),
-            ),
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 32,
-                getTitlesWidget: _getBottomTitles,
+    final barWidth = 20.0;
+    final barSpacing = 20.0;
+    final chartWidth = (barWidth + barSpacing) * analytics.length;
+
+    return SizedBox(
+      height: 300,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: SizedBox(
+          width: chartWidth,
+          child: BarChart(
+            BarChartData(
+              maxY: 100,
+              barGroups: _buildBarGroups(),
+              titlesData: FlTitlesData(
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: true, reservedSize: 28),
+                ),
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 32,
+                    getTitlesWidget: _getBottomTitles,
+                  ),
+                ),
+                rightTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                topTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
               ),
-            ),
-            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          ),
-          gridData: FlGridData(show: true),
-          borderData: FlBorderData(show: false),
-          barTouchData: BarTouchData(
-            enabled: true,
-            touchTooltipData: BarTouchTooltipData(
-              getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                final percentage = rod.toY.toStringAsFixed(1);
-                return BarTooltipItem(
-                  "Q${group.x + 1}\n$percentage%",
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                );
-              },
+              gridData: FlGridData(show: true),
+              borderData: FlBorderData(show: false),
+              barTouchData: BarTouchData(
+                enabled: true,
+                touchTooltipData: BarTouchTooltipData(
+                  getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                    final percentage = rod.toY.toStringAsFixed(1);
+                    return BarTooltipItem(
+                      "Q${group.x + 1}\n$percentage%",
+                      const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    );
+                  },
+                ),
+              ),
             ),
           ),
         ),
@@ -57,7 +74,7 @@ class AccuracyBarChart extends StatelessWidget {
 
       final Color color =
           percentage >= 70
-              ? Color(blueColor)
+              ? const Color(blueColor)
               : (percentage >= 50 ? Colors.orange : Colors.red);
 
       return BarChartGroupData(
@@ -66,10 +83,11 @@ class AccuracyBarChart extends StatelessWidget {
           BarChartRodData(
             toY: percentage,
             color: color,
-            width: 14,
+            width: 20,
             borderRadius: BorderRadius.circular(4),
           ),
         ],
+        barsSpace: 10, // This is spacing between rods in group (if any)
       );
     });
   }

@@ -11,17 +11,15 @@ import 'package:class_app/features/tutor/home/presentation/bloc/audio/audio_stat
 import 'package:class_app/features/tutor/home/presentation/bloc/transcript/transcript_bloc.dart';
 import 'package:class_app/features/tutor/home/presentation/bloc/transcript/transcript_events.dart';
 import 'package:class_app/features/tutor/home/presentation/bloc/transcript/transcript_state.dart';
-import 'package:class_app/features/tutor/home/presentation/screens/animated_process_screen.dart';
 import 'package:class_app/features/tutor/home/presentation/screens/transcript_audio_screen.dart';
 import 'package:class_app/features/tutor/home/presentation/widgets/custom_container.dart';
 import 'package:class_app/features/tutor/home/presentation/widgets/recording_bottom_sheet.dart';
 import 'package:class_app/features/tutor/profile/presentation/screens/assessment_screen.dart';
 import 'package:class_app/features/tutor/quiz/presentation/bloc/question_bloc.dart';
 import 'package:class_app/features/tutor/quiz/presentation/bloc/question_events.dart';
-import 'package:class_app/features/tutor/quiz/presentation/bloc/question_state.dart';
 import 'package:class_app/features/tutor/quiz/presentation/screens/set_quiz_dialog.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide ErrorWidget;
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -47,335 +45,231 @@ class _HomeScreenState extends State<HomeScreen> {
     SizeConfig().init(context);
     final isPortrait = SizeConfig.orientation(context) == Orientation.portrait;
 
-    return MultiBlocListener(
-      listeners: [
-        BlocListener<AudioBloc, AudioState>(
-          listener: (context, state) {
-            if (state is AudioUploading) {
-              showDialog(
-                barrierDismissible: false,
-                context: context,
-                builder:
-                    (_) => const AnimatedProcessScreen(
-                      animationPath: 'assets/animations/uploading.json',
-                      message: 'Uploading audio...',
-                    ),
-              );
-            } else if (state is AudioTranscribing) {
-              showDialog(
-                barrierDismissible: false,
-                context: context,
-                builder:
-                    (_) => const AnimatedProcessScreen(
-                      animationPath: 'assets/animations/transcribing.json',
-                      message: 'Transcribing audio...',
-                    ),
-              );
-            } else if (state is AudioTranscribed) {
-              Navigator.of(context).pop(); // Close transcription dialog
-              context.read<TranscriptBloc>().add(FetchTranscriptsRequested());
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    "Transcription ${state.success ? 'succeeded' : 'failed'}",
+    return BlocBuilder<AudioBloc, AudioState>(
+      builder: (context, state) {
+        return Scaffold(
+          body: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: SizeConfig.horizontalPadding(context),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height:
+                        SizeConfig.orientation(context) == Orientation.portrait
+                            ? SizeConfig.blockSizeVertical! * 2
+                            : SizeConfig.blockSizeVertical! * 0.3,
                   ),
-                ),
-              );
-            } else if (state is GenerateQuestionsEvent) {
-              context.read<QuestionBloc>().add(
-                GenerateQuestionsEventRequest(
-                  transcript: state.transcript,
-                  numberOfQuestions: state.numberOfQuestions,
-                  title: state.title,
-                  expiresAt: state.expiresAt,
-                  duration: state.duration,
-                  accessPassword: state.accessPassword,
-                ),
-              );
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Quiz generation started")),
-              );
-            } else if (state is AudioUploaded) {
-              if (!mounted) return;
-              Navigator.of(context).pop(); // Close upload dialog
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Audio uploaded successfully")),
-              );
-            } else if (state is AudioError) {
-              if (!mounted) return;
-              Navigator.of(context).pop(); // Close any open dialog
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(state.message)));
-            }
-          },
-        ),
-        BlocListener<QuestionBloc, QuestionState>(
-          listener: (context, state) {
-            if (state is QuestionLoadingState) {
-              showDialog(
-                barrierDismissible: false,
-                context: context,
-                builder:
-                    (_) => const AnimatedProcessScreen(
-                      animationPath: 'assets/animations/loading.json',
-                      message: 'Generating quiz questions...',
-                    ),
-              );
-            } else if (state is QuestionGeneratedState) {
-              if (!mounted) return;
-              Navigator.of(context).pop(); // Close loading dialog
-              showDialog(
-                barrierDismissible: false,
-                context: context,
-                builder:
-                    (_) => AnimatedProcessScreen(
-                      animationPath: 'assets/animations/success.json',
-                      message: 'Generating Generated Successfully',
-                    ),
-              );
-            } else if (state is QuestionsGeneratedCompletedState) {
-              Future.delayed(const Duration(seconds: 3), () {
-                if (!mounted) return;
-                Navigator.of(context).pop(); // Close success dialog
-              });
-            } else if (state is QuestionErrorState) {
-              if (!mounted) return;
-              Navigator.of(context).pop(); // Close any open dialog
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(state.message)));
-            } else if (state is QuestionErrorState) {
-              if (!mounted) return;
-              Navigator.of(context).pop(); // Close any open dialog
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(state.message)));
-            }
-          },
-        ),
-      ],
-      child: BlocBuilder<AudioBloc, AudioState>(
-        builder: (context, state) {
-          return Scaffold(
-            body: SafeArea(
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: SizeConfig.horizontalPadding(context),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      height:
-                          SizeConfig.orientation(context) ==
-                                  Orientation.portrait
-                              ? SizeConfig.blockSizeVertical! * 2
-                              : SizeConfig.blockSizeVertical! * 0.3,
-                    ),
-                    AppTopWidget(),
-                    SizedBox(
-                      height:
-                          SizeConfig.orientation(context) ==
-                                  Orientation.portrait
-                              ? SizeConfig.blockSizeVertical! * 3
-                              : SizeConfig.blockSizeVertical! * 1,
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: CustomElevatedButton(
-                            buttonText: recordText,
-                            showIcon: true,
-                            iconPath: micOutlineImage,
-                            onPressed: () async {
-                              await showModalBottomSheet(
-                                constraints: BoxConstraints(
-                                  maxHeight:
-                                      isPortrait
-                                          ? SizeConfig.screenHeight! * 0.7
-                                          : SizeConfig.screenHeight! * 0.95,
-                                ),
-                                showDragHandle: true,
-                                isDismissible: false,
-                                backgroundColor: Color(whiteColor),
+                  AppTopWidget(),
+                  SizedBox(
+                    height:
+                        SizeConfig.orientation(context) == Orientation.portrait
+                            ? SizeConfig.blockSizeVertical! * 3
+                            : SizeConfig.blockSizeVertical! * 1,
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: CustomElevatedButton(
+                          buttonText: recordText,
+                          showIcon: true,
+                          iconPath: micOutlineImage,
+                          onPressed: () async {
+                            await showModalBottomSheet(
+                              constraints: BoxConstraints(
+                                maxHeight:
+                                    isPortrait
+                                        ? SizeConfig.screenHeight! * 0.7
+                                        : SizeConfig.screenHeight! * 0.95,
+                              ),
+                              showDragHandle: true,
+                              isDismissible: false,
+                              backgroundColor: Color(whiteColor),
+                              context: context,
+                              builder: (context) {
+                                return RecordingBottomSheet(
+                                  isPortrait: isPortrait,
+                                );
+                              },
+                            );
+                            // Navigator.pushNamed(context, '/audioRecorder');
+                          },
+                        ),
+                      ),
+                      SizedBox(width: SizeConfig.blockSizeHorizontal! * 2),
+                      Expanded(
+                        child: CustomElevatedButton(
+                          isOutlineButton: true,
+                          buttonText: importText,
+                          showIcon: true,
+                          iconColor: blueColor,
+                          iconPath: importImage,
+                          onPressed: () async {
+                            FilePickerResult? result = await FilePicker.platform
+                                .pickFiles(
+                                  type: FileType.custom,
+                                  allowedExtensions: [
+                                    'mp3',
+                                    'wav',
+                                    'aac',
+                                    'm4a',
+                                    'flac',
+                                    'ogg',
+                                  ],
+                                  allowMultiple: true,
+                                  dialogTitle: "Select Audio File",
+                                );
+
+                            if (result != null) {
+                              File file = File(result.files.single.path!);
+                              setState(() {
+                                selectedFileName = result.files.single.name;
+                                filePath = file.path;
+                              });
+
+                              await showDialog(
                                 context: context,
                                 builder: (context) {
-                                  return RecordingBottomSheet(
-                                    isPortrait: isPortrait,
+                                  return CustomAlertDialog(
+                                    screenWidth: SizeConfig.screenWidth!,
+                                    screenHeight: SizeConfig.screenHeight!,
+                                    height:
+                                        SizeConfig.orientation(context) ==
+                                                Orientation.portrait
+                                            ? SizeConfig.screenHeight! * 0.28
+                                            : SizeConfig.screenHeight! * 0.6,
+                                    rightButtonText: transcribeText,
+                                    onRightButtonPressed: () {
+                                      if (filePath != null) {
+                                        context.read<AudioBloc>().add(
+                                          UploadAudioRequested(filePath!),
+                                        );
+                                        Navigator.of(
+                                          context,
+                                        ).pop(); // Dismiss dialog
+                                      }
+                                    },
+                                    body: Column(
+                                      children: [
+                                        Text(
+                                          importfileText,
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontSize:
+                                                SizeConfig.orientation(
+                                                          context,
+                                                        ) ==
+                                                        Orientation.portrait
+                                                    ? SizeConfig
+                                                            .blockSizeHorizontal! *
+                                                        6
+                                                    : SizeConfig
+                                                            .blockSizeVertical! *
+                                                        6,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height:
+                                              SizeConfig.blockSizeVertical! * 2,
+                                        ),
+                                        Column(
+                                          children: [
+                                            Text(
+                                              selectedFileName!,
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontSize:
+                                                    SizeConfig.orientation(
+                                                              context,
+                                                            ) ==
+                                                            Orientation.portrait
+                                                        ? SizeConfig
+                                                                .blockSizeHorizontal! *
+                                                            4
+                                                        : SizeConfig
+                                                                .blockSizeVertical! *
+                                                            4,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(blueColor),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              height:
+                                                  SizeConfig
+                                                      .blockSizeVertical! *
+                                                  2,
+                                            ),
+                                            Text(
+                                              "Selected file",
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontSize:
+                                                    SizeConfig.orientation(
+                                                              context,
+                                                            ) ==
+                                                            Orientation.portrait
+                                                        ? SizeConfig
+                                                                .blockSizeHorizontal! *
+                                                            4
+                                                        : SizeConfig
+                                                                .blockSizeVertical! *
+                                                            4,
+                                                fontWeight: FontWeight.w500,
+                                                color: Color(blueColor),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                                   );
                                 },
                               );
-                              // Navigator.pushNamed(context, '/audioRecorder');
-                            },
-                          ),
+                            }
+                          },
                         ),
-                        SizedBox(width: SizeConfig.blockSizeHorizontal! * 2),
-                        Expanded(
-                          child: CustomElevatedButton(
-                            isOutlineButton: true,
-                            buttonText: importText,
-                            showIcon: true,
-                            iconColor: blueColor,
-                            iconPath: importImage,
-                            onPressed: () async {
-                              FilePickerResult? result = await FilePicker
-                                  .platform
-                                  .pickFiles(
-                                    type: FileType.custom,
-                                    allowedExtensions: [
-                                      'mp3',
-                                      'wav',
-                                      'aac',
-                                      'm4a',
-                                      'flac',
-                                      'ogg',
-                                    ],
-                                    allowMultiple: true,
-                                    dialogTitle: "Select Audio File",
-                                  );
-
-                              if (result != null) {
-                                File file = File(result.files.single.path!);
-                                setState(() {
-                                  selectedFileName = result.files.single.name;
-                                  filePath = file.path;
-                                });
-
-                                await showDialog(
-                                  context: context,
-                                  builder: (context) {
-                                    return CustomAlertDialog(
-                                      screenWidth: SizeConfig.screenWidth!,
-                                      screenHeight: SizeConfig.screenHeight!,
-                                      height:
-                                          SizeConfig.orientation(context) ==
-                                                  Orientation.portrait
-                                              ? SizeConfig.screenHeight! * 0.28
-                                              : SizeConfig.screenHeight! * 0.6,
-                                      rightButtonText: transcribeText,
-                                      onRightButtonPressed: () {
-                                        if (filePath != null) {
-                                          context.read<AudioBloc>().add(
-                                            UploadAudioRequested(filePath!),
-                                          );
-                                          Navigator.of(
-                                            context,
-                                          ).pop(); // Dismiss dialog
-                                        }
-                                      },
-                                      body: Column(
-                                        children: [
-                                          Text(
-                                            importfileText,
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontSize:
-                                                  SizeConfig.orientation(
-                                                            context,
-                                                          ) ==
-                                                          Orientation.portrait
-                                                      ? SizeConfig
-                                                              .blockSizeHorizontal! *
-                                                          6
-                                                      : SizeConfig
-                                                              .blockSizeVertical! *
-                                                          6,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                SizeConfig.blockSizeVertical! *
-                                                2,
-                                          ),
-                                          Column(
-                                            children: [
-                                              Text(
-                                                selectedFileName!,
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                  fontSize:
-                                                      SizeConfig.orientation(
-                                                                context,
-                                                              ) ==
-                                                              Orientation
-                                                                  .portrait
-                                                          ? SizeConfig
-                                                                  .blockSizeHorizontal! *
-                                                              4
-                                                          : SizeConfig
-                                                                  .blockSizeVertical! *
-                                                              4,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Color(blueColor),
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                height:
-                                                    SizeConfig
-                                                        .blockSizeVertical! *
-                                                    2,
-                                              ),
-                                              Text(
-                                                "Selected file",
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                  fontSize:
-                                                      SizeConfig.orientation(
-                                                                context,
-                                                              ) ==
-                                                              Orientation
-                                                                  .portrait
-                                                          ? SizeConfig
-                                                                  .blockSizeHorizontal! *
-                                                              4
-                                                          : SizeConfig
-                                                                  .blockSizeVertical! *
-                                                              4,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: Color(blueColor),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                );
-                              }
-                            },
-                          ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: SizeConfig.blockSizeVertical! * 3),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        recentTranscriptionsText,
+                        style: TextStyle(
+                          fontSize:
+                              SizeConfig.orientation(context) ==
+                                      Orientation.portrait
+                                  ? SizeConfig.screenWidth! * 0.06
+                                  : SizeConfig.screenWidth! * 0.025,
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
-                    ),
-                    SizedBox(height: SizeConfig.blockSizeVertical! * 3),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text(
-                          recentTranscriptionsText,
-                          style: TextStyle(
-                            fontSize:
-                                SizeConfig.orientation(context) ==
-                                        Orientation.portrait
-                                    ? SizeConfig.screenWidth! * 0.06
-                                    : SizeConfig.screenWidth! * 0.025,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 1,
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: SizeConfig.blockSizeVertical! * 2),
-                    Expanded(
+                        maxLines: 1,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: SizeConfig.blockSizeVertical! * 2),
+                  Expanded(
+                    child: BlocListener<TranscriptBloc, TranscriptState>(
+                      listener: (context, state) {
+                        if (state is DeleteTranscriptError) {}
+                      },
                       child: BlocBuilder<TranscriptBloc, TranscriptState>(
                         builder: (context, state) {
                           if (state is FetchingTranscripts) {
-                            return const Center(
-                              child: CircularProgressIndicator(
-                                color: Color(yellowColor),
+                            return Center(
+                              child: LoadingWidget(
+                                loadingText: "Loading transcripts...",
+                              ),
+                            );
+                          } else if (state is DeletingTranscript) {
+                            return Center(
+                              child: LoadingWidget(
+                                loadingText: "Deleting transcript...",
                               ),
                             );
                           } else if (state is TranscriptsFetched) {
@@ -412,8 +306,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   final transcript = transcripts[index];
                                   return CustomContainer(
                                     titleText: 'Transcription ${index + 1}',
-                                    subText:
-                                        '${transcript.id} | ${transcript.userId} words',
+                                    subText: transcript.transcript,
                                     showTrailingIcon: true,
                                     onTap: () {
                                       Navigator.of(context).push(
@@ -476,11 +369,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                           );
                                         }
                                       } else if (value == 'delete') {
-                                        // context.read<TranscriptBloc>().add(
-                                        //   DeleteTranscriptRequested(
-                                        //     transcript.id,
-                                        //   ),
-                                        // );
+                                        context.read<TranscriptBloc>().add(
+                                          DeleteTranscriptRequested(
+                                            transcript.id,
+                                          ),
+                                        );
                                       }
                                     },
                                   );
@@ -488,33 +381,13 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             );
                           } else if (state is TranscriptError) {
-                            return Center(
-                              child: Column(
-                                children: [
-                                  Text(
-                                    state.message,
-                                    style: TextStyle(
-                                      color: Colors.red,
-                                      fontSize:
-                                          SizeConfig.orientation(context) ==
-                                                  Orientation.portrait
-                                              ? SizeConfig.screenWidth! * 0.04
-                                              : SizeConfig.screenWidth! * 0.025,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: SizeConfig.blockSizeVertical! * 2,
-                                  ),
-                                  CustomElevatedButton(
-                                    buttonText: retryText,
-                                    onPressed: () {
-                                      context.read<TranscriptBloc>().add(
-                                        FetchTranscriptsRequested(),
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
+                            return CustomErrorWidget(
+                              message: state.message,
+                              onRetry: () {
+                                context.read<TranscriptBloc>().add(
+                                  FetchTranscriptsRequested(),
+                                );
+                              },
                             );
                           } else {
                             return SizedBox();
@@ -522,13 +395,31 @@ class _HomeScreenState extends State<HomeScreen> {
                         },
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class LoadingWidget extends StatelessWidget {
+  const LoadingWidget({super.key, required this.loadingText});
+  final String loadingText;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Center(child: CircularProgressIndicator(color: Color(blueColor))),
+        SizedBox(height: SizeConfig.blockSizeVertical! * 2),
+        Text(loadingText),
+      ],
     );
   }
 }

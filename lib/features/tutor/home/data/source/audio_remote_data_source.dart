@@ -1,7 +1,6 @@
 import 'package:class_app/core/network/connectivity.dart';
 import 'package:class_app/core/service/audio_service.dart';
 import 'package:class_app/core/service/errors/exceptions.dart';
-import 'package:class_app/features/auth/data/source/auth_remote_data_source.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
@@ -38,12 +37,9 @@ class AudioRemoteDataSourceImpl implements AudioRemoteDataSource {
         );
       }
     } catch (e) {
-      logger.e("Audio upload failed: $e");
-      throw ServerException(
-        "An unexpected error occurred while uploading audio.",
-      );
+      throw ServerException("An unexpected error while uploading audio.");
     }
-    throw ServerException("Audio upload failed for an unknown reason.");
+    throw ServerException("Audio upload Text for an unknown reason.");
   }
 
   @override
@@ -59,29 +55,4 @@ class AudioRemoteDataSourceImpl implements AudioRemoteDataSource {
     }
     return http.transcribeAudio(audioUrl: audioUrl);
   }
-
-  // @override
-  // Future<List<String>> fetchAudioFiles() async {
-  //   try {
-  //     final res = await http.get(Endpoints.fetchAudioFiles);
-  //     return List<String>.from(res.data['files']);
-  //   } catch (e) {
-  //     logger.e("Failed to fetch audio files: $e");
-  //     throw ServerException(
-  //       "An unexpected error occurred while fetching audio files.",
-  //     );
-  //   }
-  // }
-
-  // @override
-  // Future<void> deleteAudioFile(String fileName) async {
-  //   try {
-  //     await http.post(Endpoints.deleteAudioFile, data: {'fileName': fileName});
-  //   } catch (e) {
-  //     logger.e("Failed to delete audio file: $e");
-  //     throw ServerException(
-  //       "An unexpected error occurred while deleting the audio file.",
-  //     );
-  //   }
-  // }
 }

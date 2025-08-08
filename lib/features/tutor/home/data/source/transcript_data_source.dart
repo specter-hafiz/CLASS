@@ -27,7 +27,7 @@ class TranscriptRemoteDataSourceImpl implements TranscriptRemoteDataSource {
     } on CustomTimeoutException {
       rethrow;
     } on Exception catch (e) {
-      throw Exception("Failed to fetch transcript: ${e.toString()}");
+      throw Exception(e.toString());
     }
   }
 
@@ -43,7 +43,7 @@ class TranscriptRemoteDataSourceImpl implements TranscriptRemoteDataSource {
       );
       return Transcript.fromJson(response['updatedTranscript']);
     } catch (e) {
-      throw Exception("Failed to update transcript: ${e.toString()}");
+      throw Exception(e.toString());
     }
   }
 
@@ -52,7 +52,7 @@ class TranscriptRemoteDataSourceImpl implements TranscriptRemoteDataSource {
     try {
       await _trancriptService.deleteTranscript(transcriptId: transcriptId);
     } catch (e) {
-      throw Exception("Failed to delete transcript: ${e.toString()}");
+      throw Exception(e.toString());
     }
   }
 
@@ -61,7 +61,7 @@ class TranscriptRemoteDataSourceImpl implements TranscriptRemoteDataSource {
     try {
       return _trancriptService.fetchTranscripts();
     } catch (e) {
-      throw Exception("Failed to fetch transcripts: ${e.toString()}");
+      throw Exception("e.toString()}");
     }
   }
 

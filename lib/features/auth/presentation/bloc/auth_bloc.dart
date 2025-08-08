@@ -10,6 +10,7 @@ import 'package:class_app/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:class_app/features/auth/domain/usecases/resend_otp_usecase.dart';
 import 'package:class_app/features/auth/domain/usecases/reset_password_usecase.dart';
 import 'package:class_app/features/auth/domain/usecases/signup_usecase.dart';
+import 'package:class_app/features/auth/domain/usecases/upload_profile_pic_usecase.dart';
 import 'package:class_app/features/auth/domain/usecases/verify_otp_usecase.dart';
 import 'package:class_app/features/auth/presentation/bloc/auth_event.dart';
 import 'package:class_app/features/auth/presentation/bloc/auth_state.dart';
@@ -26,6 +27,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final ChangePasswordUsecase changePasswordUsecase; //
   final ResetPasswordUsecase resetPasswordUsecase; //
   final ResendOtpUsecase resendOtpUsecase;
+  final UploadProfilePicUsecase uploadProfilePicUsecase;
 
   AuthBloc(
     this.loginUseCase,
@@ -38,6 +40,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     this.changePasswordUsecase,
     this.resetPasswordUsecase,
     this.resendOtpUsecase,
+    this.uploadProfilePicUsecase,
   ) : super(AuthInitial()) {
     on<LoginRequested>((event, emit) async {
       emit(AuthLoading());
@@ -136,6 +139,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(ResetPasswordSuccess(response['message']));
       } catch (e) {
         emit(ResetPasswordError(e.toString()));
+      }
+    });
+
+    on<UploadProfileImageRequested>((event, emit) async {
+      emit(UploadingProfileImage());
+      try {
+        final response = await uploadProfilePicUsecase(event.imagePath);
+        final message = response['message']?.toString() ?? 'Image uploaded';
+        final url = response['url']?.toString() ?? '';
+
+        if (url.isEmpty) throw Exception("Upload failed: URL missing");
+
+        emit(UploadProfileImageSuccess(message, url));
+      } catch (e) {
+        emit(UploadProfileImageError(e.toString()));
       }
     });
   }

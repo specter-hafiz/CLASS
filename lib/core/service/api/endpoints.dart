@@ -10,6 +10,7 @@ class Endpoints {
   static const String verifyOTP = '/auth/verify-otp';
   static const String editProfile = '/auth/edit-profile';
   static const String resendOTP = '/auth/resend-otp';
+  static const String uploadProfileImage = '/auth/upload-profile-image';
 
   // AUDIO ROUTES
   static const String transcribeAudio = '/audio/transcribe';
@@ -30,4 +31,5 @@ class Endpoints {
   static const String fetchSubmittedResponses = '/questions/fetch/responses';
   static const String getAnalytics = '/questions/analytics';
   static String getQuizAnalytics(String id) => '/questions/analytics/$id';
+  static String getResults(String id) => '/questions/$id/results';
 }

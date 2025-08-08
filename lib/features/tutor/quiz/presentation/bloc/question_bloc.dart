@@ -6,6 +6,7 @@ import 'package:class_app/features/tutor/quiz/domain/usecase/fetch_submitted_res
 import 'package:class_app/features/tutor/quiz/domain/usecase/generate_questions_usecase.dart';
 import 'package:class_app/features/tutor/quiz/domain/usecase/get_analytics_usecase.dart';
 import 'package:class_app/features/tutor/quiz/domain/usecase/get_quiz_analytics_usecase.dart';
+import 'package:class_app/features/tutor/quiz/domain/usecase/get_quiz_results_usecase.dart';
 import 'package:class_app/features/tutor/quiz/domain/usecase/get_shared_questions_usecase.dart';
 import 'package:class_app/features/tutor/quiz/domain/usecase/submit_assessment_usecase.dart';
 import 'package:class_app/features/tutor/quiz/presentation/bloc/question_events.dart';
@@ -20,6 +21,7 @@ class QuestionBloc extends Bloc<QuestionEvent, QuestionState> {
   final GenerateQuestionsUsecase generateQuestionsUsecase;
   final GetAnalyticsUsecase getAnalyticsUsecase;
   final GetQuizAnalyticsUsecase getQuizAnalyticsUsecase;
+  final GetQuizResultsUsecase getQuizResultsUsecase;
   QuestionBloc(
     this.fetchQuizzesUsecase,
     this.getSharedQuestionsUsecase,
@@ -28,9 +30,10 @@ class QuestionBloc extends Bloc<QuestionEvent, QuestionState> {
     this.fetchSubmittedResponsesUsecase,
     this.getAnalyticsUsecase,
     this.getQuizAnalyticsUsecase,
+    this.getQuizResultsUsecase,
   ) : super(QuestionInitialState()) {
     on<GenerateQuestionsEventRequest>((event, emit) async {
-      emit(QuestionLoadingState());
+      emit(GeneratingQuizzesState());
       try {
         final questions = await generateQuestionsUsecase(
           transcript: event.transcript,
@@ -53,7 +56,7 @@ class QuestionBloc extends Bloc<QuestionEvent, QuestionState> {
       }
     });
     on<FetchQuizzesEvent>((event, emit) async {
-      emit(QuestionLoadingState());
+      emit(FetchingQuizzesState());
       try {
         final quizzes = await fetchQuizzesUsecase();
         emit(
@@ -64,7 +67,7 @@ class QuestionBloc extends Bloc<QuestionEvent, QuestionState> {
           ),
         );
       } catch (e) {
-        emit(QuestionErrorState(e.toString()));
+        emit(FetchQuizzesErrorState(e.toString()));
       }
     });
 
@@ -149,6 +152,16 @@ class QuestionBloc extends Bloc<QuestionEvent, QuestionState> {
         emit(GetQuizAnalyticsLoadedState(analytics));
       } catch (e) {
         emit(GetQuizAnalyticsErrorState(e.toString()));
+      }
+    });
+
+    on<FetchQuizResultsEvent>((event, emit) async {
+      emit(FetchingQuizResultsState());
+      try {
+        final results = await getQuizResultsUsecase(event.id);
+        emit(FetchQuizResultsSuccessState(results));
+      } catch (e) {
+        emit(FetchQuizResultsErrorState(e.toString()));
       }
     });
   }

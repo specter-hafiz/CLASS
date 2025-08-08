@@ -1,6 +1,7 @@
 import 'package:class_app/core/constants/app_colors.dart';
 import 'package:class_app/core/constants/strings.dart';
 import 'package:class_app/core/utilities/size_config.dart';
+import 'package:class_app/features/tutor/home/presentation/screens/home_screen.dart';
 import 'package:class_app/features/tutor/home/presentation/widgets/custom_container.dart';
 import 'package:class_app/features/tutor/profile/presentation/screens/assessment_screen.dart';
 import 'package:class_app/features/tutor/quiz/presentation/bloc/question_bloc.dart';
@@ -87,38 +88,21 @@ class _QuizScreenState extends State<QuizScreen> {
                         ? SizeConfig.blockSizeVertical! * 2
                         : SizeConfig.blockSizeHorizontal! * 1,
               ),
-              BlocBuilder<QuestionBloc, QuestionState>(
-                builder: (context, state) {
-                  if (state is QuestionLoadingState) {
-                    return Expanded(
-                      child: const Center(child: CircularProgressIndicator()),
-                    );
-                  } else if (state is QuestionErrorState) {
-                    return Expanded(
-                      child: Center(
-                        child: Column(
-                          children: [
-                            Text(
-                              state.message,
-                              style: TextStyle(color: Colors.red),
-                            ),
-                            SizedBox(height: 20),
-                            ElevatedButton(
-                              onPressed: () {
-                                context.read<QuestionBloc>().add(
-                                  FetchQuizzesEvent(),
-                                );
-                              },
-                              child: Text('Retry'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  } else if (state is QuizzesFetchedState) {
-                    if (state.quizzes.isEmpty) {
-                      return Expanded(
-                        child: Center(
+              Expanded(
+                child: BlocBuilder<QuestionBloc, QuestionState>(
+                  builder: (context, state) {
+                    if (state is FetchingQuizzesState) {
+                      return LoadingWidget(loadingText: "Loading quizzes...");
+                    } else if (state is FetchQuizzesErrorState) {
+                      return CustomErrorWidget(
+                        message: state.message,
+                        onRetry: () {
+                          context.read<QuestionBloc>().add(FetchQuizzesEvent());
+                        },
+                      );
+                    } else if (state is QuizzesFetchedState) {
+                      if (state.quizzes.isEmpty) {
+                        return Center(
                           child: Text(
                             'No quizzes available\nQuizzes you create from your transcripts\nwill appear here.',
                             style: TextStyle(
@@ -128,12 +112,10 @@ class _QuizScreenState extends State<QuizScreen> {
                             textAlign: TextAlign.center,
                             maxLines: 3,
                           ),
-                        ),
-                      );
-                    }
+                        );
+                      }
 
-                    return Expanded(
-                      child: ListView.builder(
+                      return ListView.builder(
                         shrinkWrap: true,
                         itemCount: state.quizzes.length,
                         itemBuilder: (context, index) {
@@ -157,10 +139,6 @@ class _QuizScreenState extends State<QuizScreen> {
                                 PopupMenuItem(
                                   value: 'password',
                                   child: Text('Password'),
-                                ),
-                                PopupMenuItem(
-                                  value: 'delete',
-                                  child: Text('Delete'),
                                 ),
                               ];
                             },
@@ -216,15 +194,15 @@ class _QuizScreenState extends State<QuizScreen> {
                                     );
                                   },
                                 );
-                              } else if (value == "delete") {}
+                              }
                             },
                           );
                         },
-                      ),
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
               ),
             ],
           ),

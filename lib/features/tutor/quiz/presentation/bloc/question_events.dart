@@ -75,3 +75,11 @@ class GetQuizAnalyticsEvent extends QuestionEvent {
   @override
   List<Object?> get props => [id];
 }
+
+class FetchQuizResultsEvent extends QuestionEvent {
+  final String id;
+  FetchQuizResultsEvent(this.id);
+
+  @override
+  List<Object?> get props => [id];
+}

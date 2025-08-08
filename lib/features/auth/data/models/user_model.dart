@@ -15,8 +15,10 @@ class UserModel extends User {
   final bool isVerified;
   final String accessToken;
   final String refreshToken;
+  final String imageUrl;
 
-  const UserModel({
+  const UserModel(
+    this.imageUrl, {
     required this.id,
     required this.name,
     required this.email,
@@ -34,6 +36,7 @@ class UserModel extends User {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
+      json['profileUrl'] ?? '',
       id: json['_id'],
       name: json['name'],
       email: json['email'],
@@ -53,10 +56,12 @@ class UserModel extends User {
       'isVerified': isVerified,
       'accessToken': accessToken,
       'refreshToken': refreshToken,
+      'profileUrl': imageUrl,
     };
   }
 
   UserModel copyWith({
+    String? imageUrl,
     String? id,
     String? name,
     String? email,
@@ -66,6 +71,7 @@ class UserModel extends User {
     String? refreshToken,
   }) {
     return UserModel(
+      imageUrl ?? this.imageUrl,
       id: id ?? this.id,
       name: name ?? this.name,
       email: email ?? this.email,

@@ -73,4 +73,9 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Map<String, dynamic>> resendOTP(String email) {
     return remote.resendOTP(email);
   }
+
+  @override
+  Future<Map<String, dynamic>> uploadProfileImage(String imagePath) {
+    return remote.uploadProfileImage(imagePath);
+  }
 }

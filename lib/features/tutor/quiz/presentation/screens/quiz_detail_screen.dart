@@ -1,10 +1,10 @@
 import 'package:class_app/core/constants/strings.dart';
+import 'package:class_app/core/utilities/quiz_export_service.dart';
 import 'package:class_app/core/utilities/size_config.dart';
 import 'package:class_app/features/auth/presentation/widgets/custom_back_button.dart';
 import 'package:class_app/features/tutor/profile/presentation/widgets/answer_widget.dart';
 import 'package:class_app/features/tutor/profile/presentation/widgets/question_widget.dart';
 import 'package:class_app/features/tutor/quiz/data/models/quiz_model.dart';
-import 'package:class_app/features/tutor/quiz/presentation/widgets/export_quiz_dialog.dart';
 import 'package:flutter/material.dart';
 
 class QuizDetailScreen extends StatelessWidget {
@@ -36,19 +36,27 @@ class QuizDetailScreen extends StatelessWidget {
             child: Row(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.share_outlined),
-                  onPressed: quiz.questions.isEmpty ? null : () async {},
-                ),
-                IconButton(
                   icon: const Icon(Icons.download_outlined),
                   onPressed:
                       quiz.questions.isEmpty
                           ? null
                           : () async {
-                            await showDialog(
-                              context: context,
-                              builder: (context) => const ExportQuizDialog(),
+                            final path = await QuizExportService.exportToPdf(
+                              quiz,
+                              fileName: quiz.title,
                             );
+                            if (path != null) {
+                              // Optionally show dialog or snackbar
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Downloaded to: $path')),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Permission denied or failed.'),
+                                ),
+                              );
+                            }
                           },
                 ),
               ],

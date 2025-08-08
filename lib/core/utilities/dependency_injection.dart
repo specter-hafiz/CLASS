@@ -14,6 +14,7 @@ import 'package:class_app/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:class_app/features/auth/domain/usecases/resend_otp_usecase.dart';
 import 'package:class_app/features/auth/domain/usecases/reset_password_usecase.dart';
 import 'package:class_app/features/auth/domain/usecases/signup_usecase.dart';
+import 'package:class_app/features/auth/domain/usecases/upload_profile_pic_usecase.dart';
 import 'package:class_app/features/auth/domain/usecases/verify_otp_usecase.dart';
 import 'package:class_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:class_app/features/tutor/home/data/repository/audio_repo_impl.dart';
@@ -38,6 +39,7 @@ import 'package:class_app/features/tutor/quiz/domain/usecase/fetch_submitted_res
 import 'package:class_app/features/tutor/quiz/domain/usecase/generate_questions_usecase.dart';
 import 'package:class_app/features/tutor/quiz/domain/usecase/get_analytics_usecase.dart';
 import 'package:class_app/features/tutor/quiz/domain/usecase/get_quiz_analytics_usecase.dart';
+import 'package:class_app/features/tutor/quiz/domain/usecase/get_quiz_results_usecase.dart';
 import 'package:class_app/features/tutor/quiz/domain/usecase/get_shared_questions_usecase.dart';
 import 'package:class_app/features/tutor/quiz/domain/usecase/submit_assessment_usecase.dart';
 import 'package:class_app/features/tutor/quiz/presentation/bloc/question_bloc.dart';
@@ -66,7 +68,19 @@ Future<void> initCore() async {
 
   // Bloc
   sl.registerFactory(
-    () => AuthBloc(sl(), sl(), sl(), sl(), sl(), sl(), sl(), sl(), sl(), sl()),
+    () => AuthBloc(
+      sl(),
+      sl(),
+      sl(),
+      sl(),
+      sl(),
+      sl(),
+      sl(),
+      sl(),
+      sl(),
+      sl(),
+      sl(),
+    ),
   );
   sl.registerFactory(() => AudioBloc(sl(), sl()));
   sl.registerFactory(() => TranscriptBloc(sl(), sl(), sl(), sl()));
@@ -79,6 +93,7 @@ Future<void> initCore() async {
       sl<FetchSubmittedResponsesUsecase>(),
       sl<GetAnalyticsUsecase>(),
       sl<GetQuizAnalyticsUsecase>(),
+      sl<GetQuizResultsUsecase>(),
     ),
   );
 
@@ -106,6 +121,8 @@ Future<void> initCore() async {
   sl.registerLazySingleton(() => FetchSubmittedResponsesUsecase(sl()));
   sl.registerLazySingleton(() => GetAnalyticsUsecase(sl()));
   sl.registerLazySingleton(() => GetQuizAnalyticsUsecase(sl()));
+  sl.registerLazySingleton(() => GetQuizResultsUsecase(sl()));
+  sl.registerLazySingleton(() => UploadProfilePicUsecase(sl()));
 
   // Repository
   sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(sl()));

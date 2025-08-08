@@ -47,9 +47,9 @@ class TrancriptService {
           'Timed out, check your internet connection and try again',
         );
       }
-      throw Exception("Dio error: ${e.message}");
+      throw Exception(e.message);
     } catch (e) {
-      throw Exception("Failed to fetch transcript: ${e.toString()}");
+      throw Exception(e.toString());
     }
   }
 
@@ -74,7 +74,7 @@ class TrancriptService {
       );
       return response.data;
     } catch (e) {
-      throw Exception("Failed to fetch transcript: ${e.toString()}");
+      throw Exception(e.toString());
     }
   }
 
@@ -101,7 +101,7 @@ class TrancriptService {
       );
       return response.data;
     } catch (e) {
-      throw Exception("Failed to update transcript: ${e.toString()}");
+      throw Exception(e.toString());
     }
   }
 
@@ -123,7 +123,7 @@ class TrancriptService {
         ),
       );
     } catch (e) {
-      throw Exception("Failed to delete transcript: ${e.toString()}");
+      throw Exception(e.toString());
     }
   }
 }

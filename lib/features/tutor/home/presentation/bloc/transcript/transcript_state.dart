@@ -10,6 +10,26 @@ class TranscriptInitial extends TranscriptState {}
 
 class TranscriptLoading extends TranscriptState {}
 
+class DeletingTranscript extends TranscriptState {}
+
+class TranscriptDeleted extends TranscriptState {
+  final String message;
+
+  TranscriptDeleted(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class DeleteTranscriptError extends TranscriptState {
+  final String message;
+
+  DeleteTranscriptError(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+
 class FetchingTranscripts extends TranscriptState {}
 
 class TranscriptLoaded extends TranscriptState {

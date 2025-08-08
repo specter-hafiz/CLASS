@@ -1,69 +1,124 @@
 import 'package:class_app/core/constants/app_colors.dart';
+import 'package:class_app/core/service/shared_pref/shared_pref.dart';
+import 'package:class_app/core/utilities/dependency_injection.dart';
 import 'package:class_app/core/utilities/size_config.dart';
+import 'package:class_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:class_app/features/auth/presentation/bloc/auth_event.dart';
+import 'package:class_app/features/auth/presentation/bloc/auth_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 
-class ProfilePicture extends StatelessWidget {
+class ProfilePicture extends StatefulWidget {
   const ProfilePicture({super.key});
 
   @override
+  State<ProfilePicture> createState() => _ProfilePictureState();
+}
+
+class _ProfilePictureState extends State<ProfilePicture> {
+  String? storedImageUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfilePic();
+  }
+
+  Future<void> _loadProfilePic() async {
+    final user = await sl<SharedPrefService>().getUser();
+    if (user != null && user.imageUrl.isNotEmpty) {
+      setState(() {
+        storedImageUrl = user.imageUrl;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Stack(
-        children: [
-          Container(
-            padding: EdgeInsets.all(
-              SizeConfig.orientation(context) == Orientation.portrait
-                  ? SizeConfig.blockSizeVertical! * 0.8
-                  : SizeConfig.blockSizeVertical! * 0.8,
-            ),
-            decoration: BoxDecoration(
-              color: Color(whiteColor),
-              border: Border.all(
-                color: Color(blueColor),
-                width: SizeConfig.blockSizeVertical! * 0.5,
+    SizeConfig().init(context);
+    final double avatarSize =
+        SizeConfig.orientation(context) == Orientation.portrait
+            ? SizeConfig.screenWidth! * 0.4
+            : SizeConfig.screenWidth! * 0.2;
+
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        final imageWidget = () {
+          if (state is UploadingProfileImage) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is UploadProfileImageSuccess && state.url != null) {
+            return _networkImage(state.url!, avatarSize);
+          } else if (storedImageUrl != null && storedImageUrl!.isNotEmpty) {
+            return _networkImage(storedImageUrl!, avatarSize);
+          } else {
+            return _defaultAvatar(avatarSize);
+          }
+        }();
+
+        return Center(
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: avatarSize + 12,
+                height: avatarSize + 12,
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Color(whiteColor),
+                  border: Border.all(color: Color(blueColor), width: 2),
+                  shape: BoxShape.circle,
+                ),
+                child: ClipOval(child: imageWidget),
               ),
-              borderRadius: BorderRadius.circular(
-                SizeConfig.blockSizeVertical! * 50,
+              Positioned(
+                bottom: 0,
+                right: MediaQuery.of(context).size.width * 0.3 * 0.1,
+                child: IconButton.filled(
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.all(Color(blueColor)),
+                  ),
+                  icon: const Icon(Icons.edit, color: Colors.white),
+                  onPressed: () async {
+                    final picker = ImagePicker();
+                    final picked = await picker.pickImage(
+                      source: ImageSource.gallery,
+                    );
+                    if (picked != null) {
+                      context.read<AuthBloc>().add(
+                        UploadProfileImageRequested(picked.path),
+                      );
+                    }
+                  },
+                ),
               ),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(
-                SizeConfig.blockSizeVertical! * 50,
-              ),
-              child: Image.asset(
-                'assets/images/image.png',
-                width:
-                    SizeConfig.orientation(context) == Orientation.portrait
-                        ? SizeConfig.screenWidth! * 0.5
-                        : SizeConfig.screenWidth! * 0.15,
-                height:
-                    SizeConfig.orientation(context) == Orientation.portrait
-                        ? SizeConfig.screenWidth! * 0.5
-                        : SizeConfig.screenWidth! * 0.15,
-                fit: BoxFit.cover,
-              ),
-            ),
+            ],
           ),
-          Positioned(
-            bottom:
-                SizeConfig.orientation(context) == Orientation.portrait
-                    ? SizeConfig.blockSizeVertical! * 0.5
-                    : SizeConfig.blockSizeHorizontal! * 0.2,
-            right:
-                SizeConfig.orientation(context) == Orientation.portrait
-                    ? SizeConfig.blockSizeVertical! * 0.5
-                    : SizeConfig.blockSizeHorizontal! * 0.2,
-            child: IconButton.filled(
-              style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all(Color(blueColor)),
-              ),
-              color: Color(whiteColor),
-              onPressed: () {},
-              icon: Icon(Icons.edit),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
+    );
+  }
+
+  Widget _defaultAvatar(double size) {
+    return Image.asset(
+      'assets/images/image.png',
+      width: size,
+      height: size,
+      fit: BoxFit.cover,
+    );
+  }
+
+  Widget _networkImage(String url, double size) {
+    return Image.network(
+      url,
+      width: size,
+      height: size,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => _defaultAvatar(size),
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return const Center(child: CircularProgressIndicator());
+      },
     );
   }
 }

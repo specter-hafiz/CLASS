@@ -26,7 +26,7 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
           ),
         );
       } catch (e) {
-        emit(AudioError("Failed to upload audio: ${e.toString()}"));
+        emit(AudioError(e.toString()));
       }
     });
 
@@ -57,9 +57,7 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
           ),
         );
       } catch (e) {
-        emit(
-          AudioError("Failed to upload and transcribe audio: ${e.toString()}"),
-        );
+        emit(AudioError(e.toString()));
       }
     });
 
@@ -76,7 +74,7 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
           ),
         );
       } catch (e) {
-        emit(AudioError("Failed to transcribe audio: ${e.toString()}"));
+        emit(AudioError(e.toString()));
       }
     });
 

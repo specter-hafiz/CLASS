@@ -12,6 +12,18 @@ class QuestionInitialState extends QuestionState {}
 
 class QuestionLoadingState extends QuestionState {}
 
+class FetchingQuizzesState extends QuestionState {}
+
+class FetchQuizzesErrorState extends QuestionState {
+  final String message;
+  FetchQuizzesErrorState(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class GeneratingQuizzesState extends QuestionState {}
+
 class SubmittingAssessmentState extends QuestionState {}
 
 class SubmittedAssessmentState extends QuestionState {
@@ -151,6 +163,23 @@ class GetAnalyticsErrorState extends QuestionState {
   final String message;
 
   GetAnalyticsErrorState(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class FetchQuizResultsSuccessState extends QuestionState {
+  final List<Map<String, dynamic>> results;
+  FetchQuizResultsSuccessState(this.results);
+  @override
+  List<Object?> get props => [results];
+}
+
+class FetchingQuizResultsState extends QuestionState {}
+
+class FetchQuizResultsErrorState extends QuestionState {
+  final String message;
+  FetchQuizResultsErrorState(this.message);
 
   @override
   List<Object?> get props => [message];

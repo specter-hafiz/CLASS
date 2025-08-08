@@ -46,6 +46,15 @@ class OTPVerificationRequested extends AuthEvent {
   List<Object?> get props => [message];
 }
 
+class UploadProfileImageRequested extends AuthEvent {
+  final String imagePath;
+
+  const UploadProfileImageRequested(this.imagePath);
+
+  @override
+  List<Object?> get props => [imagePath];
+}
+
 class ChangePasswordRequested extends AuthEvent {
   final String userId;
   final String oldPassword;

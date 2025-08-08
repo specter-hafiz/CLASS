@@ -27,7 +27,7 @@ class TranscriptBloc extends Bloc<TranscriptEvents, TranscriptState> {
       } on CustomTimeoutException catch (e) {
         emit(TranscriptError(e.toString()));
       } catch (e) {
-        emit(TranscriptError("Failed to fetch transcripts: ${e.toString()}"));
+        emit(TranscriptError(e.toString()));
       }
     });
 
@@ -39,7 +39,7 @@ class TranscriptBloc extends Bloc<TranscriptEvents, TranscriptState> {
         );
         emit(TranscriptFetched(transcript));
       } catch (e) {
-        emit(TranscriptError("Failed to fetch transcript: ${e.toString()}"));
+        emit(TranscriptError(e.toString()));
       }
     });
 
@@ -52,24 +52,27 @@ class TranscriptBloc extends Bloc<TranscriptEvents, TranscriptState> {
         );
         emit(TranscriptUpdated(updatedTranscript));
       } catch (e) {
-        emit(TranscriptError("Failed to update transcript"));
+        emit(TranscriptError(e.toString()));
       }
     });
-
     on<DeleteTranscriptRequested>((event, emit) async {
-      emit(TranscriptLoading());
+      emit(DeletingTranscript());
       try {
         await deleteTranscriptUsecase(event.transcriptId);
         final currentState = state;
-        if (currentState is TranscriptLoaded) {
+        if (currentState is TranscriptsFetched) {
           final updatedTranscripts =
               currentState.transcripts
                   .where((transcript) => transcript.id != event.transcriptId)
                   .toList();
-          emit(TranscriptLoaded(updatedTranscripts));
+          emit(TranscriptsFetched(updatedTranscripts));
+        } else {
+          // If current state is not TranscriptsFetched, just refetch all
+          final transcripts = await fetchTranscriptsUsecase();
+          emit(TranscriptsFetched(transcripts));
         }
       } catch (e) {
-        emit(TranscriptError("Failed to delete transcript: ${e.toString()}"));
+        emit(DeleteTranscriptError(e.toString()));
       }
     });
   }
