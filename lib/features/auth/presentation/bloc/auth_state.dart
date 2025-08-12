@@ -136,3 +136,21 @@ class ResetPasswordError extends AuthState {
 }
 
 class ResetPasswordStarting extends AuthState {}
+
+class GoogleLoggingInState extends AuthState {}
+
+class GoogleLoginSuccess extends AuthState {
+  final String message;
+
+  const GoogleLoginSuccess(this.message);
+  @override
+  List<Object?> get props => [message];
+}
+
+class GoogleLoginError extends AuthState {
+  final String message;
+
+  const GoogleLoginError(this.message);
+  @override
+  List<Object?> get props => [message];
+}

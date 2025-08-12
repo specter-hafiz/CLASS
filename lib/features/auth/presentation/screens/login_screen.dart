@@ -1,13 +1,45 @@
+import 'package:class_app/core/constants/app_secrets.dart';
 import 'package:class_app/core/constants/strings.dart';
 import 'package:class_app/core/utilities/size_config.dart';
 import 'package:class_app/features/auth/presentation/widgets/continue_with_widget.dart';
 import 'package:class_app/features/auth/presentation/widgets/login_form.dart';
 import 'package:class_app/features/auth/presentation/widgets/rich_text_widget.dart';
 import 'package:class_app/features/onboarding/widgets/custom_elevated_button.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
+
+  Future<void> signInWithGoogle() async {
+    try {
+      // Trigger native Google account picker
+      final googleUser = await GoogleSignIn.instance.initialize(
+        clientId: AppSecrets.googleClientId,
+        serverClientId: AppSecrets.googleWebClientId,
+      );
+      GoogleSignInAccount account = await GoogleSignIn.instance.authenticate(
+        scopeHint: ['email', 'profile'],
+      );
+      if (account.id != null) {
+        // Obtain the auth details from the request
+        final googleAuth = account.authentication;
+
+        // Create a new credential
+        final credential = GoogleAuthProvider.credential(
+          idToken: googleAuth.idToken,
+        );
+        print("Google Auth Credential: $credential");
+
+        // Sign in to Firebase with the credential
+        await FirebaseAuth.instance.signInWithCredential(credential);
+        print("Google Sign-In successful: ${account.email}, ${account.id}");
+      }
+    } catch (e) {
+      print("Google Sign-In failed: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +100,20 @@ class LoginScreen extends StatelessWidget {
                 CustomElevatedButton(
                   buttonText: "Google",
                   showIcon: true,
-                  onPressed: () {},
+                  onPressed: signInWithGoogle,
+
+                  // () async {
+                  //   try {
+                  //     final user = await FirebaseAuth.instance
+                  //         .signInWithProvider(GoogleAuthProvider());
+                  //     final GoogleSignIn googleSignIn = GoogleSignIn.instance;
+                  //     print("FIREBASE USER: ${user.user?.uid}");
+                  //   } on FirebaseAuthException catch (e) {
+                  //     print('Firebase Auth error:\n$e');
+                  //   } catch (error) {
+                  //     print('Unexpected Firebase Auth error: $error');
+                  //   }
+                  // },
                   height:
                       SizeConfig.orientation(context) == Orientation.portrait
                           ? SizeConfig.blockSizeVertical! * 6

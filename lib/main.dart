@@ -9,13 +9,16 @@ import 'package:class_app/features/onboarding/screens/onboarding_screen.dart';
 import 'package:class_app/features/tutor/home/presentation/bloc/audio/audio_bloc.dart';
 import 'package:class_app/features/tutor/home/presentation/bloc/transcript/transcript_bloc.dart';
 import 'package:class_app/features/tutor/quiz/presentation/bloc/question_bloc.dart';
+import 'package:class_app/firebase_options.dart';
 import 'package:class_app/splash_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initCore();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 

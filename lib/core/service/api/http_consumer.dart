@@ -99,6 +99,7 @@ class HttpConsumer {
         throw ServerException("Unexpected error format");
       }
     } catch (err) {
+      print("Error parsing response data POST ROUTE: $err");
       throw ServerException("response?.data}");
     }
 

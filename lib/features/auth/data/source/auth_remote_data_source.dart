@@ -10,6 +10,7 @@ import 'package:class_app/core/service/shared_pref/shared_pref.dart';
 import 'package:class_app/core/utilities/dependency_injection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http_parser/http_parser.dart';
 
 import '../models/user_model.dart';
@@ -176,6 +177,27 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     if (!hasConnection) {
       throw NetworkException("No internet connection");
     }
+
+    final GoogleSignInAccount? user =
+        await GoogleSignIn.instance.authenticate();
+
+    if (user != null) {
+      final GoogleSignInAuthentication auth = user.authentication;
+      final String? idToken = auth.idToken;
+
+      if (idToken != null) {
+        print("ID Token: $idToken");
+        // await sendTokenToBackend(idToken);
+      } else {
+        print("Failed to get ID token.");
+      }
+    }
+    // Send ID token to backend
+    // final response = await http.post(
+    //   Uri.parse('http://your-server.com/api/auth/google'),
+    //   headers: {'Content-Type': 'application/json'},
+    //   body: jsonEncode({'token': idToken}),
+    // );
     final res = await http.post(
       Endpoints.googleLogin,
       data: {'name': username, 'email': email, 'googleId': googleId},
