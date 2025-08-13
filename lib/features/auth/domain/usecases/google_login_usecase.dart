@@ -3,11 +3,7 @@ import 'package:class_app/features/auth/domain/repository/auth_repository.dart';
 class GoogleLoginUsecase {
   AuthRepository repository;
   GoogleLoginUsecase(this.repository);
-  Future<Map<String, dynamic>> call(
-    String username,
-    String email,
-    String googleId,
-  ) {
-    return repository.loginWithGoogle(username, email, googleId);
+  Future<Map<String, dynamic>> call(String googleId) {
+    return repository.loginWithGoogle(googleId);
   }
 }

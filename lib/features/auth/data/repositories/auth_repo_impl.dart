@@ -42,12 +42,8 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Map<String, dynamic>> loginWithGoogle(
-    String username,
-    String email,
-    String googleId,
-  ) {
-    return remote.loginWithGoogle(username, email, googleId);
+  Future<Map<String, dynamic>> loginWithGoogle(String googleId) {
+    return remote.loginWithGoogle(googleId);
   }
 
   @override

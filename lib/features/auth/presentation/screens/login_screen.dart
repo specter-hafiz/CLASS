@@ -1,39 +1,43 @@
 import 'package:class_app/core/constants/app_secrets.dart';
 import 'package:class_app/core/constants/strings.dart';
 import 'package:class_app/core/utilities/size_config.dart';
+import 'package:class_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:class_app/features/auth/presentation/bloc/auth_event.dart';
+import 'package:class_app/features/auth/presentation/bloc/auth_state.dart';
 import 'package:class_app/features/auth/presentation/widgets/continue_with_widget.dart';
 import 'package:class_app/features/auth/presentation/widgets/login_form.dart';
 import 'package:class_app/features/auth/presentation/widgets/rich_text_widget.dart';
 import 'package:class_app/features/onboarding/widgets/custom_elevated_button.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
-  Future<void> signInWithGoogle() async {
+  Future<void> signInWithGoogle(BuildContext context) async {
     try {
       // Trigger native Google account picker
-      final googleUser = await GoogleSignIn.instance.initialize(
+      await GoogleSignIn.instance.initialize(
         clientId: AppSecrets.googleClientId,
         serverClientId: AppSecrets.googleWebClientId,
       );
       GoogleSignInAccount account = await GoogleSignIn.instance.authenticate(
-        scopeHint: ['email', 'profile'],
+        scopeHint: [
+          'https://www.googleapis.com/auth/userinfo.email',
+          'https://www.googleapis.com/auth/userinfo.profile',
+        ],
       );
-      if (account.id != null) {
-        // Obtain the auth details from the request
-        final googleAuth = account.authentication;
 
-        // Create a new credential
-        final credential = GoogleAuthProvider.credential(
-          idToken: googleAuth.idToken,
-        );
-        print("Google Auth Credential: $credential");
+      GoogleSignInAuthentication googleAuth = account.authentication;
+      if (googleAuth.idToken != null) {
+        // Obtain the auth details from the request
+        final idToken = googleAuth.idToken; // ✅ Send this to backend
+
+        print("Google ID Token: $idToken");
+        context.read<AuthBloc>().add(LoginWithGoogleRequested(id: idToken!));
 
         // Sign in to Firebase with the credential
-        await FirebaseAuth.instance.signInWithCredential(credential);
         print("Google Sign-In successful: ${account.email}, ${account.id}");
       }
     } catch (e) {
@@ -44,103 +48,113 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     SizeConfig().init(context);
-    return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: SizeConfig.horizontalPadding(context),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: SizeConfig.screenHeight! * 0.05),
-                Center(
-                  child: Image.asset(
-                    logoImage,
-                    height:
-                        SizeConfig.orientation(context) == Orientation.portrait
+    return BlocConsumer<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is GoogleLoginSuccess) {
+          Navigator.pushNamedAndRemoveUntil(context, '/base', (route) => false);
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
+          body: SafeArea(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: SizeConfig.horizontalPadding(context),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: SizeConfig.screenHeight! * 0.05),
+                    Center(
+                      child: Image.asset(
+                        logoImage,
+                        height:
+                            SizeConfig.orientation(context) ==
+                                Orientation.portrait
                             ? SizeConfig.screenHeight! * 0.15
                             : SizeConfig.screenHeight! * 0.2,
-                    width: SizeConfig.screenWidth! * 0.2,
-                  ),
-                ),
-                SizedBox(height: SizeConfig.blockSizeVertical! * 1),
+                        width: SizeConfig.screenWidth! * 0.2,
+                      ),
+                    ),
+                    SizedBox(height: SizeConfig.blockSizeVertical! * 1),
 
-                Text(
-                  loginText,
-                  style: TextStyle(
-                    fontSize:
-                        SizeConfig.orientation(context) == Orientation.portrait
+                    Text(
+                      loginText,
+                      style: TextStyle(
+                        fontSize:
+                            SizeConfig.orientation(context) ==
+                                Orientation.portrait
                             ? SizeConfig.screenWidth! * 0.09
                             : SizeConfig.screenWidth! * 0.05,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 1,
-                ),
-                SizedBox(height: SizeConfig.blockSizeVertical! * 2),
-                Text(
-                  loginToContinueText,
-                  style: TextStyle(
-                    fontSize:
-                        SizeConfig.orientation(context) == Orientation.portrait
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                    ),
+                    SizedBox(height: SizeConfig.blockSizeVertical! * 2),
+                    Text(
+                      loginToContinueText,
+                      style: TextStyle(
+                        fontSize:
+                            SizeConfig.orientation(context) ==
+                                Orientation.portrait
                             ? SizeConfig.screenWidth! * 0.05
                             : SizeConfig.screenWidth! * 0.03,
-                    fontWeight: FontWeight.w400,
-                  ),
-                  maxLines: 1,
-                ),
-                SizedBox(height: SizeConfig.blockSizeVertical! * 2),
+                        fontWeight: FontWeight.w400,
+                      ),
+                      maxLines: 1,
+                    ),
+                    SizedBox(height: SizeConfig.blockSizeVertical! * 2),
 
-                LoginForm(),
+                    AbsorbPointer(
+                      absorbing: state is GoogleLoggingInState,
+                      child: LoginForm(),
+                    ),
 
-                SizedBox(height: SizeConfig.blockSizeVertical! * 2),
-                ContinueWithWidget(),
-                SizedBox(height: SizeConfig.blockSizeVertical! * 2),
-                CustomElevatedButton(
-                  buttonText: "Google",
-                  showIcon: true,
-                  onPressed: signInWithGoogle,
-
-                  // () async {
-                  //   try {
-                  //     final user = await FirebaseAuth.instance
-                  //         .signInWithProvider(GoogleAuthProvider());
-                  //     final GoogleSignIn googleSignIn = GoogleSignIn.instance;
-                  //     print("FIREBASE USER: ${user.user?.uid}");
-                  //   } on FirebaseAuthException catch (e) {
-                  //     print('Firebase Auth error:\n$e');
-                  //   } catch (error) {
-                  //     print('Unexpected Firebase Auth error: $error');
-                  //   }
-                  // },
-                  height:
-                      SizeConfig.orientation(context) == Orientation.portrait
+                    SizedBox(height: SizeConfig.blockSizeVertical! * 2),
+                    ContinueWithWidget(),
+                    SizedBox(height: SizeConfig.blockSizeVertical! * 2),
+                    CustomElevatedButton(
+                      buttonText: state is GoogleLoggingInState
+                          ? "Logging in..."
+                          : "Google",
+                      showIcon: true,
+                      onPressed: state is GoogleLoggingInState
+                          ? null
+                          : () => signInWithGoogle(context),
+                      height:
+                          SizeConfig.orientation(context) ==
+                              Orientation.portrait
                           ? SizeConfig.blockSizeVertical! * 6
                           : SizeConfig.blockSizeHorizontal! * 5,
-                  borderRadius:
-                      SizeConfig.orientation(context) == Orientation.portrait
+                      borderRadius:
+                          SizeConfig.orientation(context) ==
+                              Orientation.portrait
                           ? SizeConfig.blockSizeHorizontal! * 3
                           : SizeConfig.blockSizeHorizontal! * 1,
-                ),
-                SizedBox(height: SizeConfig.blockSizeVertical! * 2),
-                RichTextWidget(
-                  text: "Don't have an account? ",
-                  actionText: registerText,
-                  onTap: () {
-                    FocusScope.of(context).unfocus();
+                    ),
+                    SizedBox(height: SizeConfig.blockSizeVertical! * 2),
+                    RichTextWidget(
+                      text: "Don't have an account? ",
+                      actionText: registerText,
+                      onTap: state is AuthLoading
+                          ? null
+                          : () {
+                              FocusScope.of(context).unfocus();
 
-                    Navigator.pushNamed(context, '/register');
-                  },
+                              Navigator.pushNamed(context, '/register');
+                            },
+                    ),
+                    SizeConfig.orientation(context) == Orientation.portrait
+                        ? SizedBox.shrink()
+                        : SizedBox(height: SizeConfig.blockSizeVertical! * 2),
+                  ],
                 ),
-                SizeConfig.orientation(context) == Orientation.portrait
-                    ? SizedBox.shrink()
-                    : SizedBox(height: SizeConfig.blockSizeVertical! * 2),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

@@ -92,5 +92,9 @@ class ResetPasswordRequested extends AuthEvent {
 }
 
 class LoginWithGoogleRequested extends AuthEvent {
-  const LoginWithGoogleRequested();
+  String id;
+  LoginWithGoogleRequested({required this.id});
+
+  @override
+  List<Object?> get props => [id];
 }

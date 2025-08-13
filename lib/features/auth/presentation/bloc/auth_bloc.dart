@@ -156,5 +156,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(UploadProfileImageError(e.toString()));
       }
     });
+
+    on<LoginWithGoogleRequested>((event, emit) async {
+      emit(GoogleLoggingInState());
+      try {
+        final user = await googleLoginUsecase(event.id);
+        emit(GoogleLoginSuccess(""));
+      } on NetworkException catch (e) {
+        emit(AuthError(e.message));
+      } catch (e) {
+        emit(AuthError(e.toString()));
+      }
+    });
   }
 }

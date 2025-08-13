@@ -14,11 +14,7 @@ abstract class AuthRepository {
     bool? isLoginSignUp,
   );
   Future<Map<String, dynamic>> editProfile(String username);
-  Future<Map<String, dynamic>> loginWithGoogle(
-    String username,
-    String email,
-    String googleId,
-  );
+  Future<Map<String, dynamic>> loginWithGoogle(String googleId);
   Future<Map<String, dynamic>> forgotPassword(String email);
   Future<Map<String, dynamic>> changePassword(
     String userId,

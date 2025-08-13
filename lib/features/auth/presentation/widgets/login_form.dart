@@ -96,9 +96,8 @@ class _LoginFormState extends State<LoginForm> {
                   return null;
                 },
                 textInputAction: TextInputAction.next,
-                onFieldSubmitted:
-                    (_) =>
-                        FocusScope.of(context).requestFocus(_passwordFocusNode),
+                onFieldSubmitted: (_) =>
+                    FocusScope.of(context).requestFocus(_passwordFocusNode),
               ),
               SizedBox(height: SizeConfig.blockSizeVertical! * 1),
 
@@ -141,17 +140,18 @@ class _LoginFormState extends State<LoginForm> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   InkWell(
-                    onTap:
-                        () => Navigator.pushNamed(context, '/forgotPassword'),
+                    onTap: state is AuthLoading
+                        ? null
+                        : () => Navigator.pushNamed(context, '/forgotPassword'),
                     child: Text(
                       forgotPasswordText,
                       style: TextStyle(
                         color: Color(blueColor),
                         fontSize:
                             SizeConfig.orientation(context) ==
-                                    Orientation.portrait
-                                ? SizeConfig.screenWidth! * 0.04
-                                : SizeConfig.screenWidth! * 0.025,
+                                Orientation.portrait
+                            ? SizeConfig.screenWidth! * 0.04
+                            : SizeConfig.screenWidth! * 0.025,
                         fontWeight: FontWeight.w400,
                       ),
                       maxLines: 1,
@@ -165,26 +165,28 @@ class _LoginFormState extends State<LoginForm> {
               state is AuthLoading
                   ? Center(child: CircularProgressIndicator())
                   : CustomElevatedButton(
-                    buttonText: loginText,
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        context.read<AuthBloc>().add(
-                          LoginRequested(
-                            _emailController.text.trim(),
-                            _passwordController.text.trim(),
-                          ),
-                        );
-                      }
-                    },
-                    height:
-                        SizeConfig.orientation(context) == Orientation.portrait
-                            ? SizeConfig.blockSizeVertical! * 6
-                            : SizeConfig.blockSizeHorizontal! * 5,
-                    borderRadius:
-                        SizeConfig.orientation(context) == Orientation.portrait
-                            ? SizeConfig.blockSizeHorizontal! * 3
-                            : SizeConfig.blockSizeHorizontal! * 1,
-                  ),
+                      buttonText: loginText,
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          context.read<AuthBloc>().add(
+                            LoginRequested(
+                              _emailController.text.trim(),
+                              _passwordController.text.trim(),
+                            ),
+                          );
+                        }
+                      },
+                      height:
+                          SizeConfig.orientation(context) ==
+                              Orientation.portrait
+                          ? SizeConfig.blockSizeVertical! * 6
+                          : SizeConfig.blockSizeHorizontal! * 5,
+                      borderRadius:
+                          SizeConfig.orientation(context) ==
+                              Orientation.portrait
+                          ? SizeConfig.blockSizeHorizontal! * 3
+                          : SizeConfig.blockSizeHorizontal! * 1,
+                    ),
             ],
           ),
         );
@@ -193,8 +195,8 @@ class _LoginFormState extends State<LoginForm> {
         if (state is RequireOtpVerification) {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder:
-                  (context) => VerifyOTPScreen(email: _emailController.text),
+              builder: (context) =>
+                  VerifyOTPScreen(email: _emailController.text),
             ),
           );
         } else if (state is AuthAuthenticated) {

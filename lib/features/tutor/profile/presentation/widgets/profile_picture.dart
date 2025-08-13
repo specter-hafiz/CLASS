@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:class_app/core/constants/app_colors.dart';
 import 'package:class_app/core/service/shared_pref/shared_pref.dart';
 import 'package:class_app/core/utilities/dependency_injection.dart';
@@ -109,16 +110,15 @@ class _ProfilePictureState extends State<ProfilePicture> {
   }
 
   Widget _networkImage(String url, double size) {
-    return Image.network(
-      url,
+    return CachedNetworkImage(
+      imageUrl: url,
       width: size,
       height: size,
       fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) => _defaultAvatar(size),
-      loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null) return child;
-        return const Center(child: CircularProgressIndicator());
-      },
+      progressIndicatorBuilder:
+          (context, url, downloadProgress) =>
+              CircularProgressIndicator(value: downloadProgress.progress),
+      errorWidget: (_, _, _) => _defaultAvatar(size),
     );
   }
 }

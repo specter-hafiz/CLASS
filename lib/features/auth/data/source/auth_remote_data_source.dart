@@ -10,7 +10,6 @@ import 'package:class_app/core/service/shared_pref/shared_pref.dart';
 import 'package:class_app/core/utilities/dependency_injection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http_parser/http_parser.dart';
 
 import '../models/user_model.dart';
@@ -35,11 +34,7 @@ abstract class AuthRemoteDataSource {
     bool? isLoginSignUp,
   );
   Future<Map<String, dynamic>> editProfile(String username);
-  Future<Map<String, dynamic>> loginWithGoogle(
-    String username,
-    String email,
-    String googleId,
-  );
+  Future<Map<String, dynamic>> loginWithGoogle(String googleId);
   Future<Map<String, dynamic>> forgotPassword(String email);
   Future<Map<String, dynamic>> changePassword(
     String userId,
@@ -168,45 +163,20 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<Map<String, dynamic>> loginWithGoogle(
-    String username,
-    String email,
-    String googleId,
-  ) async {
+  Future<Map<String, dynamic>> loginWithGoogle(String googleId) async {
     bool hasConnection = await NetworkConnectivity().isConnected;
     if (!hasConnection) {
       throw NetworkException("No internet connection");
     }
-
-    final GoogleSignInAccount? user =
-        await GoogleSignIn.instance.authenticate();
-
-    if (user != null) {
-      final GoogleSignInAuthentication auth = user.authentication;
-      final String? idToken = auth.idToken;
-
-      if (idToken != null) {
-        print("ID Token: $idToken");
-        // await sendTokenToBackend(idToken);
-      } else {
-        print("Failed to get ID token.");
-      }
-    }
-    // Send ID token to backend
-    // final response = await http.post(
-    //   Uri.parse('http://your-server.com/api/auth/google'),
-    //   headers: {'Content-Type': 'application/json'},
-    //   body: jsonEncode({'token': idToken}),
-    // );
     final res = await http.post(
       Endpoints.googleLogin,
-      data: {'name': username, 'email': email, 'googleId': googleId},
+      data: {'token': googleId},
     );
-    if (res.statusCode != StatusCode.ok) {
-      throw ServerException(
-        res.data['message'] ?? 'Failed to login with Google',
-      );
-    }
+    final data = res.data is String ? jsonDecode(res.data) : res.data;
+    final user = UserModel.fromJson(data['user']);
+    await SharedPrefService().saveToken(data['user']['accessToken']);
+    await SharedPrefService().saveRefreshToken(data['user']['refreshToken']);
+    await SharedPrefService().saveUser(user);
     return res.data;
   }
 
