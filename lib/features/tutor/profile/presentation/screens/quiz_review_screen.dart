@@ -5,6 +5,7 @@ import 'package:class_app/features/tutor/profile/presentation/widgets/question_w
 import 'package:class_app/features/tutor/quiz/data/models/question_model.dart';
 import 'package:class_app/features/tutor/quiz/data/models/response_model.dart';
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 
 class QuizReviewScreen extends StatelessWidget {
   const QuizReviewScreen({
@@ -16,6 +17,28 @@ class QuizReviewScreen extends StatelessWidget {
   final List<Question> questions;
   final String title;
   final ResponseModel response;
+
+  String buildQuizSummary(List<Question> questions, ResponseModel response) {
+    final buffer = StringBuffer();
+    for (int i = 0; i < questions.length; i++) {
+      final q = questions[i];
+      buffer.writeln('Q${i + 1}: ${q.question}');
+      for (int j = 0; j < q.options.length; j++) {
+        final option = q.options[j];
+        final isCorrect = option == q.answer;
+        final isSelected =
+            (response.answers.length > i &&
+                response.answers[i].answer == option);
+        buffer.writeln(
+          '   ${String.fromCharCode(65 + j)}. $option'
+          '${isCorrect ? "  (Correct)" : ""}'
+          '${isSelected ? "  (Selected)" : ""}',
+        );
+      }
+      buffer.writeln('');
+    }
+    return buffer.toString();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +64,12 @@ class QuizReviewScreen extends StatelessWidget {
             ),
             child: IconButton(
               icon: const Icon(Icons.share_outlined),
-              onPressed: () {},
+              onPressed: () async {
+                final summary = buildQuizSummary(questions, response);
+                SharePlus.instance.share(
+                  ShareParams(text: summary, subject: title),
+                );
+              },
             ),
           ),
         ],

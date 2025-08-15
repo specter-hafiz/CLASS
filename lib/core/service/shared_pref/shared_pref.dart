@@ -2,14 +2,10 @@ import 'dart:convert';
 
 import 'package:class_app/features/auth/data/models/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:logger/logger.dart';
 
 class SharedPrefService {
   // print to show initialization
-  final logger = Logger();
-  SharedPrefService() {
-    logger.i('SharedPrefService initialized');
-  }
+  SharedPrefService();
   Future<void> saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('token', token);

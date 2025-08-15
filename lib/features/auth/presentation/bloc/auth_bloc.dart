@@ -160,10 +160,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<LoginWithGoogleRequested>((event, emit) async {
       emit(GoogleLoggingInState());
       try {
-        final user = await googleLoginUsecase(event.id);
+        await googleLoginUsecase(event.id);
         emit(GoogleLoginSuccess(""));
       } on NetworkException catch (e) {
         emit(AuthError(e.message));
+      } catch (e) {
+        emit(AuthError(e.toString()));
+      }
+    });
+
+    on<ResendOTPRequested>((event, emit) async {
+      emit(ResendingOTPState());
+      try {
+        final response = await resendOtpUsecase(event.email);
+        emit(ResendOTPSuccess(response['message']));
       } catch (e) {
         emit(AuthError(e.toString()));
       }

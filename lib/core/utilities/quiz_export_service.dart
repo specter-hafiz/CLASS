@@ -34,8 +34,8 @@ class QuizExportService {
                     pw.Text(
                       'Q${index + 1}: ${question.question}',
                       style: pw.TextStyle(
-                        fontSize: 18,
-                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 12,
+                        fontWeight: pw.FontWeight.normal,
                       ),
                     ),
                     pw.SizedBox(height: 5),
@@ -44,12 +44,7 @@ class QuizExportService {
                       final opt = optEntry.value;
                       return pw.Bullet(
                         text: '$label. $opt',
-                        style: pw.TextStyle(
-                          fontWeight:
-                              opt == question.answer
-                                  ? pw.FontWeight.bold
-                                  : pw.FontWeight.normal,
-                        ),
+                        style: pw.TextStyle(fontWeight: pw.FontWeight.normal),
                       );
                     }),
                     pw.SizedBox(height: 20),

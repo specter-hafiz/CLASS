@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:class_app/core/constants/app_colors.dart';
 import 'package:class_app/core/utilities/size_config.dart';
+import 'package:class_app/features/tutor/home/presentation/screens/home_screen.dart';
 import 'package:class_app/features/tutor/home/presentation/widgets/recording_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -139,7 +140,7 @@ class _AudioPlaybackScreenState extends State<AudioPlaybackScreen> {
   Widget build(BuildContext context) {
     SizeConfig().init(context);
     return _audioUrl == null
-        ? const Center(child: CircularProgressIndicator())
+        ? const Center(child: LoadingWidget(loadingText: "Fetching audio..."))
         : SingleChildScrollView(
           child: Column(
             children: [

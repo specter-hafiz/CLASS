@@ -11,6 +11,7 @@ import 'package:class_app/features/tutor/quiz/presentation/bloc/question_state.d
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:open_file/open_file.dart';
 
 class DetailAnalyticsScreen extends StatefulWidget {
   const DetailAnalyticsScreen({
@@ -38,177 +39,195 @@ class _DetailAnalyticsScreenState extends State<DetailAnalyticsScreen> {
   @override
   Widget build(BuildContext context) {
     SizeConfig().init(context);
-    return Scaffold(
-      appBar: AppBar(
-        leading: CustomBackButton(
-          onTap: () {
-            if (FocusScope.of(context).hasFocus) {
-              FocusScope.of(context).unfocus();
-            }
-            Navigator.pop(context);
-            context.read<QuestionBloc>().add(GetAnalyticsEvent());
-          },
-        ),
-        title: Text(
-          widget.title,
-          style: TextStyle(
-            fontSize: SizeConfig.blockSizeHorizontal! * 6,
-            fontWeight: FontWeight.w600,
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (bool bul, results) async {
+        if (FocusScope.of(context).hasFocus) {
+          FocusScope.of(context).unfocus();
+        }
+        context.read<QuestionBloc>().add(GetAnalyticsEvent());
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: CustomBackButton(
+            onTap: () {
+              Navigator.pop(context);
+            },
           ),
-          maxLines: 1,
+          title: Text(
+            widget.title,
+            style: TextStyle(
+              fontSize: SizeConfig.blockSizeHorizontal! * 6,
+              fontWeight: FontWeight.w600,
+            ),
+            maxLines: 1,
+          ),
+          automaticallyImplyLeading: false,
         ),
-        automaticallyImplyLeading: false,
-      ),
-      body: BlocBuilder<QuestionBloc, QuestionState>(
-        buildWhen:
-            (previous, current) =>
-                current is GetQuizAnalyticsLoadedState ||
-                current is GetQuizAnalyticsErrorState ||
-                current is GetQuizAnalyticsLoadingState,
-        builder: (context, state) {
-          if (state is GetQuizAnalyticsLoadingState) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is GetQuizAnalyticsErrorState) {
-            return Center(child: Text(state.message));
-          } else if (state is GetQuizAnalyticsLoadedState) {
-            final analytics = state.analytics;
+        body: BlocBuilder<QuestionBloc, QuestionState>(
+          buildWhen:
+              (previous, current) =>
+                  current is GetQuizAnalyticsLoadedState ||
+                  current is GetQuizAnalyticsErrorState ||
+                  current is GetQuizAnalyticsLoadingState,
+          builder: (context, state) {
+            if (state is GetQuizAnalyticsLoadingState) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is GetQuizAnalyticsErrorState) {
+              return Center(child: Text(state.message));
+            } else if (state is GetQuizAnalyticsLoadedState) {
+              final analytics = state.analytics;
 
-            if (analytics.isEmpty) {
-              return const Center(
-                child: Text(
-                  "No responses received yet.",
-                  style: TextStyle(color: Color(blackColor)),
-                  textAlign: TextAlign.center,
-                ),
-              );
-            }
+              if (analytics.isEmpty) {
+                return const Center(
+                  child: Text(
+                    "No responses received yet.",
+                    style: TextStyle(color: Color(blackColor)),
+                    textAlign: TextAlign.center,
+                  ),
+                );
+              }
 
-            /// Build score frequency map from totalSubmissions per score (optional)
-            final scoreFrequency = <int, int>{};
-            for (var item in analytics) {
-              int score = item['correctAnswers'] ?? 0;
-              scoreFrequency[score] = (scoreFrequency[score] ?? 0) + 1;
-            }
+              /// Build score frequency map from totalSubmissions per score (optional)
+              final scoreFrequency = <int, int>{};
+              for (var item in analytics) {
+                int score = item['correctAnswers'] ?? 0;
+                scoreFrequency[score] = (scoreFrequency[score] ?? 0) + 1;
+              }
 
-            return Column(
-              children: [
-                Expanded(
-                  child: ListView(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: SizeConfig.horizontalPadding(context),
-                    ),
-                    children: [
-                      SizedBox(height: SizeConfig.blockSizeVertical! * 1),
+              return Column(
+                children: [
+                  Expanded(
+                    child: ListView(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: SizeConfig.horizontalPadding(context),
+                      ),
+                      children: [
+                        SizedBox(height: SizeConfig.blockSizeVertical! * 1),
 
-                      AccuracyBarChart(analytics: analytics),
-                      SizedBox(height: SizeConfig.blockSizeVertical! * 2),
-                      BlocConsumer<QuestionBloc, QuestionState>(
-                        listener: (context, state) async {
-                          if (state is FetchQuizResultsErrorState) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(state.message)),
-                            );
-                          }
-
-                          if (state is FetchQuizResultsSuccessState) {
-                            final filePath =
-                                await QuizResultExportService.exportToPdf(
-                                  quizTitle: widget.title,
-                                  responses: state.results,
-                                  fileName: '${widget.title}_quiz_results',
-                                );
-                            if (filePath != null) {
+                        AccuracyBarChart(analytics: analytics),
+                        SizedBox(height: SizeConfig.blockSizeVertical! * 2),
+                        BlocConsumer<QuestionBloc, QuestionState>(
+                          listener: (context, state) async {
+                            if (state is FetchQuizResultsErrorState) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Check your downloads folder for file.',
-                                  ),
-                                ),
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Permission denied or error occurred.',
-                                  ),
-                                ),
+                                SnackBar(content: Text(state.message)),
                               );
                             }
-                          }
-                        },
-                        builder: (context, state) {
-                          return CustomElevatedButton(
-                            buttonText:
-                                state is FetchingQuizResultsState
-                                    ? exportingResultsText
-                                    : exportResultsText,
-                            onPressed: () {
-                              context.read<QuestionBloc>().add(
-                                FetchQuizResultsEvent(widget.id),
-                              );
-                            },
-                          );
-                        },
-                      ),
-                      SizedBox(height: SizeConfig.blockSizeVertical! * 2),
-                      GridView.builder(
-                        itemCount: analytics.length,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          mainAxisSpacing: 12,
-                          crossAxisSpacing: 12,
-                          childAspectRatio:
-                              SizeConfig.orientation(context) ==
-                                      Orientation.portrait
-                                  ? 1.2
-                                  : 2.2,
-                        ),
-                        itemBuilder: (context, index) {
-                          final item = analytics[index];
-                          final correct = item['correctAnswers'] ?? 0;
-                          final total = item['totalSubmissions'] ?? 0;
-                          return InkWell(
-                            borderRadius: BorderRadius.circular(
-                              SizeConfig.blockSizeVertical! * 2,
-                            ),
-                            onTap: () {},
-                            child: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Color(greyColor)),
-                                borderRadius: BorderRadius.circular(
-                                  SizeConfig.blockSizeVertical! * 2,
-                                ),
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text("Q${index + 1}"),
-                                  Text(
-                                    "$correct/$total",
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
+
+                            if (state is FetchQuizResultsSuccessState) {
+                              final filePath =
+                                  await QuizResultExportService.exportToPdf(
+                                    quizTitle: widget.title,
+                                    responses: state.results,
+                                    fileName: '${widget.title}_quiz_results',
+                                  );
+                              if (filePath != null) {
+                                final messenger = ScaffoldMessenger.of(context);
+
+                                messenger.showSnackBar(
+                                  SnackBar(
+                                    duration: const Duration(
+                                      seconds: 3,
+                                    ), // basically won't auto-dismiss
+                                    content: Text(
+                                      'File downloaded successfully.',
+                                    ),
+                                    action: SnackBarAction(
+                                      textColor: Color(whiteColor),
+                                      label: 'Open',
+                                      onPressed: () {
+                                        OpenFile.open(filePath);
+                                      },
                                     ),
                                   ),
-                                ],
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Permission denied or error occurred.',
+                                    ),
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                          builder: (context, state) {
+                            return CustomElevatedButton(
+                              buttonText:
+                                  state is FetchingQuizResultsState
+                                      ? exportingResultsText
+                                      : exportResultsText,
+                              onPressed: () {
+                                context.read<QuestionBloc>().add(
+                                  FetchQuizResultsEvent(widget.id),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                        SizedBox(height: SizeConfig.blockSizeVertical! * 2),
+                        GridView.builder(
+                          itemCount: analytics.length,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3,
+                                mainAxisSpacing: 12,
+                                crossAxisSpacing: 12,
+                                childAspectRatio:
+                                    SizeConfig.orientation(context) ==
+                                            Orientation.portrait
+                                        ? 1.2
+                                        : 2.2,
                               ),
-                            ),
-                          );
-                        },
-                      ),
-                      SizedBox(height: SizeConfig.blockSizeVertical! * 1),
-                    ],
+                          itemBuilder: (context, index) {
+                            final item = analytics[index];
+                            final correct = item['correctAnswers'] ?? 0;
+                            final total = item['totalSubmissions'] ?? 0;
+                            return InkWell(
+                              borderRadius: BorderRadius.circular(
+                                SizeConfig.blockSizeVertical! * 2,
+                              ),
+                              onTap: () {},
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Color(greyColor)),
+                                  borderRadius: BorderRadius.circular(
+                                    SizeConfig.blockSizeVertical! * 2,
+                                  ),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text("Q${index + 1}"),
+                                    Text(
+                                      "$correct/$total",
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        SizedBox(height: SizeConfig.blockSizeVertical! * 1),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            );
-          } else {
-            // Handle unexpected states
-            return const Center(child: Text("Unexpected state encountered."));
-          }
-        },
+                ],
+              );
+            } else {
+              // Handle unexpected states
+              return const Center(child: Text("Unexpected state encountered."));
+            }
+          },
+        ),
       ),
     );
   }

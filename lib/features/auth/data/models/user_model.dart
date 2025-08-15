@@ -38,12 +38,12 @@ class UserModel extends User {
     return UserModel(
       json['profileUrl'] ?? '',
       id: json['_id'],
-      name: json['name'],
-      email: json['email'],
+      name: json['name'] ?? "",
+      email: json['email'] ?? "",
       role: json['role'] ?? 'user',
       isVerified: json['isVerified'] ?? false,
-      accessToken: json['accessToken'],
-      refreshToken: json['refreshToken'],
+      accessToken: json['accessToken'] ?? "",
+      refreshToken: json['refreshToken'] ?? "",
     );
   }
 

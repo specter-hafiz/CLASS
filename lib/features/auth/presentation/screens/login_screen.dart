@@ -31,14 +31,8 @@ class LoginScreen extends StatelessWidget {
 
       GoogleSignInAuthentication googleAuth = account.authentication;
       if (googleAuth.idToken != null) {
-        // Obtain the auth details from the request
         final idToken = googleAuth.idToken; // ✅ Send this to backend
-
-        print("Google ID Token: $idToken");
         context.read<AuthBloc>().add(LoginWithGoogleRequested(id: idToken!));
-
-        // Sign in to Firebase with the credential
-        print("Google Sign-In successful: ${account.email}, ${account.id}");
       }
     } catch (e) {
       print("Google Sign-In failed: $e");
@@ -71,9 +65,9 @@ class LoginScreen extends StatelessWidget {
                         logoImage,
                         height:
                             SizeConfig.orientation(context) ==
-                                Orientation.portrait
-                            ? SizeConfig.screenHeight! * 0.15
-                            : SizeConfig.screenHeight! * 0.2,
+                                    Orientation.portrait
+                                ? SizeConfig.screenHeight! * 0.15
+                                : SizeConfig.screenHeight! * 0.2,
                         width: SizeConfig.screenWidth! * 0.2,
                       ),
                     ),
@@ -84,9 +78,9 @@ class LoginScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize:
                             SizeConfig.orientation(context) ==
-                                Orientation.portrait
-                            ? SizeConfig.screenWidth! * 0.09
-                            : SizeConfig.screenWidth! * 0.05,
+                                    Orientation.portrait
+                                ? SizeConfig.screenWidth! * 0.09
+                                : SizeConfig.screenWidth! * 0.05,
                         fontWeight: FontWeight.bold,
                       ),
                       maxLines: 1,
@@ -97,9 +91,9 @@ class LoginScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize:
                             SizeConfig.orientation(context) ==
-                                Orientation.portrait
-                            ? SizeConfig.screenWidth! * 0.05
-                            : SizeConfig.screenWidth! * 0.03,
+                                    Orientation.portrait
+                                ? SizeConfig.screenWidth! * 0.05
+                                : SizeConfig.screenWidth! * 0.03,
                         fontWeight: FontWeight.w400,
                       ),
                       maxLines: 1,
@@ -115,35 +109,38 @@ class LoginScreen extends StatelessWidget {
                     ContinueWithWidget(),
                     SizedBox(height: SizeConfig.blockSizeVertical! * 2),
                     CustomElevatedButton(
-                      buttonText: state is GoogleLoggingInState
-                          ? "Logging in..."
-                          : "Google",
+                      buttonText:
+                          state is GoogleLoggingInState
+                              ? "Logging in..."
+                              : "Google",
                       showIcon: true,
-                      onPressed: state is GoogleLoggingInState
-                          ? null
-                          : () => signInWithGoogle(context),
+                      onPressed:
+                          state is GoogleLoggingInState
+                              ? null
+                              : () => signInWithGoogle(context),
                       height:
                           SizeConfig.orientation(context) ==
-                              Orientation.portrait
-                          ? SizeConfig.blockSizeVertical! * 6
-                          : SizeConfig.blockSizeHorizontal! * 5,
+                                  Orientation.portrait
+                              ? SizeConfig.blockSizeVertical! * 6
+                              : SizeConfig.blockSizeHorizontal! * 5,
                       borderRadius:
                           SizeConfig.orientation(context) ==
-                              Orientation.portrait
-                          ? SizeConfig.blockSizeHorizontal! * 3
-                          : SizeConfig.blockSizeHorizontal! * 1,
+                                  Orientation.portrait
+                              ? SizeConfig.blockSizeHorizontal! * 3
+                              : SizeConfig.blockSizeHorizontal! * 1,
                     ),
                     SizedBox(height: SizeConfig.blockSizeVertical! * 2),
                     RichTextWidget(
                       text: "Don't have an account? ",
                       actionText: registerText,
-                      onTap: state is AuthLoading
-                          ? null
-                          : () {
-                              FocusScope.of(context).unfocus();
+                      onTap:
+                          state is AuthLoading
+                              ? null
+                              : () {
+                                FocusScope.of(context).unfocus();
 
-                              Navigator.pushNamed(context, '/register');
-                            },
+                                Navigator.pushNamed(context, '/register');
+                              },
                     ),
                     SizeConfig.orientation(context) == Orientation.portrait
                         ? SizedBox.shrink()

@@ -99,7 +99,7 @@ class HttpConsumer {
         throw ServerException("Unexpected error format");
       }
     } catch (err) {
-      throw ServerException("Failed to parse response");
+      throw ServerException("");
     }
 
     final message = data['message']?.toString();

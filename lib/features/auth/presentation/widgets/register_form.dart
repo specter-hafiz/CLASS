@@ -1,4 +1,5 @@
 import 'package:class_app/core/constants/app_colors.dart';
+import 'package:class_app/core/constants/app_secrets.dart';
 import 'package:class_app/core/constants/strings.dart';
 import 'package:class_app/core/utilities/size_config.dart';
 import 'package:class_app/features/auth/presentation/bloc/auth_bloc.dart';
@@ -10,6 +11,7 @@ import 'package:class_app/features/auth/presentation/widgets/rich_text_widget.da
 import 'package:class_app/features/onboarding/widgets/custom_elevated_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class RegisterForm extends StatefulWidget {
   const RegisterForm({super.key});
@@ -26,6 +28,9 @@ class _RegisterFormState extends State<RegisterForm> {
   late final FocusNode emailFocusNode;
   late final FocusNode passwordFocusNode;
 
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool agreedToTerms = false;
+
   @override
   void initState() {
     super.initState();
@@ -35,13 +40,6 @@ class _RegisterFormState extends State<RegisterForm> {
     userNameFocusNode = FocusNode();
     emailFocusNode = FocusNode();
     passwordFocusNode = FocusNode();
-    userNameFocusNode.addListener(
-      () => _scrollIntoViewIfNeeded(userNameFocusNode),
-    );
-    emailFocusNode.addListener(() => _scrollIntoViewIfNeeded(emailFocusNode));
-    passwordFocusNode.addListener(
-      () => _scrollIntoViewIfNeeded(passwordFocusNode),
-    );
   }
 
   @override
@@ -52,36 +50,60 @@ class _RegisterFormState extends State<RegisterForm> {
     userNameFocusNode.dispose();
     emailFocusNode.dispose();
     passwordFocusNode.dispose();
-    userNameFocusNode.removeListener(
-      () => _scrollIntoViewIfNeeded(userNameFocusNode),
-    );
-    emailFocusNode.removeListener(
-      () => _scrollIntoViewIfNeeded(emailFocusNode),
-    );
-    passwordFocusNode.removeListener(
-      () => _scrollIntoViewIfNeeded(passwordFocusNode),
-    );
     super.dispose();
   }
 
-  void _scrollIntoViewIfNeeded(FocusNode node) {
-    if (node.hasFocus) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Scrollable.ensureVisible(
-          context,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          alignment: 0.4,
-        );
-      });
+  void _launchUrl() async {
+    Uri _url = Uri.parse(AppSecrets.policyDocument);
+    if (!await launchUrl(_url)) {
+      throw Exception('Could not launch $_url');
     }
   }
 
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  void _register() {
+    if (_formKey.currentState!.validate()) {
+      if (!agreedToTerms) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('You must agree to the Terms and Privacy Policy'),
+          ),
+        );
+        return;
+      }
+      FocusScope.of(context).unfocus(); // dismiss keyboard
+
+      context.read<AuthBloc>().add(
+        RegisterRequested(
+          userNameController.text.trim(),
+          emailController.text.trim(),
+          passwordController.text.trim(),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is SignupSuccess) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.message)));
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => VerifyOTPScreen(email: state.email),
+            ),
+          );
+        } else if (state is AuthError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+      },
       builder: (context, state) {
         return Form(
           key: _formKey,
@@ -89,13 +111,12 @@ class _RegisterFormState extends State<RegisterForm> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CustomTextField(
+                showSuffixIcon: false,
                 readOnly: state is AuthLoading,
                 focusNode: userNameFocusNode,
-
                 showTitle: true,
                 titleText: userNameText,
                 hintText: userNameHintText,
-                showSuffixIcon: false,
                 controller: userNameController,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -112,30 +133,26 @@ class _RegisterFormState extends State<RegisterForm> {
               ),
               SizedBox(height: SizeConfig.blockSizeVertical! * 1),
               CustomTextField(
+                showSuffixIcon: false,
                 readOnly: state is AuthLoading,
                 focusNode: emailFocusNode,
                 showTitle: true,
                 titleText: emailText,
                 hintText: emailHintText,
-                showSuffixIcon: false,
                 controller: emailController,
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return emailRequiredText;
-                  }
+                  if (value == null || value.isEmpty) return emailRequiredText;
                   if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
                     return invalidEmailText;
                   }
                   return null;
                 },
-
-                onFieldSubmitted: (_) {
-                  FocusScope.of(context).requestFocus(passwordFocusNode);
-                },
+                onFieldSubmitted:
+                    (_) =>
+                        FocusScope.of(context).requestFocus(passwordFocusNode),
                 textInputAction: TextInputAction.next,
               ),
               SizedBox(height: SizeConfig.blockSizeVertical! * 1),
-
               CustomTextField(
                 showTitle: true,
                 focusNode: passwordFocusNode,
@@ -153,55 +170,34 @@ class _RegisterFormState extends State<RegisterForm> {
                   }
                   return null;
                 },
-                onFieldSubmitted: (_) {
-                  if (_formKey.currentState!.validate()) {
-                    // Dismiss the keyboard
-                    FocusScope.of(context).unfocus();
-
-                    context.read<AuthBloc>().add(
-                      RegisterRequested(
-                        userNameController.text.trim(),
-                        emailController.text.trim(),
-                        passwordController.text.trim(),
-                      ),
-                    );
-                  }
-                },
+                onFieldSubmitted: (_) => _register(),
                 readOnly: state is AuthLoading,
               ),
               SizedBox(height: SizeConfig.blockSizeVertical! * 1),
               Row(
                 children: [
-                  // checkbox for terms and conditions
-                  CustomCheckBox(),
+                  CustomCheckBox(
+                    value: agreedToTerms,
+                    onChanged: (value) {
+                      setState(() {
+                        agreedToTerms = value ?? false;
+                      });
+                    },
+                  ),
                   SizedBox(width: SizeConfig.blockSizeHorizontal! * 0.5),
                   RichTextWidget(
                     text: "I agree to the ",
                     actionText: "Terms and Privacy Policy",
-                    onTap: () {
-                      // Handle terms and privacy policy tap
-                    },
+                    onTap: _launchUrl,
                   ),
                 ],
               ),
               SizedBox(height: SizeConfig.blockSizeVertical! * 1),
-
               state is AuthLoading
-                  ? Center(child: CircularProgressIndicator())
+                  ? const Center(child: CircularProgressIndicator())
                   : CustomElevatedButton(
                     buttonText: registerText,
-                    onPressed: () {
-                      // Trigger the registration event
-                      if (_formKey.currentState!.validate()) {
-                        context.read<AuthBloc>().add(
-                          RegisterRequested(
-                            userNameController.text.trim(),
-                            emailController.text.trim(),
-                            passwordController.text.trim(),
-                          ),
-                        );
-                      }
-                    },
+                    onPressed: _register,
                     height:
                         SizeConfig.orientation(context) == Orientation.portrait
                             ? SizeConfig.blockSizeVertical! * 6
@@ -216,46 +212,19 @@ class _RegisterFormState extends State<RegisterForm> {
           ),
         );
       },
-      listener: (BuildContext context, AuthState state) {
-        if (state is SignupSuccess) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.message)));
-
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => VerifyOTPScreen(email: state.email),
-            ),
-          );
-        } else if (state is AuthError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              duration: Duration(seconds: 3),
-            ),
-          );
-        }
-      },
     );
   }
 }
 
-class CustomCheckBox extends StatefulWidget {
-  const CustomCheckBox({super.key, this.onChanged});
-  final void Function(bool?)? onChanged;
+class CustomCheckBox extends StatelessWidget {
+  const CustomCheckBox({
+    super.key,
+    required this.value,
+    required this.onChanged,
+  });
 
-  @override
-  State<CustomCheckBox> createState() => _CustomCheckBoxState();
-}
-
-class _CustomCheckBoxState extends State<CustomCheckBox> {
-  var isChecked = false;
-  void toggleCheckbox(bool? value) {
-    setState(() {
-      // Update the checkbox state
-      isChecked = value ?? false;
-    });
-  }
+  final bool value;
+  final void Function(bool?) onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -264,13 +233,8 @@ class _CustomCheckBoxState extends State<CustomCheckBox> {
       checkColor: Color(whiteColor),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       visualDensity: VisualDensity.compact,
-      value: isChecked,
-      onChanged: (value) {
-        toggleCheckbox(value);
-        if (widget.onChanged != null) {
-          widget.onChanged!(value);
-        }
-      },
+      value: value,
+      onChanged: onChanged,
     );
   }
 }

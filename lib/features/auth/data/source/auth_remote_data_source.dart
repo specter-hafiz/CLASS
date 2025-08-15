@@ -13,9 +13,6 @@ import 'package:flutter/material.dart';
 import 'package:http_parser/http_parser.dart';
 
 import '../models/user_model.dart';
-import 'package:logger/logger.dart';
-
-final logger = Logger(level: Level.debug);
 
 abstract class AuthRemoteDataSource {
   Future<UserModel> login(String email, String password);

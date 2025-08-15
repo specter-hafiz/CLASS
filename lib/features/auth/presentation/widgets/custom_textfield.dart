@@ -116,7 +116,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                     : null,
             hintText: widget.hintText,
             hintStyle: TextStyle(
-              color: Color(hintColor),
+              color: Color(hintColor).withValues(alpha: 0.3),
               fontSize:
                   SizeConfig.orientation(context) == Orientation.portrait
                       ? SizeConfig.blockSizeHorizontal! * 5

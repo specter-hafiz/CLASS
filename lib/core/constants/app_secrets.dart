@@ -6,4 +6,7 @@ class AppSecrets {
       "59189148175-4ei3epsjf9pijjtg66bhlmh6feuoa0cd.apps.googleusercontent.com";
   static const String googleWebClientId =
       "59189148175-061e0snvvpc5rlblddl80rfr337kjn4j.apps.googleusercontent.com";
+
+  static const policyDocument =
+      "https://docs.google.com/document/d/1e5c2sn7E96CydcJAOkHrZYnB5UxlgAQx/edit?usp=sharing&ouid=106533545059119776058&rtpof=true&sd=true";
 }

@@ -1,3 +1,4 @@
+import 'package:class_app/core/constants/app_colors.dart';
 import 'package:class_app/core/constants/strings.dart';
 import 'package:class_app/core/utilities/quiz_export_service.dart';
 import 'package:class_app/core/utilities/size_config.dart';
@@ -6,6 +7,7 @@ import 'package:class_app/features/tutor/profile/presentation/widgets/answer_wid
 import 'package:class_app/features/tutor/profile/presentation/widgets/question_widget.dart';
 import 'package:class_app/features/tutor/quiz/data/models/quiz_model.dart';
 import 'package:flutter/material.dart';
+import 'package:open_file/open_file.dart';
 
 class QuizDetailScreen extends StatelessWidget {
   const QuizDetailScreen({super.key, required this.quiz});
@@ -46,9 +48,24 @@ class QuizDetailScreen extends StatelessWidget {
                               fileName: quiz.title,
                             );
                             if (path != null) {
-                              // Optionally show dialog or snackbar
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Downloaded to: $path')),
+                              final messenger = ScaffoldMessenger.of(context);
+
+                              messenger.showSnackBar(
+                                SnackBar(
+                                  duration: const Duration(
+                                    seconds: 3,
+                                  ), // basically won't auto-dismiss
+                                  content: Text(
+                                    'File downloaded successfully.',
+                                  ),
+                                  action: SnackBarAction(
+                                    textColor: Color(whiteColor),
+                                    label: 'Open',
+                                    onPressed: () {
+                                      OpenFile.open(path);
+                                    },
+                                  ),
+                                ),
                               );
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(

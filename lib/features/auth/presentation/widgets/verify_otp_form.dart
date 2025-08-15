@@ -100,6 +100,12 @@ class VerifyOTPFormState extends State<VerifyOTPForm> {
             );
           }
         }
+
+        if (state is ResendOTPSuccess) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.message)));
+        }
       },
       builder: (context, state) {
         return Column(
@@ -113,6 +119,8 @@ class VerifyOTPFormState extends State<VerifyOTPForm> {
                     height: boxHeight,
                     width: boxWidth,
                     child: TextFormField(
+                      readOnly:
+                          state is AuthLoading || state is ResendingOTPState,
                       controller: _controllers[i],
                       focusNode: _focusNodes[i],
                       autofocus: i == 0,
@@ -164,38 +172,46 @@ class VerifyOTPFormState extends State<VerifyOTPForm> {
                       SizeConfig.orientation(context) == Orientation.portrait
                           ? SizeConfig.blockSizeVertical! * 6
                           : SizeConfig.blockSizeHorizontal! * 5,
-                  onPressed: () {
-                    if (_controllers.any((c) => c.text.isEmpty)) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Please fill all OTP fields')),
-                      );
-                      return;
-                    }
-                    //close the keyboard
-                    FocusScope.of(context).requestFocus(FocusNode());
-                    final otp = _controllers.map((c) => c.text).join();
-                    context.read<AuthBloc>().add(
-                      VerifyTokenRequested(
-                        widget.email,
-                        otp,
-                        widget.forgotPassword == true ? false : true,
-                      ),
-                    );
-                  },
+                  onPressed:
+                      state is ResendingOTPState
+                          ? null
+                          : () {
+                            if (_controllers.any((c) => c.text.isEmpty)) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Please fill all OTP fields'),
+                                ),
+                              );
+                              return;
+                            }
+                            //close the keyboard
+                            FocusScope.of(context).requestFocus(FocusNode());
+                            final otp = _controllers.map((c) => c.text).join();
+                            context.read<AuthBloc>().add(
+                              VerifyTokenRequested(
+                                widget.email,
+                                otp,
+                                widget.forgotPassword == true ? false : true,
+                              ),
+                            );
+                          },
                 ),
             // Add your custom text field for email input here
             SizedBox(height: SizeConfig.blockSizeVertical! * 3),
-            RichTextWidget(
-              text: didntReceiveCodeText,
-
-              actionText: resendText,
-              onTap: () {
-                // Handle resend code action
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Resend code action triggered')),
-                );
-              },
-            ),
+            state is ResendingOTPState
+                ? Center(child: CircularProgressIndicator())
+                : RichTextWidget(
+                  text: didntReceiveCodeText,
+                  actionText: resendText,
+                  onTap:
+                      state is AuthLoading
+                          ? null
+                          : () {
+                            context.read<AuthBloc>().add(
+                              ResendOTPRequested(widget.email),
+                            );
+                          },
+                ),
           ],
         );
       },

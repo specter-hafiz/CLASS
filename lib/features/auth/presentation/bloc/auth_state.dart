@@ -60,6 +60,16 @@ class UploadProfileImageSuccess extends AuthState {
   const UploadProfileImageSuccess(this.message, this.url);
 }
 
+class ResendingOTPState extends AuthState {}
+
+class ResendOTPSuccess extends AuthState {
+  final String message;
+
+  const ResendOTPSuccess(this.message);
+  @override
+  List<Object?> get props => [message];
+}
+
 class UploadProfileImageError extends AuthState {
   final String message;
 

@@ -1,11 +1,7 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:logger/logger.dart';
 
 class NetworkConnectivity {
-  final logger = Logger();
-  NetworkConnectivity() {
-    logger.i('NetworkConnectivity initialized');
-  }
+  NetworkConnectivity();
 
   final Connectivity _connectivity = Connectivity();
 

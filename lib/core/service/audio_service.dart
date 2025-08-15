@@ -4,7 +4,6 @@ import 'package:class_app/core/service/api/endpoints.dart';
 import 'package:class_app/core/service/errors/exceptions.dart';
 import 'package:class_app/core/service/shared_pref/shared_pref.dart';
 import 'package:class_app/core/utilities/dependency_injection.dart';
-import 'package:class_app/features/auth/data/source/auth_remote_data_source.dart';
 import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 
@@ -27,7 +26,6 @@ class AudioTranscriptionService {
       }
 
       // Prepare the form data with the audio file
-      logger.i("Uploading audio file: $filePath");
       if (filePath.isEmpty) {
         throw ServerException("File path cannot be empty");
       }

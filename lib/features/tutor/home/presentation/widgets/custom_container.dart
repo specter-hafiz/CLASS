@@ -25,6 +25,7 @@ class CustomContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig().init(context);
     return GestureDetector(
       onTap: onTap,
 
@@ -80,31 +81,35 @@ class CustomContainer extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      titleText,
-                      style: TextStyle(
-                        fontSize:
-                            SizeConfig.orientation(context) ==
-                                    Orientation.portrait
-                                ? SizeConfig.screenWidth! * 0.04
-                                : SizeConfig.screenWidth! * 0.025,
-                        fontWeight: FontWeight.w600,
+                    Flexible(
+                      child: Text(
+                        titleText,
+                        style: TextStyle(
+                          fontSize:
+                              SizeConfig.orientation(context) ==
+                                      Orientation.portrait
+                                  ? SizeConfig.screenWidth! * 0.04
+                                  : SizeConfig.screenWidth! * 0.025,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
                       ),
-                      maxLines: 1,
                     ),
-                    Text(
-                      subText,
+                    Flexible(
+                      child: Text(
+                        subText,
 
-                      style: TextStyle(
-                        color: Color(blueColor),
-                        fontSize:
-                            SizeConfig.orientation(context) ==
-                                    Orientation.portrait
-                                ? SizeConfig.screenWidth! * 0.04
-                                : SizeConfig.screenWidth! * 0.025,
-                        fontWeight: FontWeight.w600,
+                        style: TextStyle(
+                          color: Color(blueColor),
+                          fontSize:
+                              SizeConfig.orientation(context) ==
+                                      Orientation.portrait
+                                  ? SizeConfig.screenWidth! * 0.04
+                                  : SizeConfig.screenWidth! * 0.025,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
                       ),
-                      maxLines: 1,
                     ),
                   ],
                 ),

@@ -98,3 +98,12 @@ class LoginWithGoogleRequested extends AuthEvent {
   @override
   List<Object?> get props => [id];
 }
+
+class ResendOTPRequested extends AuthEvent {
+  final String email;
+
+  const ResendOTPRequested(this.email);
+
+  @override
+  List<Object?> get props => [email];
+}

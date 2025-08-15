@@ -115,89 +115,98 @@ class _QuizScreenState extends State<QuizScreen> {
                         );
                       }
 
-                      return ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: state.quizzes.length,
-                        itemBuilder: (context, index) {
-                          final quiz = state.quizzes[index];
-                          return CustomContainer(
-                            titleText: quiz.title,
-                            subText: "${quiz.questions.length} questions",
-                            iconPath: quizDocumentImage,
-                            showTrailingIcon: true,
-                            onTap: () {
-                              // Handle tap action
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder:
-                                      (context) => QuizDetailScreen(quiz: quiz),
-                                ),
-                              );
-                            },
-                            onMoreButton: (context) {
-                              return [
-                                PopupMenuItem(
-                                  value: 'password',
-                                  child: Text('Password'),
-                                ),
-                              ];
-                            },
-                            onMoreTap: (value) async {
-                              if (value == "password") {
-                                await showDialog(
-                                  context: context,
-                                  builder: (context) {
-                                    return CustomAlertDialog(
-                                      width: SizeConfig.screenWidth! * 0.8,
-                                      height: SizeConfig.screenHeight! * 0.4,
-                                      body: Column(
-                                        children: [
-                                          RichText(
-                                            text: TextSpan(
-                                              text: "Your quiz password is ",
-                                              style: TextStyle(
-                                                fontSize:
-                                                    SizeConfig.screenWidth! *
-                                                    0.05,
-                                                fontWeight: FontWeight.w400,
-                                                color: Color(blackColor),
-                                              ),
-                                              children: [
-                                                TextSpan(
-                                                  text: quiz.accessPassword,
-                                                  style: TextStyle(
-                                                    color: Color(blueColor),
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                                TextSpan(
-                                                  text: " and the Shared Id is",
-                                                ),
-                                                TextSpan(
-                                                  text: quiz.sharedLinkId,
-                                                  style: TextStyle(
-                                                    color: Color(blueColor),
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      leftButtonText: "Ok",
-                                      showRightButton: false,
-                                      screenWidth:
-                                          SizeConfig.screenWidth! * 0.8,
-                                      screenHeight:
-                                          SizeConfig.screenHeight! * 0.4,
-                                    );
-                                  },
-                                );
-                              }
-                            },
-                          );
+                      return RefreshIndicator(
+                        onRefresh: () async {
+                          context.read<QuestionBloc>().add(FetchQuizzesEvent());
                         },
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: state.quizzes.length,
+                          itemBuilder: (context, index) {
+                            final quiz = state.quizzes[index];
+                            return CustomContainer(
+                              titleText: quiz.title,
+                              subText: "${quiz.questions.length} questions",
+                              iconPath: quizDocumentImage,
+                              showTrailingIcon: true,
+                              onTap: () {
+                                // Handle tap action
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder:
+                                        (context) =>
+                                            QuizDetailScreen(quiz: quiz),
+                                  ),
+                                );
+                              },
+                              onMoreButton: (context) {
+                                return [
+                                  PopupMenuItem(
+                                    value: 'password',
+                                    child: Text('Password'),
+                                  ),
+                                ];
+                              },
+                              onMoreTap: (value) async {
+                                if (value == "password") {
+                                  await showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return CustomAlertDialog(
+                                        width: SizeConfig.screenWidth! * 0.8,
+                                        height: SizeConfig.screenHeight! * 0.4,
+                                        body: Column(
+                                          children: [
+                                            RichText(
+                                              text: TextSpan(
+                                                text: "Your quiz password is ",
+                                                style: TextStyle(
+                                                  fontSize:
+                                                      SizeConfig.screenWidth! *
+                                                      0.05,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(blackColor),
+                                                ),
+                                                children: [
+                                                  TextSpan(
+                                                    text: quiz.accessPassword,
+                                                    style: TextStyle(
+                                                      color: Color(blueColor),
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                  TextSpan(
+                                                    text:
+                                                        " and the Shared Id is",
+                                                  ),
+                                                  TextSpan(
+                                                    text: quiz.sharedLinkId,
+                                                    style: TextStyle(
+                                                      color: Color(blueColor),
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        leftButtonText: "Ok",
+                                        showRightButton: false,
+                                        screenWidth:
+                                            SizeConfig.screenWidth! * 0.8,
+                                        screenHeight:
+                                            SizeConfig.screenHeight! * 0.4,
+                                      );
+                                    },
+                                  );
+                                }
+                              },
+                            );
+                          },
+                        ),
                       );
                     }
                     return const SizedBox.shrink();
