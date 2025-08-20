@@ -12,7 +12,7 @@
 .swiftpm/
 migrate_working_dir/
 .key.properties
-.constants/app_secrets.dart
+lib/core/constants/app_secrets.dart
 # IntelliJ related
 *.iml
 *.ipr
