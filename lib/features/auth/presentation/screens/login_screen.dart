@@ -35,7 +35,10 @@ class LoginScreen extends StatelessWidget {
         context.read<AuthBloc>().add(LoginWithGoogleRequested(id: idToken!));
       }
     } catch (e) {
-      print("Google Sign-In failed: $e");
+      // Handle error, e.g., show a snackbar or dialog
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Google Sign-In failed')));
     }
   }
 

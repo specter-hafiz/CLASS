@@ -54,9 +54,9 @@ class _RegisterFormState extends State<RegisterForm> {
   }
 
   void _launchUrl() async {
-    Uri _url = Uri.parse(AppSecrets.policyDocument);
-    if (!await launchUrl(_url)) {
-      throw Exception('Could not launch $_url');
+    Uri url = Uri.parse(AppSecrets.policyDocument);
+    if (!await launchUrl(url)) {
+      throw Exception('Could not launch $url');
     }
   }
 
