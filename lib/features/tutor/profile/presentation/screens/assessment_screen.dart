@@ -354,6 +354,7 @@ class _CustomAlertDialogState extends State<CustomAlertDialog> {
                           controller: accessPasswordController,
                           showTitle: true,
                           showSuffixIcon: true,
+                          obscureText: true,
                           titleText: accessPassText,
                           textInputAction: TextInputAction.done,
                           onFieldSubmitted: (p0) {
@@ -372,8 +373,8 @@ class _CustomAlertDialogState extends State<CustomAlertDialog> {
                             if (value == null || value.isEmpty) {
                               return 'Access password cannot be empty';
                             }
-                            if (value.length < 5) {
-                              return 'Access password must be at least 6 characters';
+                            if (value.length < 6) {
+                              return 'At least 6 characters';
                             }
                             return null;
                           },

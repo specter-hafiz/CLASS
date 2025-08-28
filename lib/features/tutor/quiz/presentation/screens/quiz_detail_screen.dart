@@ -8,6 +8,7 @@ import 'package:class_app/features/tutor/profile/presentation/widgets/question_w
 import 'package:class_app/features/tutor/quiz/data/models/quiz_model.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class QuizDetailScreen extends StatelessWidget {
   const QuizDetailScreen({super.key, required this.quiz});
@@ -43,6 +44,16 @@ class QuizDetailScreen extends StatelessWidget {
                       quiz.questions.isEmpty
                           ? null
                           : () async {
+                            final status = await Permission.storage.request();
+
+                            if (!status.isGranted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Storage permission denied"),
+                                ),
+                              );
+                              return;
+                            }
                             final path = await QuizExportService.exportToPdf(
                               quiz,
                               fileName: quiz.title,

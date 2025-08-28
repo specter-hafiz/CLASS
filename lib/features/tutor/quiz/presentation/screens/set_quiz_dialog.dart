@@ -131,8 +131,8 @@ class _SetQuizDialogState extends State<SetQuizDialog> {
                 if (number == null) {
                   return "Please enter a valid number";
                 }
-                if (number < 10 || number > 50) {
-                  return "Number must be between 10 and 50";
+                if (number < 5 || number > 50) {
+                  return "Number must be between 5 and 50";
                 }
                 return null;
               },
@@ -174,14 +174,14 @@ class _SetQuizDialogState extends State<SetQuizDialog> {
                     hintText: "Deadline for assessment",
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return "Deadline is required";
+                        return "Deadline required";
                       }
                       final deadline = convertToMinutes(value);
                       final allowedTime = convertToMinutes(
                         timeAllowedController.text,
                       );
                       if (deadline < allowedTime) {
-                        return "Deadline must be later than time allowed";
+                        return "Deadline must be >= time allowed";
                       }
                       return null;
                     },
@@ -196,6 +196,7 @@ class _SetQuizDialogState extends State<SetQuizDialog> {
               controller: accessPasswordController,
               showTitle: true,
               showSuffixIcon: true,
+              obscureText: true,
               titleText: accessPassText,
               textInputAction: TextInputAction.done,
               validator: (value) {
@@ -203,7 +204,7 @@ class _SetQuizDialogState extends State<SetQuizDialog> {
                   return "Access password is required";
                 }
                 if (value.length < 6) {
-                  return "Access password must be at least 6 characters";
+                  return "At least 6 characters";
                 }
                 return null;
               },

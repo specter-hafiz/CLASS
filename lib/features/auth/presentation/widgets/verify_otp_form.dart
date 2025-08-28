@@ -47,6 +47,7 @@ class VerifyOTPFormState extends State<VerifyOTPForm> {
   }
 
   void _onChanged(String value, int index, BuildContext context, String email) {
+    print("Email in _onChange Function is $email");
     if (value.length == 1 && index < _otpLength - 1) {
       // move to next
       _focusNodes[index + 1].requestFocus();

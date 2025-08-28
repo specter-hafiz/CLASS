@@ -110,7 +110,16 @@ class _CustomTextFieldState extends State<CustomTextField> {
                         padding: EdgeInsets.only(
                           right: SizeConfig.blockSizeHorizontal! * 4,
                         ),
-                        child: SvgPicture.asset('assets/svgs/eye.svg'),
+                        child:
+                            _obscureText
+                                ? SvgPicture.asset('assets/svgs/eye.svg')
+                                : SvgPicture.asset(
+                                  'assets/svgs/eye_open.svg',
+                                  colorFilter: ColorFilter.mode(
+                                    Color(blueColor),
+                                    BlendMode.srcIn,
+                                  ),
+                                ),
                       ),
                     )
                     : null,

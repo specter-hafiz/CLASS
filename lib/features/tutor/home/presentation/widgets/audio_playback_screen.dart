@@ -76,6 +76,7 @@ class _AudioPlaybackScreenState extends State<AudioPlaybackScreen> {
       await _audioPlayer.setFilePath(_audioUrl!);
       _audioPlayer.durationStream.listen((duration) {
         if (duration != null) {
+          if (!mounted) return;
           setState(() {
             _totalDuration = duration;
           });
@@ -83,6 +84,7 @@ class _AudioPlaybackScreenState extends State<AudioPlaybackScreen> {
       });
 
       _audioPlayer.positionStream.listen((position) {
+        if (!mounted) return;
         setState(() {
           _currentPosition = position;
         });
@@ -91,7 +93,7 @@ class _AudioPlaybackScreenState extends State<AudioPlaybackScreen> {
       _audioPlayer.playerStateStream.listen((state) {
         final isPlaying = state.playing;
         final isCompleted = state.processingState == ProcessingState.completed;
-
+        if (!mounted) return;
         setState(() => _isPlaying = isPlaying);
 
         if (isCompleted) {
@@ -100,7 +102,7 @@ class _AudioPlaybackScreenState extends State<AudioPlaybackScreen> {
 
           _waveformController.seekTo(0);
           _waveformController.stopPlayer();
-
+          if (!mounted) return;
           setState(() {
             _isPlaying = false;
           });

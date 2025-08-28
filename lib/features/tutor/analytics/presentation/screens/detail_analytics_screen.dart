@@ -12,6 +12,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:open_file/open_file.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class DetailAnalyticsScreen extends StatefulWidget {
   const DetailAnalyticsScreen({
@@ -159,7 +160,20 @@ class _DetailAnalyticsScreenState extends State<DetailAnalyticsScreen> {
                                   state is FetchingQuizResultsState
                                       ? exportingResultsText
                                       : exportResultsText,
-                              onPressed: () {
+                              onPressed: () async {
+                                final status =
+                                    await Permission.storage.request();
+
+                                if (!status.isGranted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        "Storage permission denied",
+                                      ),
+                                    ),
+                                  );
+                                  return;
+                                }
                                 context.read<QuestionBloc>().add(
                                   FetchQuizResultsEvent(widget.id),
                                 );

@@ -1,56 +1,20 @@
 {
   "project_info": {
-    "project_number": "59189148175",
-    "project_id": "class-1205a",
-    "storage_bucket": "class-1205a.firebasestorage.app"
+    "project_number": "523784680426",
+    "project_id": "class-e9d7a",
+    "storage_bucket": "class-e9d7a.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:59189148175:android:dbdd264d564fb17280c17a",
-        "android_client_info": {
-          "package_name": "com.example.class_app"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "59189148175-061e0snvvpc5rlblddl80rfr337kjn4j.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyAHRj75tMa4S1SX_OktZQOBPgsTBkVPdio"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "59189148175-061e0snvvpc5rlblddl80rfr337kjn4j.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "59189148175-8g9pslkpeth7259tu0hi6rpn5k9mvt1l.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.example.classApp"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:59189148175:android:a7dbe8b43f81faf180c17a",
+        "mobilesdk_app_id": "1:523784680426:android:4e3c21ec8b4cdcd057b893",
         "android_client_info": {
           "package_name": "com.huaru.class_app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "59189148175-4ei3epsjf9pijjtg66bhlmh6feuoa0cd.apps.googleusercontent.com",
+          "client_id": "523784680426-akssi2hphkoi6nt02p3gdilp7osbiogt.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.huaru.class_app",
@@ -58,28 +22,21 @@
           }
         },
         {
-          "client_id": "59189148175-061e0snvvpc5rlblddl80rfr337kjn4j.apps.googleusercontent.com",
+          "client_id": "523784680426-nalf5jddkvcjidg44ur05sse59gk7247.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAHRj75tMa4S1SX_OktZQOBPgsTBkVPdio"
+          "current_key": "AIzaSyBLuFRBMzwMJ2IZvTgJ1Q6nW_J7in86PXY"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "59189148175-061e0snvvpc5rlblddl80rfr337kjn4j.apps.googleusercontent.com",
+              "client_id": "523784680426-nalf5jddkvcjidg44ur05sse59gk7247.apps.googleusercontent.com",
               "client_type": 3
-            },
-            {
-              "client_id": "59189148175-8g9pslkpeth7259tu0hi6rpn5k9mvt1l.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.example.classApp"
-              }
             }
           ]
         }

@@ -120,6 +120,6 @@ class HttpConsumer {
       }
     }
 
-    throw ServerException(message ?? 'An error occurred: ${e.message}');
+    throw ServerException(message ?? 'An internal error occurred.');
   }
 }

@@ -8,7 +8,9 @@ import 'package:class_app/features/tutor/quiz/presentation/bloc/question_bloc.da
 import 'package:class_app/features/tutor/quiz/presentation/bloc/question_events.dart';
 import 'package:class_app/features/tutor/quiz/presentation/bloc/question_state.dart';
 import 'package:class_app/features/tutor/quiz/presentation/screens/quiz_detail_screen.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class QuizScreen extends StatefulWidget {
@@ -178,7 +180,7 @@ class _QuizScreenState extends State<QuizScreen> {
                                                   ),
                                                   TextSpan(
                                                     text:
-                                                        " and the Shared Id is",
+                                                        " and the Shared Id is ",
                                                   ),
                                                   TextSpan(
                                                     text: quiz.sharedLinkId,
@@ -187,6 +189,25 @@ class _QuizScreenState extends State<QuizScreen> {
                                                       fontWeight:
                                                           FontWeight.w500,
                                                     ),
+                                                    recognizer:
+                                                        TapGestureRecognizer()
+                                                          ..onTap = () {
+                                                            Clipboard.setData(
+                                                              ClipboardData(
+                                                                text:
+                                                                    quiz.sharedLinkId,
+                                                              ),
+                                                            );
+                                                            ScaffoldMessenger.of(
+                                                              context,
+                                                            ).showSnackBar(
+                                                              SnackBar(
+                                                                content: Text(
+                                                                  "Shared Id copied to clipboard",
+                                                                ),
+                                                              ),
+                                                            );
+                                                          },
                                                   ),
                                                 ],
                                               ),
