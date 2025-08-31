@@ -69,7 +69,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           event.email,
           event.password,
         );
-        emit(SignupSuccess(response['email'], response['message']));
+        emit(SignupSuccess(response['message'], response['email']));
       } catch (e) {
         emit(AuthError(e.toString()));
       }
@@ -91,6 +91,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           ),
         );
       } catch (e) {
+        debugPrint("Token verification error: $e");
         emit(AuthError(e.toString()));
       }
     });

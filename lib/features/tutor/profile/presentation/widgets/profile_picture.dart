@@ -102,7 +102,7 @@ class _ProfilePictureState extends State<ProfilePicture> {
 
   Widget _defaultAvatar(double size) {
     return Image.asset(
-      'assets/images/image.png',
+      'assets/images/user.png',
       width: size,
       height: size,
       fit: BoxFit.cover,

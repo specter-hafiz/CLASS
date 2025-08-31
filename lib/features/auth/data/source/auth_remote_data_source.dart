@@ -98,7 +98,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
     final res = await http.post(
       Endpoints.signup,
-      data: {'name': name, 'email': email, 'password': password},
+      data: {'name': name, 'email': email.toLowerCase(), 'password': password},
     );
     if (res.statusCode != 201) {
       throw ServerException(res.data['message'] ?? 'Registration failed');
@@ -117,17 +117,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     if (!hasConnection) {
       throw NetworkException("No internet connection");
     }
-    print("AuthRemote Data Source  Email: $email");
     final res = await http.post(
       Endpoints.verifyOTP,
       token: token,
-      data: {'email': email, 'otp': token},
+      data: {'email': email.toLowerCase(), 'otp': token},
     );
     if (res.statusCode != StatusCode.ok) {
       throw Exception('Failed to verify OTP');
     }
     final data = res.data is String ? jsonDecode(res.data) : res.data;
-    print("Data from remote data source: $data");
     if (isLoginSignUp == true) {
       final user = UserModel.fromJson(data['results']['user']);
       await SharedPrefService().saveToken(data['results']['accessToken']);

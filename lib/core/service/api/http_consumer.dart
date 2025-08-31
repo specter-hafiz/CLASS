@@ -85,7 +85,6 @@ class HttpConsumer {
 
   void _handleError(DioException e) {
     final response = e.response;
-
     late Map<String, dynamic> data;
 
     try {

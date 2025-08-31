@@ -92,7 +92,9 @@ class _RegisterFormState extends State<RegisterForm> {
           ).showSnackBar(SnackBar(content: Text(state.message)));
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => VerifyOTPScreen(email: state.email),
+              builder:
+                  (context) =>
+                      VerifyOTPScreen(email: emailController.text.trim()),
             ),
           );
         } else if (state is AuthError) {

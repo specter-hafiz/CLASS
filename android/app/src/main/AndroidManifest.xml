@@ -5,7 +5,9 @@
     <application
         android:label="CLASS"
         android:name="${applicationName}"
-        android:icon="@mipmap/launcher_icon">
+        android:icon="@mipmap/launcher_icon"
+        android:usesCleartextTraffic="true"
+        >
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -25,7 +27,7 @@
               />
               <meta-data
             android:name="com.google.android.gms.client_id"
-            android:value="598814321887-c4gcnpp3i6l52itpqvt95e0h5vcues4j.apps.googleusercontent.com" />
+            android:value="523784680426-akssi2hphkoi6nt02p3gdilp7osbiogt.apps.googleusercontent.com" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
